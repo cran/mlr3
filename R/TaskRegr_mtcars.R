@@ -4,14 +4,17 @@
 #' @format [R6::R6Class] inheriting from [TaskRegr].
 #' @include mlr_tasks.R
 #'
-#' @section Usage:
+#' @section Construction:
 #' ```
 #' mlr_tasks$get("mtcars")
+#' tsk("mtcars")
 #' ```
 #'
 #' @description
 #' A regression task for the [datasets::mtcars] data set.
 #' Target variable is `mpg` (Miles/(US) gallon).
+#'
+#' @template seealso_task
 NULL
 
 load_task_mtcars = function(id = "mtcars") {

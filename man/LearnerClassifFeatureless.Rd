@@ -6,9 +6,6 @@
 \alias{mlr_learners_classif.featureless}
 \title{Featureless Classification Learner}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{LearnerClassif}.}
-\usage{
-LearnerClassifFeatureless
-}
 \description{
 A simple \link{LearnerClassif} which only analyses the labels during train, ignoring all features.
 Hyperparameter \code{method} determines the mode of operation during prediction:
@@ -17,5 +14,15 @@ Hyperparameter \code{method} determines the mode of operation during prediction:
 \item{sample:}{Randomly predict a label uniformly.}
 \item{weighed.sample:}{Randomly predict a label, with probability estimated from the training distribution.}
 }
+}
+\section{Construction}{
+\preformatted{LearnerClassifFeatureless$new()
+mlr_learners$get("classif.featureless")
+lrn("classif.featureless")
+}
+}
+
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
 }
 \keyword{datasets}

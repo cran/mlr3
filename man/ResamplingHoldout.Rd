@@ -6,13 +6,17 @@
 \alias{mlr_resamplings_holdout}
 \title{Holdout Resampling}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{Resampling}.}
-\usage{
-ResamplingHoldout
-}
 \description{
-Splits data into a single training set and a test set.
-Parameter \code{ratio} determines the ratio of observation in the train set (default: 2/3).
+Splits data into a training set and a test set.
+Parameter \code{ratio} determines the ratio of observation going into the training set (default: 2/3).
 }
+\section{Construction}{
+\preformatted{ResamplingHoldout$new()
+mlr_resamplings$get("holdout")
+rsmp("holdout")
+}
+}
+
 \section{Fields}{
 
 See \link{Resampling}.
@@ -25,11 +29,11 @@ See \link{Resampling}.
 
 \examples{
 # Create a task with 10 observations
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 task$filter(1:10)
 
 # Instantiate Resampling
-rho = mlr_resamplings$get("holdout")
+rho = rsmp("holdout", ratio = 0.5)
 rho$instantiate(task)
 
 # Individual sets:
@@ -39,5 +43,8 @@ intersect(rho$train_set(1), rho$test_set(1))
 
 # Internal storage:
 rho$instance # simple list
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
 }
 \keyword{datasets}

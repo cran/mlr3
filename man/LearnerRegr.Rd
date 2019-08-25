@@ -8,7 +8,7 @@
 \description{
 This Learner specializes \link{Learner} for regression problems.
 
-Predefined learners can be found in the \link{Dictionary} \link{mlr_learners}.
+Many predefined learners can be found in the \link{Dictionary} \link{mlr_learners} after loading the \CRANpkg{mlr3learners} package.
 }
 \section{Construction}{
 \preformatted{l = LearnerRegr$new(id, param_set = ParamSet$new(), param_vals = list(), predict_types = character(),
@@ -36,11 +36,11 @@ lrns = mlr_learners$mget(mlr_learners$keys("^regr"))
 names(lrns)
 
 # get a specific learner from mlr_learners:
-lrn = mlr_learners$get("regr.rpart")
-print(lrn)
+mlr_learners$get("regr.rpart")
+lrn("classif.featureless")
 }
 \seealso{
-Example regression learner: \code{\link[=mlr_learners_regr.rpart]{regr.rpart}}.
+Example regression learners: \code{\link[=mlr_learners_regr.rpart]{regr.rpart}}
 
 Other Learner: \code{\link{LearnerClassif}},
   \code{\link{Learner}}, \code{\link{mlr_learners}}

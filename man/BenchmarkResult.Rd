@@ -12,7 +12,7 @@ Note that all stored objects are accessed by reference.
 Do not modify any object without cloning it first.
 }
 \section{Construction}{
-\preformatted{bmr = BenchmarkResult$new(data)
+\preformatted{bmr = BenchmarkResult$new(data = data.table())
 }
 \itemize{
 \item \code{data} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
@@ -28,6 +28,9 @@ of the corresponding \link{ResampleResult}.
 \item \code{data} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Internal data storage.
 We discourage users to directly work with this field.
+\item \code{task_type} :: \code{character(1)}\cr
+Task type of objects in the \code{BenchmarkResult}.
+All stored objects (\link{Task}, \link{Learner}, \link{Prediction}) in a single \code{BenchmarkResult} are required to have the same task type, e.g., \code{"classif"} or \code{"regr"}.
 \item \code{tasks} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Table of used tasks with three columns:
 \code{"task_hash"} (\code{character(1)}), \code{"task_id"} (\code{character(1)}) and \code{"task"} (\link{Task}).
@@ -37,6 +40,10 @@ Table of used learners with three columns:
 \item \code{resamplings} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Table of used resamplings with three columns:
 \code{"resampling_hash"} (\code{character(1)}), \code{"resampling_id"} (\code{character(1)}) and \code{"resampling"} (\link{Resampling}).
+\item \code{n_resample_results} :: \code{integer(1)}\cr
+Returns the number of stored \link{ResampleResult}s.
+\item \code{hashes} :: \code{character()}\cr
+Vector of hashes of all included \link{ResampleResult}s.
 }
 }
 
@@ -44,9 +51,11 @@ Table of used resamplings with three columns:
 
 \itemize{
 \item \code{aggregate(measures = NULL, ids = TRUE, params = FALSE, warnings = FALSE, errors = FALSE)}\cr
-(\code{list()} of \link{Measure}, \code{logical(1)}, \code{logical(1)}, \code{logical(1)}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
+(list of \link{Measure}, \code{logical(1)}, \code{logical(1)}, \code{logical(1)}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Returns a result table where resampling iterations are aggregated together into \link{ResampleResult}s.
-Arguments control the number of additional columns:
+A column with the aggregated performance is added for each \link{Measure}, named with the id of the respective measure.
+
+Additional arguments control the number of additional columns:
 \itemize{
 \item \code{ids} :: \code{logical(1)}\cr
 Adds object ids (\code{"task_id"}, \code{"learner_id"}, \code{"resampling_id"}) as extra character columns.
@@ -59,19 +68,24 @@ Adds the number of resampling iterations with at least one warning as extra inte
 Adds the number of resampling iterations with errors as extra integer column \code{"errors"}.
 }
 \item \code{performance(measures = NULL, ids = TRUE)}\cr
-(\code{list()} of \link{Measure}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
-Returns a table with one row for each resampling iteration, including all involved objects.
-Additionally calculates the provided performance measures and binds the performance as extra column.
-If \code{ids} is \code{TRUE}, character column of id names are added to the table for convenient filtering.
-\item \code{best(measure)}\cr
-(\link{Measure}) -> \link{ResampleResult}\cr
-Returns the \link{ResampleResult} with the best performance according to \link{Measure}.
-\item \code{resample_result(hash)}\cr
-(\code{character(1)} -> \link{ResampleResult})\cr
-Retrieve the \link{ResampleResult} with hash \code{hash}.
+(list of \link{Measure}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
+Returns a table with one row for each resampling iteration, including all involved objects:
+\link{Task}, \link{Learner}, \link{Resampling}, iteration number (\code{integer(1)}), and \link{Prediction}.
+If \code{ids} is set to \code{TRUE}, character column of extracted ids are added to the table for convenient filtering: \code{"task_id"}, \code{"learner_id"}, and \code{"resampling_id"}.
+Additionally calculates the provided performance measures and binds the performance as extra columns.
+These columns are named using the id of the respective \link{Measure}.
+\item \code{resample_result(i)}\cr
+(\code{integer(1)} -> \link{ResampleResult})\cr
+Retrieve the i-th \link{ResampleResult}.
 \item \code{combine(bmr)}\cr
-\link{BenchmarkResult} -> \code{self}\cr
-Fuses a second \link{BenchmarkResult} into itself, mutating the BenchmarkResult in-place.
+(\link{BenchmarkResult} | \code{NULL}) -> \code{self}\cr
+Fuses a second \link{BenchmarkResult} into itself, mutating the \link{BenchmarkResult} in-place.
+If \code{bmr} is \code{NULL}, simply returns \code{self}.
+
+In case of duplicated \link{ResampleResult}s, an exception is raised.
+Two \link{ResampleResult}s are identical iff the hashes of the respective \link{Task}, \link{Learner} and \link{Resampling} are identical.
+I.e., they must operate on the exactly same data, with the same learner with the same hyperparameters and
+the same splits into training and test sets.
 }
 }
 
@@ -84,29 +98,18 @@ Returns a copy of the internal data.
 }
 }
 
-\section{Syntactic Sugar}{
-
-
-The mlr3 package provides some shortcuts to ease the creation of its objects.
-
-First, instead of an object, it is possible to pass a string identifier which is used to lookup the object in a \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}:
-\itemize{
-\item \link{Task} in \link{mlr_tasks}.
-\item \link{Learner} in \link{mlr_learners}.
-\item \link{Resampling} in \link{mlr_resamplings}.
-\item \link{Measure} in \link{mlr_measures}.
-}
-
-Additionally, each task type has an associated default measure (stored in \link{mlr_reflections}) which is used as a fallback if no other measure is provided.
-Classification tasks default to the classification error in \link[=mlr_measures_classif.ce]{"classif.ce"}, regression tasks to the mean squared error in \link[=mlr_measures_regr.mse]{"regr.mse"}.
-}
-
 \examples{
 set.seed(123)
-tasks = mlr_tasks$mget(c("sonar", "spam"))
-learners = mlr_learners$mget(c("classif.featureless", "classif.rpart"), predict_type = "prob")
-resamplings = mlr_resamplings$get("cv3")
-design = expand_grid(tasks = tasks, learners = learners, resamplings = resamplings)
+learners = list(
+  lrn("classif.featureless", predict_type = "prob"),
+  lrn("classif.rpart", predict_type = "prob")
+)
+
+design = benchmark_grid(
+  tasks = list(tsk("sonar"), tsk("spam")),
+  learners = learners,
+  resamplings = rsmp("cv", folds = 3)
+)
 print(design)
 
 bmr = benchmark(design)

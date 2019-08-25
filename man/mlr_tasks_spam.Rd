@@ -21,8 +21,9 @@ Data set collected at Hewlett-Packard Labs to classify emails as spam or non-spa
 57 variables indicate the frequency of certain words and characters in the e-mail.
 The positive class is set to "spam".
 }
-\section{Usage}{
+\section{Construction}{
 \preformatted{mlr_tasks$get("spam")
+tsk("spam")
 }
 }
 
@@ -30,4 +31,7 @@ The positive class is set to "spam".
 Dua, D. and Graff, C. (2019).
 \emph{UCI Machine Learning Repository} \url{http://archive.ics.uci.edu/ml}.
 Irvine, CA: University of California, School of Information and Computer Science.
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Task]{Tasks}: \link{mlr_tasks}
 }

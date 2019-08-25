@@ -1,15 +1,15 @@
 context("PredictionClassif")
 
 test_that("Construction", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   p = PredictionClassif$new(row_ids = task$row_ids, truth = task$truth(), response = task$truth())
   expect_prediction(p)
   expect_prediction_classif(p)
 })
 
 test_that("Internally constructed Prediction", {
-  task = mlr_tasks$get("iris")
-  lrn = mlr_learners$get("classif.featureless")
+  task = tsk("iris")
+  lrn = lrn("classif.featureless")
   lrn$predict_type = "prob"
   p = lrn$train(task)$predict(task)
   expect_prediction(p)
@@ -17,8 +17,8 @@ test_that("Internally constructed Prediction", {
 })
 
 test_that("setting threshold binaryclass", {
-  task = mlr_tasks$get("sonar")
-  lrn = mlr_learners$get("classif.rpart", predict_type = "prob")
+  task = tsk("sonar")
+  lrn = lrn("classif.rpart", predict_type = "prob")
   p = lrn$train(task)$predict(task)
   expect_factor(p$response, levels = task$class_names)
   expect_equal(as.character(p$response), colnames(p$prob)[max.col(p$prob)])
@@ -31,22 +31,22 @@ test_that("setting threshold binaryclass", {
   p = set_thresh(p, 0.5)
   expect_factor(p$response, levels = task$class_names, any.missing = FALSE)
   expect_equal(p$response, response_before)
-  expect_lt(p$score("classif.ce"), 0.25)
+  expect_lt(p$score(msr("classif.ce")), 0.25)
 
   set_thresh(p, 0)
   expect_factor(p$response, levels = task$class_names, any.missing = FALSE)
   expect_true(all(as.character(p$response) == task$positive | p$prob[, task$positive] == 0))
-  expect_gt(p$score(), 0.25)
+  expect_gt(p$score(msr("classif.ce")), 0.25)
 
   set_thresh(p, 1)
   expect_factor(p$response, levels = task$class_names, any.missing = FALSE)
   expect_true(all(as.character(p$response) == task$negative | p$prob[, task$negative] == 0))
-  expect_gt(p$score(), 0.25)
+  expect_gt(p$score(msr("classif.ce")), 0.25)
 })
 
 test_that("setting threshold multiclass", {
-  task = mlr_tasks$get("zoo")
-  lrn = mlr_learners$get("classif.rpart", predict_type = "prob")
+  task = tsk("zoo")
+  lrn = lrn("classif.rpart", predict_type = "prob")
   p = lrn$train(task)$predict(task)
 
   # a small fix for our tests ... Add a small number to all probabilities so that
@@ -77,8 +77,8 @@ test_that("setting threshold multiclass", {
 })
 
 test_that("confusion", {
-  task = mlr_tasks$get("iris")
-  lrn = mlr_learners$get("classif.featureless")
+  task = tsk("iris")
+  lrn = lrn("classif.featureless")
   lrn$predict_type = "prob"
   p = lrn$train(task)$predict(task)
   cm = p$confusion
@@ -90,10 +90,10 @@ test_that("confusion", {
 })
 
 test_that("c", {
-  task = mlr_tasks$get("iris")
-  lrn = mlr_learners$get("classif.featureless")
+  task = tsk("iris")
+  lrn = lrn("classif.featureless")
   lrn$predict_type = "prob"
-  rr = resample(task, lrn, "cv3")
+  rr = resample(task, lrn, rsmp("cv", folds = 3))
 
   pred = do.call(c, rr$data$prediction)
   expect_prediction(pred)

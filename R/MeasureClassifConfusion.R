@@ -20,6 +20,7 @@ confusion_measure_info = setindexv(rowwise_table(
 
 #' @title Binary Classification Measures Derived from a Confusion Matrix
 #'
+#' @usage NULL
 #' @aliases mlr_measures_classif.confusion
 #'  mlr_measures_classif.tp
 #'  mlr_measures_classif.fn
@@ -40,25 +41,69 @@ confusion_measure_info = setindexv(rowwise_table(
 #' @format [R6::R6Class()] inheriting from [MeasureClassif].
 #' @include MeasureClassif.R
 #'
+#' @section Construction:
+#' ```
+#' MeasureClassifConfusion$new(id = type, type)
+#'
+#' mlr_measures("classif.tp")
+#' mlr_measures("classif.fn")
+#' mlr_measures("classif.fp")
+#' mlr_measures("classif.tn")
+#' mlr_measures("classif.tpr")
+#' mlr_measures("classif.fnr")
+#' mlr_measures("classif.fpr")
+#' mlr_measures("classif.tnr")
+#' mlr_measures("classif.ppv")
+#' mlr_measures("classif.fdr")
+#' mlr_measures("classif.for")
+#' mlr_measures("classif.npv")
+#' mlr_measures("classif.precision")
+#' mlr_measures("classif.recall")
+#' mlr_measures("classif.sensitivity")
+#' mlr_measures("classif.specificity")
+#'
+#' msr("classif.tp")
+#' msr("classif.fn")
+#' msr("classif.fp")
+#' msr("classif.tn")
+#' msr("classif.tpr")
+#' msr("classif.fnr")
+#' msr("classif.fpr")
+#' msr("classif.tnr")
+#' msr("classif.ppv")
+#' msr("classif.fdr")
+#' msr("classif.for")
+#' msr("classif.npv")
+#' msr("classif.precision")
+#' msr("classif.recall")
+#' msr("classif.sensitivity")
+#' msr("classif.specificity")
+#' ```
+#'
+#' * `type` :: `character(1)`\cr
+#'   See [confusion_measures()].
+#'
 #' @description
 #' All implemented [Measure]s call [confusion_measures()] with the respective `type` internally.
 #'
+#' @template seealso_measure
 #' @export
 #' @examples
-#' task = mlr_tasks$get("german_credit")
-#' learner = mlr_learners$get("classif.rpart")
+#' task = tsk("german_credit")
+#' learner = lrn("classif.rpart")
 #' p = learner$train(task)$predict(task)
-#' round(p$score(c("classif.sensitivity", "classif.specificity")), 2)
+#' measures = list(msr("classif.sensitivity"), msr("classif.specificity"))
+#' round(p$score(measures), 2)
 MeasureClassifConfusion = R6Class("MeasureClassifConfusion",
   inherit = MeasureClassif,
   public = list(
     type = NULL,
-    initialize = function(id = type, type) {
+    initialize = function(type) {
       self$type = assert_choice(type, confusion_measure_info$id)
       row = as.list(confusion_measure_info[list(type), on = "id"])
 
       super$initialize(
-        id = id,
+        id = sprintf("classif.%s", type),
         range = c(row$lower, row$upper),
         minimize = row$minimize,
         predict_type = "response",
@@ -76,7 +121,7 @@ MeasureClassifConfusion = R6Class("MeasureClassifConfusion",
 #' @include mlr_measures.R
 for (type in confusion_measure_info$id) {
   id = sprintf("classif.%s", type)
-  mlr_measures$add(id, MeasureClassifConfusion, id = id, type = type)
+  mlr_measures$add(id, MeasureClassifConfusion, type = type)
 }
 
 #' @title Calculate Confusion Measures
@@ -112,8 +157,8 @@ for (type in confusion_measure_info$id) {
 #' @return (named `numeric()`) of confusion measures.
 #' @export
 #' @examples
-#' task = mlr_tasks$get("german_credit")
-#' learner = mlr_learners$get("classif.rpart")
+#' task = tsk("german_credit")
+#' learner = lrn("classif.rpart")
 #' p = learner$train(task)$predict(task)
 #' round(confusion_measures(p$confusion), 2)
 confusion_measures = function(m, type = NULL) {

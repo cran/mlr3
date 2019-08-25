@@ -55,18 +55,17 @@ Hash (unique identifier) for this object.
 \section{Methods}{
 
 \itemize{
-\item \code{combine(rr)}\cr
-\link{ResampleResult} -> \link{BenchmarkResult}\cr
-Takes a second \link{ResampleResult} and combines both \link{ResampleResult}s to a \link{BenchmarkResult}.
 \item \code{performance(measures = NULL, ids = TRUE)}\cr
-(\code{list()} of \link{Measure}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
-Returns a table with one row for each resampling iteration, including all involved objects.
-Additionally calculates the provided performance measures and binds the performance as extra column.
-If \code{ids} is \code{TRUE}, character column of id names are added to the table for convenient filtering.
+(list of \link{Measure}, \code{logical(1)}) -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
+Returns a table with one row for each resampling iteration, including all involved objects:
+\link{Task}, \link{Learner}, \link{Resampling}, iteration number (\code{integer(1)}), and \link{Prediction}.
+A column with the individual (per resampling iteration) performance is added for each \link{Measure}, named with the id of the respective measure.
+If \code{ids} is \code{TRUE}, extra columns with the ids of objects (\code{"task_id"}, \code{"learner_id"}, \code{"resampling_id"}) are binded to the table to allow a more convenient subsetting.
+If \code{measures} is \code{NULL}, \code{measures} defaults to the return value of \code{\link[=default_measures]{default_measures()}}.
 \item \code{aggregate(measures = NULL)}\cr
-\code{list()} of \link{Measure} -> named \code{numeric()}\cr
-Calculates and aggregates performance values for all provided measures.
-See \link{Measure} for the aggregation function.
+list of \link{Measure} -> named \code{numeric()}\cr
+Calculates and aggregates performance values for all provided measures, according to the respective aggregation function in \link{Measure}.
+If \code{measures} is \code{NULL}, \code{measures} defaults to the return value of \code{\link[=default_measures]{default_measures()}}.
 }
 }
 
@@ -80,9 +79,13 @@ Returns a copy of the internal data.
 }
 
 \examples{
-rr = resample("iris", "classif.featureless", "cv3")
+task = tsk("iris")
+learner = lrn("classif.rpart")
+resampling = rsmp("cv", folds = 3)
+rr = resample(task, learner, resampling)
 print(rr)
-rr$aggregate("classif.acc")
+
+rr$aggregate(msr("classif.acc"))
 rr$prediction
 rr$prediction$confusion
 rr$warnings

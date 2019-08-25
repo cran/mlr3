@@ -6,10 +6,17 @@
 \alias{mlr_measures_regr.mae}
 \title{Absolute Errors Regression Measure}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{MeasureClassif}.}
-\usage{
-MeasureRegrMAE
-}
 \description{
 Calls \code{\link[Metrics:mae]{Metrics::mae()}}.
+}
+\section{Construction}{
+\preformatted{MeasureRegrMAE$new()
+mlr_measures$get("regr.mae")
+msr("regr.mae")
+}
+}
+
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
 }
 \keyword{datasets}

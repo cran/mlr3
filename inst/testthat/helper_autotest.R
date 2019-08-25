@@ -18,9 +18,9 @@ generate_generic_tasks = function(learner, proto) {
 
   if (length(proto$feature_names) > 1L) {
     # individual tasks with each supported feature type
-    for (type in learner$feature_types) {
-      sel = proto$feature_types[type, "id", on = "type", with = FALSE][[1L]]
-      tasks[[sprintf("feat_single_%s", type)]] = proto$clone()$select(sel)
+    for (ftype in learner$feature_types) {
+      sel = proto$feature_types[ftype, "id", on = "type", with = FALSE][[1L]]
+      tasks[[sprintf("feat_single_%s", ftype)]] = proto$clone()$select(sel)
     }
   }
 
@@ -85,7 +85,7 @@ generate_data = function(learner, N) {
 #' @keywords internal
 #' @export
 #' @examples
-#' tasks = generate_tasks(mlr_learners$get("classif.rpart"))
+#' tasks = generate_tasks(lrn("classif.rpart"))
 #' tasks$missings_binary$data()
 generate_tasks = function(learner, N = 30L) {
   N = checkmate::assert_int(N, lower = 10L, coerce = TRUE)
@@ -157,13 +157,13 @@ sanity_check = function(prediction) {
 }
 
 sanity_check.PredictionClassif = function(prediction) {
-  prediction$score("classif.ce") <= 0.3
+  prediction$score(mlr3::msr("classif.ce")) <= 0.3
 }
 registerS3method("sanity_check", "LearnerClassif", sanity_check.PredictionClassif)
 
 
 sanity_check.PredictionRegr = function(prediction) {
-  prediction$score("regr.mse") <= 1
+  prediction$score(mlr3::msr("regr.mse")) <= 1
 }
 registerS3method("sanity_check", "LearnerRegr", sanity_check.PredictionRegr)
 
@@ -179,7 +179,7 @@ run_experiment = function(task, learner) {
   }
 
   mlr3::assert_task(task)
-  learner = mlr3::assert_learner(learner, task = task, clone = TRUE)
+  learner = mlr3::assert_learner(mlr3::as_learner(learner, clone = TRUE), task = task)
   prediction = NULL
   learner$encapsulate = c(train = "evaluate", predict = "evaluate")
 
@@ -189,7 +189,7 @@ run_experiment = function(task, learner) {
     return(err(as.character(ok)))
   log = learner$log[stage == "train"]
   if ("error" %in% log$class)
-    return(err("train log has errors: %s", mlr3misc::str_collapse(log[stage == "error", msg])))
+    return(err("train log has errors: %s", mlr3misc::str_collapse(log[class == "error", msg])))
   if (is.null(learner$model))
     return(err("model is NULL"))
 
@@ -199,7 +199,7 @@ run_experiment = function(task, learner) {
     return(err(as.character(ok)))
   log = learner$log[stage == "predict"]
   if ("error" %in% log$class)
-    return(err("predict log has errors: %s", mlr3misc::str_collapse(log[stage == "error", msg])))
+    return(err("predict log has errors: %s", mlr3misc::str_collapse(log[class == "error", msg])))
   msg = checkmate::check_class(prediction, "Prediction")
   if (!isTRUE(msg))
     return(err(msg))
@@ -209,7 +209,7 @@ run_experiment = function(task, learner) {
     return(err("prediction is missing predict_types"))
 
   stage = "score()"
-  perf = try(prediction$score(mlr3::mlr_reflections$default_measures[[learner$task_type]]), silent = TRUE)
+  perf = try(prediction$score(mlr3::default_measures(learner$task_type)), silent = TRUE)
   if (inherits(perf, "try-error"))
     return(err(as.character(perf)))
   msg = checkmate::check_numeric(perf, any.missing = FALSE)

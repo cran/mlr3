@@ -1,7 +1,7 @@
 context("mlr_resampling_holdout")
 
 test_that("holdout has no duplicated ids", {
-  r = mlr_resamplings$get("holdout")
+  r = rsmp("holdout")
   expect_identical(r$duplicated_ids, FALSE)
 })
 
@@ -10,7 +10,7 @@ test_that("stratification", {
   b = as_data_backend(data)
   task = TaskClassif$new("stratify_data", b, target = "y")
 
-  r = mlr_resamplings$get("holdout", param_vals = list(ratio = .5, stratify = TRUE))
+  r = rsmp("holdout", ratio = .5, stratify = TRUE)
   r$instantiate(task)
 
   for (i in seq_len(r$iters)) {
@@ -22,6 +22,6 @@ test_that("stratification", {
 })
 
 test_that("grouping", {
-  r = mlr_resamplings$get("holdout")
+  r = rsmp("holdout")
   expect_grouping_works(r)
 })

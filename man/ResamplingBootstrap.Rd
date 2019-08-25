@@ -6,14 +6,18 @@
 \alias{mlr_resamplings_bootstrap}
 \title{Bootstrap Resampling}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{Resampling}.}
-\usage{
-ResamplingBootstrap
-}
 \description{
-Simple Bootstrap sampling.
+Splits data into bootstrap samples (sampling with replacement).
 Hyperparameters are the number of bootstrap iterations (\code{repeats}, default: 30)
-and the ratio of observations to draw per iteration (\code{ratio}, default: 1).
+and the ratio of observations to draw per iteration (\code{ratio}, default: 1) for the training set.
 }
+\section{Construction}{
+\preformatted{ResamplingBootstrap$new()
+mlr_resamplings$get("bootstrap")
+rsmp("bootstrap")
+}
+}
+
 \section{Fields}{
 
 See \link{Resampling}.
@@ -26,12 +30,11 @@ See \link{Resampling}.
 
 \examples{
 # Create a task with 10 observations
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 task$filter(1:10)
 
 # Instantiate Resampling
-rb = mlr_resamplings$get("bootstrap")
-rb$param_set$values = list(repeats = 2, ratio = 1)
+rb = rsmp("bootstrap", repeats = 2, ratio = 1)
 rb$instantiate(task)
 
 # Individual sets:
@@ -41,5 +44,8 @@ intersect(rb$train_set(1), rb$test_set(1))
 
 # Internal storage:
 rb$instance$M # Matrix of counts
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
 }
 \keyword{datasets}

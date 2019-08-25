@@ -6,12 +6,16 @@
 \alias{mlr_resamplings_custom}
 \title{Custom Resampling}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{Resampling}.}
-\usage{
-ResamplingCustom
-}
 \description{
-A custom resampling class where the training and test indices can be set manually.
+Splits data into training and test sets using manually provided indices.
 }
+\section{Construction}{
+\preformatted{ResamplingCustom$new()
+mlr_resamplings$get("custom")
+rsmp("custom")
+}
+}
+
 \section{Fields}{
 
 See \link{Resampling}.
@@ -24,16 +28,19 @@ See \link{Resampling}.
 
 \examples{
 # Create a task with 10 observations
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 task$filter(1:10)
 
 # Instantiate Resampling
-rc = mlr_resamplings$get("custom")
+rc = rsmp("custom")
 train_sets = list(1:5, 5:10)
 test_sets = list(5:10, 1:5)
 rc$instantiate(task, train_sets, test_sets)
 
 rc$train_set(1)
 rc$test_set(1)
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
 }
 \keyword{datasets}

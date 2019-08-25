@@ -6,16 +6,20 @@
 \alias{mlr_resamplings_repeated_cv}
 \title{Repeated Cross Validation Resampling}
 \format{\code{\link[R6:R6Class]{R6::R6Class()}} inheriting from \link{Resampling}.}
-\usage{
-ResamplingRepeatedCV
-}
 \description{
-\code{repeats} (default: 10) times repeated \code{folds}-fold (default: 10) cross-validation.
+Splits data \code{repeats} (default: 10) times using a \code{folds}-fold (default: 10) cross-validation.
 
 The iteration counter translates to \code{repeats} blocks of \code{folds}
 cross-validations, i.e., the first \code{folds} iterations belong to
 a single cross-validation.
 }
+\section{Construction}{
+\preformatted{ResamplingRepeatedCV$new()
+mlr_resamplings$get("repeated_cv")
+rsmp("repeated_cv")
+}
+}
+
 \section{Fields}{
 
 See \link{Resampling}.
@@ -37,12 +41,11 @@ Translates iteration numbers to repetition number.
 
 \examples{
 # Create a task with 10 observations
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 task$filter(1:10)
 
 # Instantiate Resampling
-rrcv = mlr_resamplings$get("repeated_cv")
-rrcv$param_set$values = list(repeats = 2, folds = 3)
+rrcv = rsmp("repeated_cv", repeats = 2, folds = 3)
 rrcv$instantiate(task)
 rrcv$iters
 rrcv$folds(1:6)
@@ -55,5 +58,8 @@ intersect(rrcv$train_set(1), rrcv$test_set(1))
 
 # Internal storage:
 rrcv$instance # table
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
 }
 \keyword{datasets}

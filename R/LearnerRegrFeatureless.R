@@ -1,8 +1,16 @@
 #' @title Featureless Regression Learner
 #'
+#' @usage NULL
 #' @aliases mlr_learners_regr.featureless
 #' @format [R6::R6Class] inheriting from [LearnerRegr].
 #' @include LearnerRegr.R
+#'
+#' @section Construction:
+#' ```
+#' LearnerRegrFeatureless$new()
+#' mlr_learners$get("regr.featureless")
+#' lrn("regr.featureless")
+#' ```
 #'
 #' @description
 #' A simple [LearnerRegr] which only analyses the response during train, ignoring all features.
@@ -10,12 +18,14 @@
 #' and `sd(y)` as standard error.
 #' If `robust` is `TRUE`, `median()` and `madn()` are used instead of `mean()` and `sd()`,
 #' respectively.
+#'
+#' @template seealso_learner
 #' @export
 LearnerRegrFeatureless = R6Class("LearnerRegrFeatureless", inherit = LearnerRegr,
   public = list(
-    initialize = function(id = "regr.featureless") {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "regr.featureless",
         feature_types = c("logical", "integer", "numeric", "character", "factor", "ordered"),
         predict_types = c("response", "se"),
         param_set = ParamSet$new(
@@ -54,7 +64,7 @@ LearnerRegrFeatureless = R6Class("LearnerRegrFeatureless", inherit = LearnerRegr
         stopf("No model stored")
       }
       fn = self$model$features
-      set_names(double(length(fn)), fn)
+      named_vector(fn, 0)
     },
 
     selected_features = function() {

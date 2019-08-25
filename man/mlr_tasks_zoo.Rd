@@ -7,8 +7,12 @@
 \description{
 A classification task for the \link[mlbench:Zoo]{mlbench::Zoo} data set.
 }
-\section{Usage}{
+\section{Construction}{
 \preformatted{mlr_tasks$get("zoo")
+tsk("zoo")
 }
 }
 
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Task]{Tasks}: \link{mlr_tasks}
+}

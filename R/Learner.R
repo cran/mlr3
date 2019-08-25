@@ -85,11 +85,17 @@
 #' * `packages` :: `character()`\cr
 #'   Stores the names of required packages.
 #'
+#' * `state` :: `NULL` | named `list()`\cr
+#'   Current (internal) state of the learner.
+#'   Contains all information learnt during `train()` and `predict()`.
+#'   Do not access elements from here directly.
+#'
 #' * `encapsulate` (named `character()`)\cr
 #'   How to call the code in `train_internal()` and `predict_internal()`.
 #'   Must be a named character vector with names `"train"` and `"predict"`.
 #'   Possible values are `"none"`, `"evaluate"` and `"callr"`.
 #'   See [mlr3misc::encapsulate()] for more details.
+#'
 #' * `fallback` ([Learner])\cr
 #'   Learner which is fitted to impute predictions in case that either the model fitting or the prediction of the top learner is not successful.
 #'   Requires you to enable encapsulation, otherwise errors are not caught and the execution is terminated before the fallback learner kicks in.
@@ -116,19 +122,19 @@
 #'   Returns the logged errors as vector.
 #'
 #' @section Methods:
-#' * `train(task, row_ids = NULL, ctrl = list())`\cr
-#'   ([Task], `integer()` | `character()`, [mlr_control()]) -> `self`\cr
+#' * `train(task, row_ids = NULL))`\cr
+#'   ([Task], `integer()` | `character()`) -> `self`\cr
 #'   Train the learner on the row ids of the provided [Task].
-#'   Mutates the learner by reference, i.e. stores the model alongside other objects in field `$data`.
+#'   Mutates the learner by reference, i.e. stores the model alongside other objects in field `$state`.
 #'
-#' * `predict(task, row_ids = NULL, ctrl = list())`\cr
-#'   ([Task], `integer()` | `character()`, [mlr_control()]) -> [Prediction]\cr
-#'   Uses the data stored during `$train()` to create a new [Prediction] based on the provided `row_ids`
+#' * `predict(task, row_ids = NULL)`\cr
+#'   ([Task], `integer()` | `character()`) -> [Prediction]\cr
+#'   Uses the data stored during `$train()` in `$state` to create a new [Prediction] based on the provided `row_ids`
 #'   of the `task`.
 #'
-#' * `predict_newdata(task, newdata, ctrl = list())`\cr
-#'   ([Task], `data.frame()`, [mlr_control()]) -> [Prediction]\cr
-#'   Uses the data stored during `$train()` to create a new [Prediction] based on the new data in `newdata`.
+#' * `predict_newdata(task, newdata)`\cr
+#'   ([Task], `data.frame()`) -> [Prediction]\cr
+#'   Uses the data stored during `$train()` in `$state` to create a new [Prediction] based on the new data in `newdata`.
 #'   Object `task` is the task used during `$train()` and required for conversions of `newdata`.
 #'
 #' @section Optional Extractors:
@@ -157,7 +163,7 @@
 #' possible levels (for factors), default values and assigned values.
 #' To set hyperparameters, assign a named list to the subslot `values`:
 #' ```
-#' lrn = mlr_learners$get("classif.rpart")
+#' lrn = lrn("classif.rpart")
 #' lrn$param_set$values = list(minsplit = 3, cp = 0.01)
 #' ```
 #' Note that this operation replaces all previously set hyperparameter values.
@@ -176,7 +182,7 @@
 Learner = R6Class("Learner",
   public = list(
     id = NULL,
-    data = list(),
+    state = NULL,
     task_type = NULL,
     predict_types = NULL,
     feature_types = NULL,
@@ -189,16 +195,16 @@ Learner = R6Class("Learner",
       feature_types = character(), properties = character(), data_formats = "data.table", packages = character()) {
 
       self$id = assert_string(id, min.chars = 1L)
-      self$task_type = assert_choice(task_type, mlr_reflections$task_types)
+      self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
       private$.param_set = assert_param_set(param_set)
       private$.encapsulate = c(train = "none", predict = "none")
       self$param_set$values = param_vals
-      self$feature_types = assert_sorted_subset(feature_types, mlr_reflections$task_feature_types)
-      self$predict_types = assert_sorted_subset(predict_types, names(mlr_reflections$learner_predict_types[[task_type]]), empty.ok = FALSE)
+      self$feature_types = assert_subset(feature_types, mlr_reflections$task_feature_types)
+      self$predict_types = assert_subset(predict_types, names(mlr_reflections$learner_predict_types[[task_type]]), empty.ok = FALSE)
       private$.predict_type = predict_types[1L]
       self$packages = assert_set(packages)
       self$properties = sort(assert_subset(properties, mlr_reflections$learner_properties[[task_type]]))
-      self$data_formats = assert_subset(data_formats, mlr_reflections$task_data_formats)
+      self$data_formats = assert_subset(data_formats, mlr_reflections$data_formats)
     },
 
     format = function() {
@@ -209,23 +215,24 @@ Learner = R6Class("Learner",
       learner_print(self)
     },
 
-    train = function(task, row_ids = NULL, ctrl = list()) {
-      assert_task(task, task_type = self$task_type, feature_types = self$feature_types)
-      if (!is.null(row_ids))
+    train = function(task, row_ids = NULL) {
+      task = assert_task(as_task(task), task_type = self$task_type, feature_types = self$feature_types)
+      if (!is.null(row_ids)) {
         row_ids = assert_row_ids(row_ids)
-      ctrl = mlr_control(ctrl)
-      invisible(learner_train(self, task, row_ids, ctrl))
+      }
+      invisible(learner_train(self, task, row_ids))
     },
 
-    predict = function(task, row_ids = NULL, ctrl = list()) {
-      assert_task(task, task_type = self$task_type, feature_types = self$feature_types)
-      if (!is.null(row_ids))
+    predict = function(task, row_ids = NULL) {
+      task = assert_task(as_task(task), task_type = self$task_type, feature_types = self$feature_types)
+      if (!is.null(row_ids)) {
         row_ids = assert_row_ids(row_ids)
-      ctrl = mlr_control(ctrl)
-      learner_predict(self, task, row_ids, ctrl)
+      }
+      learner_predict(self, task, row_ids)
     },
 
-    predict_newdata = function(task, newdata, ctrl = list()) {
+    predict_newdata = function(task, newdata) {
+      task = assert_task(as_task(task), task_type = self$task_type, feature_types = self$feature_types)
       assert_data_frame(newdata, min.rows = 1L)
       tn = task$target_names
       if (any(tn %nin% colnames(newdata))) {
@@ -234,33 +241,34 @@ Learner = R6Class("Learner",
       old_row_ids = task$row_ids
       task = task$clone(deep = TRUE)$rbind(newdata)
       row_ids = setdiff(task$row_ids, old_row_ids)
-      self$predict(task, row_ids, ctrl = ctrl)
+      self$predict(task, row_ids)
     }
   ),
 
   active = list(
     model = function() {
-      self$data$model
+      self$state$model
     },
 
     timings = function() {
-      set_names(c(self$data$train_time %??% NA_real_, self$data$predict_time %??% NA_real_), c("train", "predict"))
+      set_names(c(self$state$train_time %??% NA_real_, self$state$predict_time %??% NA_real_), c("train", "predict"))
     },
 
     log = function() {
-      tab = rbindlist(list(train = self$data$train_log, predict = self$data$predict_log), idcol = "stage", use.names = TRUE)
-      if (nrow(tab) == 0L)
+      tab = rbindlist(list(train = self$state$train_log, predict = self$state$predict_log), idcol = "stage", use.names = TRUE)
+      if (nrow(tab) == 0L) {
         tab = data.table(stage = character(), class = character(), msg = character())
+      }
       tab$stage = as_factor(tab$stage, levels = c("train", "predict"))
       tab
     },
 
     warnings = function() {
-      self$log[get("class") == "warning"]$msg
+      self$log[class == "warning"]$msg
     },
 
     errors = function() {
-      self$log[get("class") == "error"]$msg
+      self$log[class == "error"]$msg
     },
 
     hash = function() {
@@ -286,8 +294,9 @@ Learner = R6Class("Learner",
     },
 
     encapsulate = function(rhs) {
-      if (missing(rhs))
+      if (missing(rhs)) {
         return(private$.encapsulate)
+      }
       assert_character(rhs)
       assert_names(names(rhs), subset.of = c("train", "predict"))
       private$.encapsulate = insert_named(c(train = "none", predict = "none"), rhs)
@@ -303,6 +312,7 @@ Learner = R6Class("Learner",
 
 
 learner_print = function(self) {
+
   catf(format(self))
   catf(str_indent("* Model:", if (is.null(self$model)) "-" else class(self$model)[1L]))
   catf(str_indent("* Parameters:", as_short_string(self$param_set$values, 1000L)))
@@ -312,8 +322,10 @@ learner_print = function(self) {
   catf(str_indent("* Properties:", self$properties))
   w = self$warnings
   e = self$errors
-  if (length(w))
+  if (length(w)) {
     catf(str_indent("* Warnings:", w))
-  if (length(e))
+  }
+  if (length(e)) {
     catf(str_indent("* Errors:", e))
+  }
 }

@@ -4,13 +4,16 @@
 #' @format [R6::R6Class] inheriting from [TaskClassif].
 #' @include mlr_tasks.R
 #'
-#' @section Usage:
+#' @section Construction:
 #' ```
 #' mlr_tasks$get("zoo")
+#' tsk("zoo")
 #' ```
 #'
 #' @description
 #' A classification task for the [mlbench::Zoo] data set.
+#'
+#' @template seealso_task
 NULL
 
 load_task_zoo = function(id = "zoo") {

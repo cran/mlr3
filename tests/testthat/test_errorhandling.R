@@ -1,8 +1,8 @@
 context("error handling")
 
 test_that("no encapsulation", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.debug")
+  task = tsk("iris")
+  learner = lrn("classif.debug")
 
   learner$param_set$values = list(error_train = 1)
   expect_error(learner$train(task), "classif.debug->train")
@@ -13,14 +13,14 @@ test_that("no encapsulation", {
 })
 
 test_that("no encapsulation / resampling", {
-  learner = mlr_learners$get("classif.debug", param_vals = list(error_train = 1))
-  expect_error(resample("iris", learner, "cv3"), "'classif.debug'")
+  learner = lrn("classif.debug", error_train = 1)
+  expect_error(resample(tsk("iris"), learner, rsmp("cv", folds = 3)), "'classif.debug'")
 })
 
 
 test_that("encapsulation", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.debug")
+  task = tsk("iris")
+  learner = lrn("classif.debug")
   learner$encapsulate = c(train = "evaluate", predict = "evaluate")
 
   learner$param_set$values = list(warning_train = 1)
@@ -56,37 +56,37 @@ test_that("encapsulation", {
 
 
 test_that("encapsulation / resample", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.debug")
+  task = tsk("iris")
+  learner = lrn("classif.debug")
   learner$param_set$values = list(warning_train = 1)
   learner$encapsulate = c(train = "evaluate", predict = "evaluate")
 
-  rr = resample(task, learner, "cv3")
+  rr = resample(task, learner, rsmp("cv", folds = 3))
   expect_data_table(rr$warnings, nrows = 3L)
   expect_data_table(rr$errors, nrows = 0L)
 
   learner$param_set$values = list(warning_train = 1, error_predict = 1)
-  rr = resample(task, learner, "cv3")
+  rr = resample(task, learner, rsmp("cv", folds = 3))
   expect_data_table(rr$warnings, nrows = 3L)
   expect_data_table(rr$errors, nrows = 3L)
 
-  expect_equal(unname(rr$aggregate()), NA_real_)
-  expect_equal(rr$performance()$classif.ce, rep(NA_real_, 3L))
+  expect_equal(unname(rr$aggregate(msr("classif.ce"))), NA_real_)
+  expect_equal(rr$performance(msr("classif.ce"))$classif.ce, rep(NA_real_, 3L))
 })
 
 test_that("encapsulation / benchmark", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.debug")
+  task = tsk("iris")
+  learner = lrn("classif.debug")
   learner$param_set$values = list(warning_train = 1)
   learner$encapsulate = c(train = "evaluate", predict = "evaluate")
 
-  bmr = benchmark(expand_grid(task, learner, "cv3"))
+  bmr = benchmark(benchmark_grid(task, learner, rsmp("cv", folds = 3)))
   aggr = bmr$aggregate(warnings = TRUE, errors = TRUE)
   expect_equal(aggr$warnings, 3L)
   expect_equal(aggr$errors, 0L)
 
   learner$param_set$values = list(warning_train = 1, error_predict = 1)
-  bmr = benchmark(expand_grid(task, learner, "cv3"))
+  bmr = benchmark(benchmark_grid(task, learner, rsmp("cv", folds = 3)))
   aggr = bmr$aggregate(warnings = TRUE, errors = TRUE)
   expect_equal(aggr$warnings, 3L)
   expect_equal(aggr$errors, 3L)

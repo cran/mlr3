@@ -1,7 +1,7 @@
 context("mlr_resampling_cv")
 
 test_that("cv has no duplicated ids", {
-  r = mlr_resamplings$get("cv")
+  r = rsmp("cv")
   expect_identical(r$duplicated_ids, FALSE)
 })
 
@@ -10,8 +10,7 @@ test_that("stratification", {
   b = as_data_backend(data)
   task = TaskClassif$new("stratify_data", b, target = "y")
 
-  r = mlr_resamplings$get("cv")
-  r$param_set$values = list(folds = 5, stratify = TRUE)
+  r = rsmp("cv", folds = 5L, stratify = TRUE)
   r$instantiate(task)
 
   for (i in seq_len(r$iters)) {
@@ -23,7 +22,6 @@ test_that("stratification", {
 })
 
 test_that("grouping", {
-  r = mlr_resamplings$get("cv")
-  r$param_set$values$folds = 3L
+  r = rsmp("cv", folds = 3)
   expect_grouping_works(r)
 })

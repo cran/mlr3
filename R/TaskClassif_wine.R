@@ -4,9 +4,10 @@
 #' @format [R6::R6Class] inheriting from [TaskClassif].
 #' @include mlr_tasks.R
 #'
-#' @section Usage:
+#' @section Construction:
 #' ```
 #' mlr_tasks$get("wine")
+#' tsk("wine")
 #' ```
 #'
 #' @description
@@ -25,6 +26,8 @@
 #' Dua, D. and Graff, C. (2019).
 #' \emph{UCI Machine Learning Repository} \url{http://archive.ics.uci.edu/ml}.
 #' Irvine, CA: University of California, School of Information and Computer Science.
+#'
+#' @template seealso_task
 NULL
 
 load_task_wine = function(id = "wine") {

@@ -1,12 +1,21 @@
 #' @title Classification Error Measure
 #'
+#' @usage NULL
 #' @aliases mlr_measures_classif.ce
 #' @format [R6::R6Class()] inheriting from [MeasureClassif].
 #' @include MeasureClassif.R
 #'
+#' @section Construction:
+#' ```
+#' MeasureClassifCE$new()
+#' mlr_measures$get("classif.ce")
+#' msr("classif.ce")
+#' ```
+#'
 #' @description
 #' Calls [Metrics::ce()].
 #'
+#' @template seealso_measure
 #' @export
 MeasureClassifCE = R6Class("MeasureClassifCE",
   inherit = MeasureClassif,

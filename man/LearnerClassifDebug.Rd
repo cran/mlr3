@@ -6,39 +6,46 @@
 \alias{mlr_learners_classif.debug}
 \title{Classification Learner for Debugging}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{LearnerClassif}.}
-\usage{
-LearnerClassifDebug
-}
 \description{
 A simple \link{LearnerClassif} used primarily in the unit tests and for debugging purposes.
 If no hyperparameter is set, it simply constantly predicts a randomly selected label.
 The following hyperparameters trigger the following actions:
 \describe{
-\item{message_train:}{Outputs a message during train if \code{runif(1)} exceeds its value.}
-\item{message_predict:}{Outputs a message during predict if \code{runif(1)} exceeds its value.}
-\item{warning_train:}{Signals a warning during train if \code{runif(1)} exceeds its value.}
-\item{warning_predict:}{Signals a warning during predict if \code{runif(1)} exceeds its value.}
-\item{error_train:}{Raises an exception during train if \code{runif(1)} exceeds its value.}
-\item{error_predict:}{Raises an exception during predict if \code{runif(1)} exceeds its value.}
-\item{segfault_train:}{Provokes a segfault during train if \code{runif(1)} exceeds its value.}
-\item{segfault_predict:}{Provokes a segfault during predict if \code{runif(1)} exceeds its value.}
+\item{message_train:}{Outputs a message during train if the parameter value exceeds \code{runif(1)}.}
+\item{message_predict:}{Outputs a message during predict if the parameter value exceeds \code{runif(1)}.}
+\item{warning_train:}{Signals a warning during train if the parameter value exceeds \code{runif(1)}.}
+\item{warning_predict:}{Signals a warning during predict if the parameter value exceeds \code{runif(1)}.}
+\item{error_train:}{Raises an exception during train if the parameter value exceeds \code{runif(1)}.}
+\item{error_predict:}{Raises an exception during predict if the parameter value exceeds \code{runif(1)}.}
+\item{segfault_train:}{Provokes a segfault during train if the parameter value exceeds \code{runif(1)}.}
+\item{segfault_predict:}{Provokes a segfault during predict if the parameter value exceeds \code{runif(1)}.}
 \item{predict_missing}{Ratio of predictions which will be NA.}
 \item{save_tasks:}{Saves input task in \code{model} slot during training and prediction.}
-\item{x:}{Numeric parameter. Ignored.}
+\item{x:}{Numeric parameter. Has no effect.}
 }
 Note that segfaults may not work on your operating system.
 Also note that if they work, they will tear down your R session immediately!
 }
+\section{Construction}{
+\preformatted{LearnerClassifDebug$new()
+mlr_learners$get("classif.debug")
+lrn("classif.debug")
+}
+}
+
 \examples{
-learner = LearnerClassifDebug$new()
+learner = lrn("classif.debug")
 learner$param_set$values = list(message_train = 1, save_tasks = TRUE)
 
 # this should signal a message
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 learner$train(task)
 learner$predict(task)
 
 # task_train and task_predict are the input tasks for train() and predict()
 names(learner$model)
+}
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
 }
 \keyword{datasets}

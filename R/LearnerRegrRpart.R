@@ -1,8 +1,16 @@
 #' @title Regression Tree Learner
 #'
+#' @usage NULL
 #' @aliases mlr_learners_regr.rpart
 #' @format [R6::R6Class] inheriting from [LearnerRegr].
 #' @include LearnerRegr.R
+#'
+#' @section Construction:
+#' ```
+#' LearnerRegrRpart$new()
+#' mlr_learners$get("regr.rpart")
+#' lrn("regr.rpart")
+#' ```
 #'
 #' @description
 #' A [LearnerRegr] for a regression tree implemented in [rpart::rpart()] in package \CRANpkg{rpart}.
@@ -14,12 +22,13 @@
 #' New York: Routledge.
 #' \doi{10.1201/9781315139470}.
 #'
+#' @template seealso_learner
 #' @export
 LearnerRegrRpart = R6Class("LearnerRegrRpart", inherit = LearnerRegr,
   public = list(
-    initialize = function(id = "regr.rpart") {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "regr.rpart",
         feature_types = c("logical", "integer", "numeric", "character", "factor", "ordered"),
         predict_types = "response",
         packages = "rpart",

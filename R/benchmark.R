@@ -6,35 +6,35 @@
 #' However, these auto-instantiated resamplings will not be synchronized per task, i.e. different learners will
 #' work on different splits of the same task.
 #'
-#' To generate exhaustive designs and automatically instantiate resampling strategies per task, use [expand_grid()].
+#' To generate exhaustive designs and automatically instantiate resampling strategies per task, use [benchmark_grid()].
 #'
 #' @param design :: [data.frame()]\cr
-#'   Data frame (or [data.table()]) with three columns: "task", "learner", and "resampling".
+#'   Data frame (or [data.table::data.table()]) with three columns: "task", "learner", and "resampling".
 #'   Each row defines a resampling by providing a [Task], [Learner] and a [Resampling] strategy.
 #'   All resamplings must be properly instantiated.
-#'   The helper function [expand_grid()] can assist in generating an exhaustive design (see examples) and
+#'   The helper function [benchmark_grid()] can assist in generating an exhaustive design (see examples) and
 #'   instantiate the [Resampling]s per [Task].
-#' @param ctrl :: (named `list()`)\cr
-#'   Object to control learner execution. See [mlr_control()] for details.
-#'   Note that per default, fitted learner models are discarded after the prediction in order to save
-#'   some memory.
+#' @param store_models :: `logical(1)`\cr
+#'   Keep the fitted model after the test set has been predicted?
+#'   Set to `TRUE` if you want to further analyse the models or want to
+#'   extract information like variable importance.
 #' @return [BenchmarkResult].
 #'
 #' @note
 #' The fitted models are discarded after the predictions have been scored in order to reduce memory consumption.
-#' If you need access to the models for later analysis, set `store_models` to `TRUE` via [mlr_control()].
+#' If you need access to the models for later analysis, set `store_models` to `TRUE`.
 #'
-#' @template section-parallelization
-#' @template section-sugar
+#' @template section_parallelization
+#' @template section_logging
 #'
 #' @export
 #' @examples
-#' # benchmarking with expand_grid()
-#' tasks = mlr_tasks$mget(c("iris", "sonar"))
-#' learners = mlr_learners$mget(c("classif.featureless", "classif.rpart"))
-#' resamplings = mlr_resamplings$mget("cv3")
+#' # benchmarking with benchmark_grid()
+#' tasks = lapply(c("iris", "sonar"), tsk)
+#' learners = lapply(c("classif.featureless", "classif.rpart"), lrn)
+#' resamplings = rsmp("cv", folds = 3)
 #'
-#' design = expand_grid(tasks, learners, resamplings)
+#' design = benchmark_grid(tasks, learners, resamplings)
 #' print(design)
 #'
 #' set.seed(123)
@@ -54,10 +54,14 @@
 #' # benchmarking with a custom design:
 #' # - fit classif.featureless on iris with a 3-fold CV
 #' # - fit classif.rpart on sonar using a holdout
+#' tasks = list(tsk("iris"), tsk("sonar"))
+#' learners = list(lrn("classif.featureless"), lrn("classif.rpart"))
+#' resamplings = list(rsmp("cv", folds = 3), rsmp("holdout"))
+#'
 #' design = data.table::data.table(
-#'   task = mlr_tasks$mget(c("iris", "sonar")),
-#'   learner = mlr_learners$mget(c("classif.featureless", "classif.rpart")),
-#'   resampling = mlr_resamplings$mget(c("cv3", "holdout"))
+#'   task = tasks,
+#'   learner = learners,
+#'   resampling = resamplings
 #' )
 #'
 #' ## instantiate resamplings
@@ -73,12 +77,13 @@
 #' ## get the training set of the 2nd iteration of the featureless learner on iris
 #' rr = bmr$aggregate()[learner_id == "classif.featureless"]$resample_result[[1]]
 #' rr$resampling$train_set(2)
-benchmark = function(design, ctrl = list()) {
+benchmark = function(design, store_models = FALSE) {
+
   assert_data_frame(design, min.rows = 1L)
   assert_names(names(design), permutation.of = c("task", "learner", "resampling"))
   design$task = list(assert_tasks(design$task))
   design$resampling = list(assert_resamplings(design$resampling, instantiated = TRUE))
-  ctrl = mlr_control(ctrl)
+  assert_flag(store_models)
 
   # check for multiple task types
   task_types = unique(map_chr(design$task, "task_type"))
@@ -95,7 +100,7 @@ benchmark = function(design, ctrl = list()) {
   # expand the design: add rows for each resampling iteration
   grid = pmap_dtr(design, function(task, learner, resampling) {
     assert_learner(learner, task = task, properties = task$properties)
-    hash = hash_resample_iteration(task, learner, resampling)
+    hash = hash_resample_result(task, learner, resampling)
     data.table(
       task = list(task), learner = list(learner), resampling = list(resampling),
       iteration = seq_len(resampling$iters), hash = hash)
@@ -108,7 +113,7 @@ benchmark = function(design, ctrl = list()) {
 
     res = future.apply::future_mapply(workhorse,
       task = grid$task, learner = grid$learner, resampling = grid$resampling,
-      iteration = grid$iteration, MoreArgs = list(ctrl = ctrl, remote = TRUE),
+      iteration = grid$iteration, MoreArgs = list(store_models = store_models, lgr_threshold = lg$threshold),
       SIMPLIFY = FALSE, USE.NAMES = FALSE,
       future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
       future.packages = "mlr3"
@@ -118,7 +123,7 @@ benchmark = function(design, ctrl = list()) {
 
     res = mapply(workhorse,
       task = grid$task, learner = grid$learner, resampling = grid$resampling,
-      iteration = grid$iteration, MoreArgs = list(ctrl = ctrl), SIMPLIFY = FALSE, USE.NAMES = FALSE
+      iteration = grid$iteration, MoreArgs = list(store_models = store_models), SIMPLIFY = FALSE, USE.NAMES = FALSE
     )
   }
 

@@ -6,10 +6,17 @@
 \alias{mlr_measures_classif.auc}
 \title{Area Under the Curve Classification Measure}
 \format{\code{\link[R6:R6Class]{R6::R6Class()}} inheriting from \link{MeasureClassif}.}
-\usage{
-MeasureClassifAUC
-}
 \description{
 Calls \code{\link[Metrics:auc]{Metrics::auc()}}.
+}
+\section{Construction}{
+\preformatted{MeasureClassifAUC$new()
+mlr_measures$get("classif.auc")
+msr("classif.auc")
+}
+}
+
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
 }
 \keyword{datasets}

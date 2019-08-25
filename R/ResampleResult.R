@@ -55,20 +55,18 @@
 #'   Hash (unique identifier) for this object.
 #'
 #' @section Methods:
-#' * `combine(rr)`\cr
-#'   [ResampleResult] -> [BenchmarkResult]\cr
-#'   Takes a second [ResampleResult] and combines both [ResampleResult]s to a [BenchmarkResult].
-#'
 #' * `performance(measures = NULL, ids = TRUE)`\cr
-#'   (`list()` of [Measure], `logical(1)`) -> [data.table::data.table()]\cr
-#'   Returns a table with one row for each resampling iteration, including all involved objects.
-#'   Additionally calculates the provided performance measures and binds the performance as extra column.
-#'   If `ids` is `TRUE`, character column of id names are added to the table for convenient filtering.
+#'   (list of [Measure], `logical(1)`) -> [data.table::data.table()]\cr
+#'   Returns a table with one row for each resampling iteration, including all involved objects:
+#'   [Task], [Learner], [Resampling], iteration number (`integer(1)`), and [Prediction].
+#'   A column with the individual (per resampling iteration) performance is added for each [Measure], named with the id of the respective measure.
+#'   If `ids` is `TRUE`, extra columns with the ids of objects (`"task_id"`, `"learner_id"`, `"resampling_id"`) are binded to the table to allow a more convenient subsetting.
+#'   If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
 #'
 #' * `aggregate(measures = NULL)`\cr
-#'   `list()` of [Measure] -> named `numeric()`\cr
-#'   Calculates and aggregates performance values for all provided measures.
-#'   See [Measure] for the aggregation function.
+#'   list of [Measure] -> named `numeric()`\cr
+#'   Calculates and aggregates performance values for all provided measures, according to the respective aggregation function in [Measure].
+#'   If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
 #'
 #' @section S3 Methods:
 #' * `as.data.table(rr)`\cr
@@ -76,9 +74,13 @@
 #'   Returns a copy of the internal data.
 #' @export
 #' @examples
-#' rr = resample("iris", "classif.featureless", "cv3")
+#' task = tsk("iris")
+#' learner = lrn("classif.rpart")
+#' resampling = rsmp("cv", folds = 3)
+#' rr = resample(task, learner, resampling)
 #' print(rr)
-#' rr$aggregate("classif.acc")
+#'
+#' rr$aggregate(msr("classif.acc"))
 #' rr$prediction
 #' rr$prediction$confusion
 #' rr$warnings
@@ -112,34 +114,34 @@ ResampleResult = R6Class("ResampleResult",
       catf(str_indent("* Errors:", sprintf("%i in %i iterations", nrow(errors), uniqueN(errors, by = "iteration"))))
     },
 
-    combine = function(rr) {
-      assert_resample_result(rr)
-      if (self$hash == rr$hash) {
-        warningf("ResampleResult$combine(): Identical hashes detected. This is likely to be unintended.")
-      }
-      BenchmarkResult$new(rbind(cbind(self$data, data.table(hash = self$hash)), cbind(rr$data, data.table(hash = rr$hash))))
-    },
-
     performance = function(measures = NULL, ids = TRUE) {
-      measures = assert_measures(measures, task = self$task, learner = self$data$learner[[1L]])
+      measures = as_measures(measures, task_type = self$task$task_type)
+      assert_measures(measures, task = self$task, learner = self$learners[[1L]])
       assert_flag(ids)
-      score = function(prediction, task, learner, resampling, iteration) {
-        if (is.null(prediction)) {
-          set_names(list(NA_real_), ids(measures))
-        } else {
-        as.list(prediction$score(measures, task = task, learner = learner, train_set = resampling$train_set(iteration)))
+      tab = copy(self$data)
+
+      if (length(measures)) {
+        score = function(prediction, task, learner, resampling, iteration) {
+          if (is.null(prediction)) {
+            set_names(list(NA_real_), ids(measures))
+          } else {
+            as.list(prediction$score(measures, task = task, learner = learner, train_set = resampling$train_set(iteration)))
+          }
         }
+        tab = rcbind(tab, pmap_dtr(self$data[, c("prediction", "task", "learner", "resampling", "iteration"), with = FALSE], score))
       }
-      tab = cbind(self$data, pmap_dtr(self$data[, c("prediction", "task", "learner", "resampling", "iteration"), with = FALSE], score))
+
       if (ids) {
-        tab[, c("task_id", "learner_id", "resampling_id") := list(ids(get("task")), ids(get("learner")), ids(get("resampling")))]
+        tab[, c("task_id", "learner_id", "resampling_id") := list(ids(task), ids(learner), ids(resampling))]
         setcolorder(tab, c("task", "task_id", "learner", "learner_id", "resampling", "resampling_id", "iteration", "prediction"))[]
       }
-      return(tab)
+
+      tab[]
     },
 
     aggregate = function(measures = NULL) {
-      measures = assert_measures(measures, task = self$task, learner = self$data$learner[[1L]])
+      measures = as_measures(measures, task_type = self$task$task_type)
+      assert_measures(measures, task = self$task, learner = self$learners[[1L]])
       set_names(map_dbl(measures, function(m) m$aggregate(self)), ids(measures))
     }
   ),
@@ -167,7 +169,7 @@ ResampleResult = R6Class("ResampleResult",
 
     hash = function() {
       data = self$data
-      hash_resample_iteration(data$task[[1L]], data$learner[[1L]], data$resampling[[1L]])
+      hash_resample_result(data$task[[1L]], data$learner[[1L]], data$resampling[[1L]])
     },
 
     warnings = function() {
@@ -191,4 +193,10 @@ ResampleResult = R6Class("ResampleResult",
 #' @export
 as.data.table.ResampleResult = function(x, ...) {
   copy(x$data)
+}
+
+#' @rdname as_benchmark_result
+#' @export
+as_benchmark_result.ResampleResult = function(x, ...) {
+  BenchmarkResult$new(cbind(x$data, data.table(hash = x$hash)))
 }

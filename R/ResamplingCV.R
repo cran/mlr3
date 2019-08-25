@@ -1,11 +1,19 @@
 #' @title Cross Validation Resampling
 #'
-#' @aliases mlr_resamplings_cv mlr_resamplings_cv3
+#' @usage NULL
+#' @aliases mlr_resamplings_cv
 #' @format [R6::R6Class] inheriting from [Resampling].
 #' @include Resampling.R
 #'
+#' @section Construction:
+#' ```
+#' ResamplingCV$new()
+#' mlr_resamplings$get("cv")
+#' rsmp("cv")
+#' ```
+#'
 #' @description
-#' Cross validation with `folds` folds (cv: 10 folds, cv3: 3 folds).
+#' Splits data using a `folds`-folds (default: 10 folds) cross-validation.
 #'
 #' @section Fields:
 #' See [Resampling].
@@ -13,15 +21,15 @@
 #' @section Methods:
 #' See [Resampling].
 #'
+#' @template seealso_resampling
 #' @export
 #' @examples
 #' # Create a task with 10 observations
-#' task = mlr_tasks$get("iris")
+#' task = tsk("iris")
 #' task$filter(1:10)
 #'
 #' # Instantiate Resampling
-#' rcv = mlr_resamplings$get("cv")
-#' rcv$param_set$values = list(folds = 3)
+#' rcv = rsmp("cv", folds = 3)
 #' rcv$instantiate(task)
 #'
 #' # Individual sets:
@@ -33,14 +41,14 @@
 #' rcv$instance # table
 ResamplingCV = R6Class("ResamplingCV", inherit = Resampling,
   public = list(
-    initialize = function(id = "cv", param_vals = list(folds = 10L)) {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "cv",
         param_set = ParamSet$new(params = list(
           ParamUty$new("stratify", default = NULL),
           ParamInt$new("folds", lower = 1L, tags = "required")
         )),
-        param_vals = param_vals
+        param_vals = list(folds = 10L)
       )
     }
   ),
@@ -80,4 +88,3 @@ ResamplingCV = R6Class("ResamplingCV", inherit = Resampling,
 
 #' @include mlr_resamplings.R
 mlr_resamplings$add("cv", ResamplingCV)
-mlr_resamplings$add("cv3", ResamplingCV, id = "cv3", param_vals = list(folds = 3L))

@@ -1,7 +1,7 @@
 context("mlr_resampling_subsampling")
 
 test_that("subsampling has no duplicated ids", {
-  r = mlr_resamplings$get("subsampling")
+  r = rsmp("subsampling")
   expect_identical(r$duplicated_ids, FALSE)
 })
 
@@ -10,8 +10,7 @@ test_that("stratification", {
   b = as_data_backend(data)
   task = TaskClassif$new("stratify_data", b, target = "y")
 
-  r = mlr_resamplings$get("subsampling")
-  r$param_set$values = list(ratio = 0.5, repeats = 3, stratify = TRUE)
+  r = rsmp("subsampling", ratio = 0.5, repeats = 3, stratify = TRUE)
   r$instantiate(task)
 
   for (i in seq_len(r$iters)) {
@@ -23,7 +22,6 @@ test_that("stratification", {
 })
 
 test_that("grouping", {
-  r = mlr_resamplings$get("subsampling")
-  r$param_set$values = list(ratio = 0.5, repeats = 3)
+  r = rsmp("subsampling", ratio = 0.5, repeats = 3)
   expect_grouping_works(r)
 })

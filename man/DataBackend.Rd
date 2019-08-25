@@ -9,12 +9,13 @@
 This is the abstract base class for data backends.
 
 Data Backends provide a layer of abstraction for various data storage systems.
-The required set of operations to implement is listed in the Methods section.
-
-Note that all data access is handled transparently via the \link{Task}.
 It is not recommended to work directly with the DataBackend.
+Instead, all data access is handled transparently via the \link{Task}.
 
-See \link{DataBackendDataTable} or \link{DataBackendMatrix} for exemplary implementations of this interface.
+To connect to out-of-memory database management systems such as SQL servers, see \CRANpkg{mlr3db}.
+
+The required set of fields and methods to implement a custom DataBackend is listed in the respective sections.
+See \link{DataBackendDataTable} or \link{DataBackendMatrix} for exemplary implementations of the interface.
 }
 \section{Construction}{
 
@@ -49,7 +50,7 @@ Returns vector of all distinct row identifiers, i.e. the primary key column.
 Returns a unique hash for this backend. This hash is cached.
 \item \code{data_formats} :: \code{character()}\cr
 Vector of supported data formats.
-A specific format of these supported formats can be picked in the \code{$data()} method.
+A specific format can be chosen in the \code{$data()} method.
 }
 }
 
@@ -59,15 +60,19 @@ A specific format of these supported formats can be picked in the \code{$data()}
 \item \code{data(rows = NULL, cols = NULL, format = "data.table")}\cr
 (\code{integer()} | \code{character()}, \code{character()}) -> \code{any}\cr
 Returns a slice of the data in the specified format.
-Currently, the only supported format is "data.table".
+Currently, the only supported formats are \code{"data.table"} and \code{"Matrix"}.
 The rows must be addressed as vector of primary key values, columns must be referred to via column names.
 Queries for rows with no matching row id and queries for columns with no matching column name are silently ignored.
-\item \code{distinct(rows, cols)}\cr
-(\code{integer()} | \code{character()}, \code{character()}) -> named \code{list()}\cr
+Rows are guaranteed to be returned in the same order as \code{rows}, columns may be returned in an arbitrary order.
+Duplicated row ids result in duplicated rows, duplicated column names lead to an exception.
+\item \code{distinct(rows, cols, na_rm = TRUE)}\cr
+(\code{integer()} | \code{character()}, \code{character()}, \code{logical(1)}) -> named \code{list()}\cr
 Returns a named list of vectors of distinct values for each column specified.
-Non-existing columns are silently ignored.
-If \code{rows} is \code{NULL}, all possible distinct values will be returned, even if they do not occur.
-This affects factor-like variables with empty levels.
+If \code{na_rm} is \code{TRUE}, missing values are removed from the returned vectors of distinct values.
+Non-existing rows and columns are silently ignored.
+
+If \code{rows} is \code{NULL}, all possible distinct values will be returned, even if the value is not present in the data.
+This affects factor-like variables with empty levels, if supported by the backend.
 \item \code{head(n = 6)}\cr
 \code{integer(1)} -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Returns the first up-to \code{n} rows of the data as \code{\link[data.table:data.table]{data.table::data.table()}}.
@@ -89,6 +94,8 @@ b$distinct(rows = b$rownames, "y")
 b$missings(rows = b$rownames, cols = names(data))
 }
 \seealso{
+Extension Packages: \CRANpkg{mlr3db}
+
 Other DataBackend: \code{\link{DataBackendDataTable}},
   \code{\link{DataBackendMatrix}},
   \code{\link{as_data_backend}}

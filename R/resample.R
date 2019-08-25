@@ -6,22 +6,25 @@
 #' @param task :: [Task].
 #' @param learner :: [Learner].
 #' @param resampling :: [Resampling].
-#' @param ctrl :: named `list()`\cr
-#'   Object to control learner execution. See [mlr_control()] for details.
+#' @param store_models :: `logical(1)`\cr
+#'   Keep the fitted model after the test set has been predicted?
+#'   Set to `TRUE` if you want to further analyse the models or want to
+#'   extract information like variable importance.
 #' @return [ResampleResult].
 #'
-#' @template section-sugar
-#' @template section-parallelization
+#'
+#' @template section_parallelization
+#' @template section_logging
 #'
 #' @note
 #' The fitted models are discarded after the predictions have been scored in order to reduce memory consumption.
-#' If you need access to the models for later analysis, set `store_models` to `TRUE` via [mlr_control()].
+#' If you need access to the models for later analysis, set `store_models` to `TRUE`.
 #'
 #' @export
 #' @examples
-#' task = mlr_tasks$get("iris")
-#' learner = mlr_learners$get("classif.rpart")
-#' resampling = mlr_resamplings$get("cv")
+#' task = tsk("iris")
+#' learner = lrn("classif.rpart")
+#' resampling = rsmp("cv")
 #'
 #' # explicitly instantiate the resampling for this task for reproduciblity
 #' set.seed(123)
@@ -31,24 +34,25 @@
 #' print(rr)
 #'
 #' # retrieve performance
-#' rr$performance("classif.ce")
-#' rr$aggregate("classif.ce")
+#' rr$performance(msr("classif.ce"))
+#' rr$aggregate(msr("classif.ce"))
 #'
 #' # merged prediction objects of all resampling iterations
 #' pred = rr$prediction
 #' pred$confusion
 #'
 #' # Repeat resampling with featureless learner
-#' rr.featureless = resample(task, "classif.featureless", resampling)
+#' rr_featureless = resample(task, lrn("classif.featureless"), resampling)
 #'
-#' # Combine the ResampleResults into a BenchmarkResult
-#' bmr = rr$combine(rr.featureless)
-#' print(bmr)
-resample = function(task, learner, resampling, ctrl = list()) {
-  task = assert_task(task, clone = TRUE)
-  learner = assert_learner(learner, task = task, properties = task$properties, clone = TRUE)
-  resampling = assert_resampling(resampling)
-  ctrl = mlr_control(ctrl)
+#' # Convert results to BenchmarkResult, then combine them
+#' bmr1 = as_benchmark_result(rr)
+#' bmr2 = as_benchmark_result(rr_featureless)
+#' print(bmr1$combine(bmr2))
+resample = function(task, learner, resampling, store_models = FALSE) {
+  task = assert_task(as_task(task, clone = TRUE))
+  learner = assert_learner(as_learner(learner, clone = TRUE), task = task, properties = task$properties)
+  resampling = assert_resampling(as_resampling(resampling))
+  assert_flag(store_models)
 
   instance = resampling$clone(deep = TRUE)
   if (!instance$is_instantiated) {
@@ -59,13 +63,13 @@ resample = function(task, learner, resampling, ctrl = list()) {
   if (use_future()) {
     lg$debug("Running resample() via future with %i iterations", n)
     res = future.apply::future_lapply(seq_len(n), workhorse,
-      task = task, learner = learner, resampling = instance, ctrl = ctrl,
-      remote = TRUE, future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
+      task = task, learner = learner, resampling = instance, store_models = store_models, lgr_threshold = lg$threshold,
+      future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
       future.packages = "mlr3")
   } else {
     lg$debug("Running resample() sequentially with %i iterations", n)
     res = lapply(seq_len(n), workhorse,
-      task = task, learner = learner, resampling = instance, ctrl = ctrl)
+      task = task, learner = learner, resampling = instance, store_models = store_models)
   }
 
   res = map_dtr(res, reassemble, learner = learner)

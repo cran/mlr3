@@ -8,8 +8,12 @@
 A classification task for the \link[mlbench:PimaIndiansDiabetes2]{mlbench::PimaIndiansDiabetes2} data set.
 Positive class is set to \code{"pos"}.
 }
-\section{Usage}{
+\section{Construction}{
 \preformatted{mlr_tasks$get("pima")
+tsk("pima")
 }
 }
 
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Task]{Tasks}: \link{mlr_tasks}
+}

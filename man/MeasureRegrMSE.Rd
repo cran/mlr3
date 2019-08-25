@@ -6,10 +6,17 @@
 \alias{mlr_measures_regr.mse}
 \title{Mean Squared Error Regression Measure}
 \format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{MeasureClassif}.}
-\usage{
-MeasureRegrMSE
-}
 \description{
 Calls \code{\link[Metrics:mse]{Metrics::mse()}}.
+}
+\section{Construction}{
+\preformatted{MeasureRegrMSE$new()
+mlr_measures$get("regr.mse")
+msr("regr.mse")
+}
+}
+
+\seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
 }
 \keyword{datasets}

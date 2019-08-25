@@ -27,7 +27,7 @@ Note: This object is typically constructed via a derived classes, e.g. \link{Tas
 Identifier for the task.
 \item \code{task_type} :: \code{character(1)}\cr
 Set in the classes which inherit from this class.
-Must be an element of \link[=mlr_reflections]{mlr_reflections$task_types}.
+Must be an element of \link[=mlr_reflections]{mlr_reflections$task_types$type}.
 \item \code{backend} :: \link{DataBackend}\cr
 Either a \link{DataBackend}, or any object which is convertible to a DataBackend with \code{as_data_backend()}.
 E.g., a \code{data.frame()} will be converted to a \link{DataBackendDataTable}.
@@ -114,10 +114,10 @@ Returns a slice of the data from the \link{DataBackend} in the data format speci
 Rows are additionally subsetted to only contain observations with role "use", and
 columns are filtered to only contain features with roles "target" and "feature".
 If invalid \code{rows} or \code{cols} are specified, an exception is raised.
-\item \code{formula(rhs = NULL)}\cr
+\item \code{formula(rhs = ".")}\cr
 \code{character()} -> \code{\link[stats:formula]{stats::formula()}}\cr
 Constructs a \code{\link[stats:formula]{stats::formula()}}, e.g. \code{[target] ~ [feature_1] + [feature_2] + ... + [feature_k]}, using
-the features provided in argument \code{rhs} (defaults to all columns with role \code{"feature"}).
+the features provided in argument \code{rhs} (defaults to all columns with role \code{"feature"}, symbolized by \code{"."}).
 \item \code{levels(cols = NULL)}\cr
 \code{character()} -> named \code{list()}\cr
 Returns the distinct values for columns referenced in \code{cols} with storage type "character", "factor" or "ordered".
@@ -148,27 +148,41 @@ If \code{exclusive} is \code{TRUE}, the referenced rows will be removed from all
 \item \code{filter(rows)}\cr
 (\code{integer()} | \code{character()}) -> \code{self}\cr
 Subsets the task, reducing it to only keep the rows specified in \code{rows}.
-This mutates the task in-place.
+
+This operation mutates the task in-place.
 See the section on task mutators for more information.
 \item \code{select(cols)}\cr
 \code{character()} -> \code{self}\cr
 Subsets the task, reducing it to only keep the features specified in \code{cols}.
 Note that you cannot deselect the target column, for obvious reasons.
-This mutates the task in-place.
+
+This operation mutates the task in-place.
 See the section on task mutators for more information.
 \item \code{cbind(data)}\cr
 \code{data.frame()} -> \code{self}\cr
-Extends the \link{DataBackend} with additional columns.
+Adds additional columns to the \link{DataBackend}.
 The row ids must be provided as column in \code{data} (with column name matching the primary key name of the \link{DataBackend}).
 If this column is missing, it is assumed that the rows are exactly in the order of \code{t$row_ids}.
-This mutates the task in-place.
+In case of name clashes of column names in \code{data} and \link{DataBackend}, columns in \code{data} have higher precedence
+and virtually overwrite the columns in the \link{DataBackend}.
+
+This operation mutates the task in-place.
 See the section on task mutators for more information.
 \item \code{rbind(data)}\cr
 \code{data.frame()} -> \code{self}\cr
-Extends the \link{DataBackend} with additional rows.
+Adds additional rows to the \link{DataBackend}.
 The new row ids must be provided as column in \code{data}.
 If this column is missing, new row ids are constructed automatically.
-This mutates the task in-place.
+In case of name clashes of row ids, rows in \code{data} have higher precedence
+and virtually overwrite the rows in the \link{DataBackend}.
+
+This operation mutates the task in-place.
+See the section on task mutators for more information.
+\item \code{rename(from, to)}\cr
+(\code{character()}, \code{character()}) -> \code{self}\cr
+Renames columns by mapping column names in \code{old} to new column names in \code{new}.
+
+This operation mutates the task in-place.
 See the section on task mutators for more information.
 }
 }
@@ -193,6 +207,7 @@ This provides a different "view" on the data without altering the data itself.
 \item \code{rbind()} and \code{cbind()} change the task in-place by binding rows or columns to the data, but without modifying the original \link{DataBackend}.
 Instead, the methods first create a new \link{DataBackendDataTable} from the provided new data, and then
 merge both backends into an abstract \link{DataBackend} which combines the results on-demand.
+\item \code{rename()} wraps the \link{DataBackend} of the Task in an additional \link{DataBackend} which deals with the renaming. Also updates \code{col_roles} and \code{col_info}.
 }
 }
 

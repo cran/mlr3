@@ -1,7 +1,7 @@
 context("Task")
 
 test_that("Task duplicates rows", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   data = task$data(c(1L, 1L))
   expect_data_table(data, nrows = 2L, any.missing = FALSE)
 })
@@ -28,7 +28,7 @@ test_that("Rows return ordered", {
 })
 
 test_that("Rows return ordered with multiple order cols", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
 
   x = task$data()
   expect_true(is.unsorted(x$Petal.Length))
@@ -46,7 +46,8 @@ test_that("Rows return ordered with multiple order cols", {
 
 
 test_that("Task rbind", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
+  expect_error(task$rbind(task), "data.frame")
   data = iris[1:10, ]
   task$rbind(iris[1:10, ])
   expect_task(task)
@@ -56,13 +57,18 @@ test_that("Task rbind", {
   expect_equal(task$nrow, 160)
 
   # 185
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   task$select("Petal.Length")
   task$rbind(task$data())
+  expect_set_equal(task$row_ids, 1:300)
+
+  task$rbind(data.table())
+  expect_equal(task$nrow, 300L)
 })
 
 test_that("Task cbind", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
+  expect_error(task$cbind(task), "data.frame")
   data = cbind(data.frame(foo = 150:1), data.frame(..row_id = task$row_ids))
   task$cbind(data)
   expect_task(task)
@@ -81,15 +87,13 @@ test_that("Task cbind", {
 
   task$cbind(iris[, character(0)])
   expect_equal(task$ncol, 7L)
-})
 
-test_that("task$feature_types preserves key (#193)", {
-  task = mlr_tasks$get("iris")$select(character(0))$cbind(iris[1:4])
-  expect_data_table(task$feature_types, ncols = 2L, nrows = 4L, key = "id")
+  task$cbind(data.table())
+  expect_equal(task$ncol, 7L)
 })
 
 test_that("cbind/rbind works", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   data = data.table(..row_id = 1:150, foo = 150:1)
 
   task$cbind(data)
@@ -103,14 +107,14 @@ test_that("cbind/rbind works", {
   expect_data_table(task$data(), ncols = 6, nrows = 160, any.missing = FALSE)
 
   # auto generate char ids
-  task = mlr_tasks$get("zoo")
+  task = tsk("zoo")
   newdata = task$data("wasp")
   task$rbind(newdata)
   expect_equal(sum(grepl("^rbind_[0-9a-z]+_1", task$row_ids)), 1L)
 })
 
 test_that("filter works", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   task$filter(1:100)
   expect_equal(task$nrow, 100L)
 
@@ -121,7 +125,7 @@ test_that("filter works", {
 })
 
 test_that("select works", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   task$select(setdiff(task$feature_names, "Sepal.Length"))
   expect_equal(task$ncol, 4L)
 
@@ -131,6 +135,17 @@ test_that("select works", {
   expect_equal(task$feature_names, "Sepal.Width")
 
   expect_error(task$select(1:4), "subset")
+})
+
+test_that("rename works", {
+  task = tsk("iris")
+  old = names(iris)
+  new = paste0("xx_", old)
+  task$rename(old, new)
+
+  expect_set_equal(task$feature_names, setdiff(new, "xx_Species"))
+  expect_equal(task$target_names, "xx_Species")
+  expect_task_classif(task)
 })
 
 test_that("groups/weights work", {
@@ -170,7 +185,7 @@ test_that("ordered factors (#95)", {
 })
 
 test_that("as.data.table", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   expect_data_table(as.data.table(task), nrows = 150, ncols = 5)
 })
 
@@ -199,8 +214,21 @@ test_that("task$droplevels works", {
 })
 
 test_that("task$missings() works", {
-  task = mlr_tasks$get("pima")
+  task = tsk("pima")
   x = task$missings()
   y = map_int(task$data(), function(x) sum(is.na(x)))
   expect_equal(x, y[match(names(x), names(y))])
+})
+
+test_that("task$feature_types preserves key (#193)", {
+  task = tsk("iris")$select(character(0))$cbind(iris[1:4])
+  expect_data_table(task$feature_types, ncols = 2L, nrows = 4L, key = "id")
+})
+
+test_that("switch columns on and off (#301)", {
+  task = tsk("iris")$
+    set_col_role("Sepal.Length", character(0))$
+    cbind(data.table(x = 1:150))$
+    set_col_role("Sepal.Length", "feature")
+  expect_data_table(task$data(), ncols = 6, nrows = 150, any.missing = FALSE)
 })

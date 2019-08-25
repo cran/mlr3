@@ -1,4 +1,4 @@
-#' @title Generate a Benchmark Design
+#' @title Generate a Benchmark Grid Design
 #'
 #' @description
 #' Takes a lists of [Task], a list of [Learner] and a list of [Resampling] to
@@ -10,15 +10,17 @@
 #' @param learners :: list of [Learner].
 #' @param resamplings :: list of [Resampling].
 #'
-#' @template section-sugar
 #' @return ([data.table::data.table()]) with the cross product of the input vectors.
 #' @export
-expand_grid = function(tasks, learners, resamplings) {
-
-  tasks = assert_tasks(tasks)
-  learners = assert_learners(learners)
-  resamplings = assert_resamplings(resamplings)
-  assert_resamplings(resamplings, instantiated = FALSE)
+#' @examples
+#' tasks = list(tsk("iris"), tsk("sonar"))
+#' learners = list(lrn("classif.featureless"), lrn("classif.rpart"))
+#' resamplings = list(rsmp("cv"), rsmp("subsampling"))
+#' benchmark_grid(tasks, learners, resamplings)
+benchmark_grid = function(tasks, learners, resamplings) {
+  tasks = assert_tasks(as_tasks(tasks))
+  learners = assert_learners(as_learners(learners))
+  resamplings = assert_resamplings(as_resamplings(resamplings), instantiated = FALSE)
 
   grid = CJ(task = seq_along(tasks), resampling = seq_along(resamplings))
   instances = pmap(grid, function(task, resampling) resamplings[[resampling]]$clone()$instantiate(tasks[[task]]))

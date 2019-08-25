@@ -1,30 +1,28 @@
 context("TaskClassif")
 
 test_that("Basic ops on iris task", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   expect_task(task)
   expect_task_supervised(task)
   expect_task_classif(task)
   expect_equal(task$target_names, "Species")
   expect_set_equal(task$class_names, levels(iris$Species))
-  expect_identical(task$class_n, nlevels(iris$Species))
 
   f = task$formula()
   expect_class(f, "formula")
   # expect_set_equal(attr(terms(f), "term.labels"), setdiff(names(iris), "Species"))
 })
 
-test_that("$class_names and $class_n consider also inactive rows", {
-  task = mlr_tasks$get("iris")
+test_that("$class_names consider also inactive rows", {
+  task = tsk("iris")
   task$set_row_role(1:100, character(0L))
 
   expect_set_equal(task$class_names, levels(iris$Species))
-  expect_identical(task$class_n, 3L)
 })
 
 test_that("Factor levels are preserved in prediction", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.featureless")
+  task = tsk("iris")
+  learner = lrn("classif.featureless")
   learner$predict_type = "prob"
   learner$train(task, 1:100)
 
@@ -57,7 +55,7 @@ test_that("0 feature task", {
   expect_task_classif(task)
   expect_data_table(task$data(), ncols = 1L)
 
-  lrn = mlr_learners$get("classif.featureless")
+  lrn = lrn("classif.featureless")
   p = lrn$train(task)$predict(task)
   expect_prediction(p)
   # expect_number(e$performance, lower = 0.6, upper = 0.7)
@@ -66,7 +64,7 @@ test_that("0 feature task", {
 test_that("Positive class always comes first", {
   sonar = load_dataset("Sonar", package = "mlbench")
   tmp = list(c("M", "R"), c("R", "M"))
-  lrn = mlr_learners$get("classif.featureless", predict_type = "prob", param_vals = list(method = "sample"))
+  lrn = lrn("classif.featureless", predict_type = "prob", method = "sample")
 
   for (lvls in tmp) {
     task = TaskClassif$new("sonar", backend = sonar, target = "Class", positive = lvls[[1]])

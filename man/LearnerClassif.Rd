@@ -8,7 +8,7 @@
 \description{
 This Learner specializes \link{Learner} for classification problems.
 
-Predefined learners can be found in the \link{Dictionary} \link{mlr_learners}.
+Many predefined learners can be found in the \link{Dictionary} \link{mlr_learners} after loading the \CRANpkg{mlr3learners} package.
 }
 \section{Construction}{
 \preformatted{l = LearnerClassif$new(id, param_set = ParamSet$new(), param_vals = list(), predict_types = character(),
@@ -36,18 +36,18 @@ lrns = mlr_learners$mget(mlr_learners$keys("^classif"))
 names(lrns)
 
 # get a specific learner from mlr_learners:
-lrn = mlr_learners$get("classif.rpart")
+lrn = lrn("classif.rpart")
 print(lrn)
 
 # train the learner:
-task = mlr_tasks$get("iris")
+task = tsk("iris")
 lrn$train(task, 1:120)
 
 # predict on new observations:
 lrn$predict(task, 121:150)$confusion
 }
 \seealso{
-Example classification learner: \code{\link[=mlr_learners_classif.rpart]{classif.rpart}}.
+Example classification learners: \code{\link[=mlr_learners_classif.rpart]{classif.rpart}}
 
 Other Learner: \code{\link{LearnerRegr}},
   \code{\link{Learner}}, \code{\link{mlr_learners}}

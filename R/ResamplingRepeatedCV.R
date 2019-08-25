@@ -1,11 +1,19 @@
 #' @title Repeated Cross Validation Resampling
 #'
+#' @usage NULL
 #' @aliases mlr_resamplings_repeated_cv
 #' @format [R6::R6Class()] inheriting from [Resampling].
 #' @include Resampling.R
 #'
+#' @section Construction:
+#' ```
+#' ResamplingRepeatedCV$new()
+#' mlr_resamplings$get("repeated_cv")
+#' rsmp("repeated_cv")
+#' ```
+#'
 #' @description
-#' `repeats` (default: 10) times repeated `folds`-fold (default: 10) cross-validation.
+#' Splits data `repeats` (default: 10) times using a `folds`-fold (default: 10) cross-validation.
 #'
 #' The iteration counter translates to `repeats` blocks of `folds`
 #' cross-validations, i.e., the first `folds` iterations belong to
@@ -26,15 +34,15 @@
 #'   `integer()` -> `integer()`\cr
 #'   Translates iteration numbers to repetition number.
 #'
+#' @template seealso_resampling
 #' @export
 #' @examples
 #' # Create a task with 10 observations
-#' task = mlr_tasks$get("iris")
+#' task = tsk("iris")
 #' task$filter(1:10)
 #'
 #' # Instantiate Resampling
-#' rrcv = mlr_resamplings$get("repeated_cv")
-#' rrcv$param_set$values = list(repeats = 2, folds = 3)
+#' rrcv = rsmp("repeated_cv", repeats = 2, folds = 3)
 #' rrcv$instantiate(task)
 #' rrcv$iters
 #' rrcv$folds(1:6)
@@ -49,15 +57,15 @@
 #' rrcv$instance # table
 ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
   public = list(
-    initialize = function(id = "repeated_cv", param_vals = list(repeats = 10L, folds = 10L)) {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "repeated_cv",
         param_set = ParamSet$new(params = list(
           ParamUty$new("stratify", default = NULL),
           ParamInt$new("repeats", lower = 1),
           ParamInt$new("folds", lower = 1L, tags = "required")
         )),
-        param_vals = param_vals
+        param_vals = list(repeats = 10L, folds = 10L)
       )
     },
 

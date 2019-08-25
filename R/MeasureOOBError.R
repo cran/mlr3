@@ -1,22 +1,32 @@
 #' @title Out-of-bag Error Measure
 #'
+#' @usage NULL
 #' @aliases mlr_measures_oob_error
 #' @format [R6::R6Class()] inheriting from [Measure].
 #' @include Measure.R
 #'
-#' @description
-#' Returns the out-of-bag error of the learner for learners that support it
-#' (these learners have property "oob_error").
+#' @section Construction:
+#' ```
+#' MeasureOOBError$new()
+#' mlr_measures$get("oob_error")
+#' msr("oob_error")
+#' ```
 #'
+#' @description
+#' Returns the out-of-bag error of the [Learner] for learners that support it
+#' (learners with property `"oob_error"`).
+#' Returns `NA` for unsupported learners.
+#'
+#' @template seealso_measure
 #' @export
 MeasureOOBError = R6Class("MeasureOOBError",
   inherit = Measure,
   public = list(
     parts = NULL,
 
-    initialize = function(id = "oob_error") {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "oob_error",
         task_type = NA_character_,
         properties = "requires_learner",
         predict_type = "response",

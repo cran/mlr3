@@ -28,7 +28,7 @@
 #'
 #' * `task_type` :: `character(1)`\cr
 #'   Set in the classes which inherit from this class.
-#'   Must be an element of [mlr_reflections$task_types][mlr_reflections].
+#'   Must be an element of [mlr_reflections$task_types$type][mlr_reflections].
 #'
 #' * `backend` :: [DataBackend]\cr
 #'   Either a [DataBackend], or any object which is convertible to a DataBackend with `as_data_backend()`.
@@ -118,10 +118,10 @@
 #'   columns are filtered to only contain features with roles "target" and "feature".
 #'   If invalid `rows` or `cols` are specified, an exception is raised.
 #'
-#' * `formula(rhs = NULL)`\cr
+#' * `formula(rhs = ".")`\cr
 #'   `character()` -> [stats::formula()]\cr
 #'   Constructs a [stats::formula()], e.g. `[target] ~ [feature_1] + [feature_2] + ... + [feature_k]`, using
-#'   the features provided in argument `rhs` (defaults to all columns with role `"feature"`).
+#'   the features provided in argument `rhs` (defaults to all columns with role `"feature"`, symbolized by `"."`).
 #'
 #' * `levels(cols = NULL)`\cr
 #'   `character()` -> named `list()`\cr
@@ -159,32 +159,46 @@
 #' * `filter(rows)`\cr
 #'   (`integer()` | `character()`) -> `self`\cr
 #'   Subsets the task, reducing it to only keep the rows specified in `rows`.
-#'   This mutates the task in-place.
+#'
+#'   This operation mutates the task in-place.
 #'   See the section on task mutators for more information.
 #'
 #' * `select(cols)`\cr
 #'   `character()` -> `self`\cr
 #'   Subsets the task, reducing it to only keep the features specified in `cols`.
 #'   Note that you cannot deselect the target column, for obvious reasons.
-#'   This mutates the task in-place.
+#'
+#'   This operation mutates the task in-place.
 #'   See the section on task mutators for more information.
 #'
 #' * `cbind(data)`\cr
 #'   `data.frame()` -> `self`\cr
-#'   Extends the [DataBackend] with additional columns.
+#'   Adds additional columns to the [DataBackend].
 #'   The row ids must be provided as column in `data` (with column name matching the primary key name of the [DataBackend]).
 #'   If this column is missing, it is assumed that the rows are exactly in the order of `t$row_ids`.
-#'   This mutates the task in-place.
+#'   In case of name clashes of column names in `data` and [DataBackend], columns in `data` have higher precedence
+#'   and virtually overwrite the columns in the [DataBackend].
+#'
+#'   This operation mutates the task in-place.
 #'   See the section on task mutators for more information.
 #'
 #' * `rbind(data)`\cr
 #'   `data.frame()` -> `self`\cr
-#'   Extends the [DataBackend] with additional rows.
+#'   Adds additional rows to the [DataBackend].
 #'   The new row ids must be provided as column in `data`.
 #'   If this column is missing, new row ids are constructed automatically.
-#'   This mutates the task in-place.
+#'   In case of name clashes of row ids, rows in `data` have higher precedence
+#'   and virtually overwrite the rows in the [DataBackend].
+#'
+#'   This operation mutates the task in-place.
 #'   See the section on task mutators for more information.
 #'
+#' * `rename(from, to)`\cr
+#'   (`character()`, `character()`) -> `self`\cr
+#'   Renames columns by mapping column names in `old` to new column names in `new`.
+#'
+#'   This operation mutates the task in-place.
+#'   See the section on task mutators for more information.
 #'
 #' @section S3 methods:
 #' * `as.data.table(t)`\cr
@@ -200,6 +214,7 @@
 #' * `rbind()` and `cbind()` change the task in-place by binding rows or columns to the data, but without modifying the original [DataBackend].
 #'   Instead, the methods first create a new [DataBackendDataTable] from the provided new data, and then
 #'   merge both backends into an abstract [DataBackend] which combines the results on-demand.
+#' * `rename()` wraps the [DataBackend] of the Task in an additional [DataBackend] which deals with the renaming. Also updates `col_roles` and `col_info`.
 #'
 #' @family Task
 #' @export
@@ -237,7 +252,7 @@ Task = R6Class("Task",
     initialize = function(id, task_type, backend) {
 
       self$id = assert_string(id, min.chars = 1L)
-      self$task_type = assert_choice(task_type, mlr_reflections$task_types)
+      self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
       if (!inherits(backend, "DataBackend")) {
         self$backend = as_data_backend(backend)
       } else {
@@ -255,11 +270,9 @@ Task = R6Class("Task",
       )
 
       rn = self$backend$rownames
-      cn = self$col_info$id
-
       self$row_roles = list(use = rn, validation = rn[0L])
       self$col_roles = named_list(mlr_reflections$task_col_roles[[task_type]], character(0L))
-      self$col_roles$feature = setdiff(cn, self$backend$primary_key)
+      self$col_roles$feature = setdiff(self$col_info$id, self$backend$primary_key)
     },
 
     format = function() {
@@ -274,8 +287,8 @@ Task = R6Class("Task",
       task_data(self, rows, cols, data_format)
     },
 
-    formula = function(rhs = NULL) {
-      formulate(self$target_names, rhs %??% ".")
+    formula = function(rhs = ".") {
+      formulate(self$target_names, rhs)
     },
 
     head = function(n = 6L) {
@@ -293,7 +306,7 @@ Task = R6Class("Task",
         assert_subset(cols, self$col_info$id)
       }
 
-      set_names(self$col_info[list(cols), "levels", with = FALSE][[1L]], cols)
+      set_names(self$col_info[list(cols), "levels", on = "id", with = FALSE][[1L]], cols)
     },
 
     missings = function(cols = NULL) {
@@ -320,12 +333,14 @@ Task = R6Class("Task",
 
     rbind = function(data) {
       task_rbind(self, data)
-      invisible(self)
     },
 
     cbind = function(data) {
       task_cbind(self, data)
-      invisible(self)
+    },
+
+    rename = function(old, new) {
+      task_rename(self, old, new)
     },
 
     set_row_role = function(rows, new_roles, exclusive = TRUE) {
@@ -349,10 +364,10 @@ Task = R6Class("Task",
 
   active = list(
     hash = function() {
-      hash(list(
+      hash(
         class(self), self$id, self$backend$hash, self$row_roles, self$col_roles,
-        self$col_info$levels, self$properties
-      ))
+        self$col_info$type, self$col_info$levels, self$properties
+      )
     },
 
     row_ids = function() {
@@ -472,7 +487,7 @@ task_print = function(self) {
   types = self$feature_types
   if (nrow(types)) {
     catf("Features (%i):", nrow(types))
-    types = types[, list(N = .N, feats = str_collapse(get("id"), n = 100L)), by = "type"][, "type" := translate_types(get("type"))]
+    types = types[, list(N = .N, feats = str_collapse(id, n = 100L)), by = "type"][, "type" := translate_types(type)]
     setorderv(types, "N", order = -1L)
     pmap(types, function(type, N, feats) catf(str_indent(sprintf("* %s (%i):", type, N), feats)))
   }
@@ -499,7 +514,7 @@ col_info = function(x, ...) {
 col_info.data.table = function(x, primary_key = character(0L), ...) {
   types = map_chr(x, function(x) class(x)[1L])
   discrete = setdiff(names(types)[types %in% c("character", "factor", "ordered")], primary_key)
-  levels = insert_named(named_list(names(types)), lapply(x[, discrete, with = FALSE], distinct, drop = FALSE))
+  levels = insert_named(named_list(names(types)), lapply(x[, discrete, with = FALSE], distinct_values, drop = FALSE))
   data.table(id = names(types), type = unname(types), levels = levels, key = "id")
 }
 

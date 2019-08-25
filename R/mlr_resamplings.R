@@ -2,9 +2,14 @@
 #'
 #' @usage NULL
 #' @format [R6::R6Class] object inheriting from [mlr3misc::Dictionary].
+#'
 #' @description
 #' A simple [Dictionary] storing objects of class [Resampling].
 #' Each resampling has an associated help page, see `mlr_resamplings_[id]`.
+#'
+#' This dictionary can get populated with additional resampling strategies by add-on packages.
+#'
+#' For a more convenient way to retrieve and construct resampling strategies, see [rsmp()].
 #'
 #' @section Methods:
 #' See [Dictionary].
@@ -16,29 +21,18 @@
 #'
 #' @family Dictionary
 #' @family Resampling
-#' @seealso Example resamplings:
-#' * [`cv`][mlr_resamplings_cv].
-#' * [`bootstrap`][mlr_resamplings_bootstrap].
+#' @seealso
+#' Example resamplings: [`cv`][mlr_resamplings_cv], [`bootstrap`][mlr_resamplings_bootstrap]
+#'
+#' Sugar function: [rsmp()]
 #' @export
 #' @examples
 #' as.data.table(mlr_resamplings)
 #' mlr_resamplings$get("cv")
+#' rsmp("subsampling")
 mlr_resamplings = R6Class("DictionaryResampling",
   inherit = Dictionary,
   cloneable = FALSE,
-
-  public = list(
-    get = function(key, id = NULL, param_vals = NULL) {
-      obj = super$get(key)
-      if (!is.null(id)) {
-        obj$id = id
-      }
-      if (!is.null(param_vals)) {
-        obj$param_set$values = insert_named(obj$param_set$values, param_vals)
-      }
-      obj
-    }
-  )
 )$new()
 
 #' @export

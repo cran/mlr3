@@ -1,13 +1,21 @@
 #' @title Bootstrap Resampling
 #'
+#' @usage NULL
 #' @aliases mlr_resamplings_bootstrap
 #' @format [R6::R6Class] inheriting from [Resampling].
 #' @include Resampling.R
 #'
+#' @section Construction:
+#' ```
+#' ResamplingBootstrap$new()
+#' mlr_resamplings$get("bootstrap")
+#' rsmp("bootstrap")
+#' ```
+#'
 #' @description
-#' Simple Bootstrap sampling.
+#' Splits data into bootstrap samples (sampling with replacement).
 #' Hyperparameters are the number of bootstrap iterations (`repeats`, default: 30)
-#' and the ratio of observations to draw per iteration (`ratio`, default: 1).
+#' and the ratio of observations to draw per iteration (`ratio`, default: 1) for the training set.
 #'
 #' @section Fields:
 #' See [Resampling].
@@ -15,15 +23,15 @@
 #' @section Methods:
 #' See [Resampling].
 #'
+#' @template seealso_resampling
 #' @export
 #' @examples
 #' # Create a task with 10 observations
-#' task = mlr_tasks$get("iris")
+#' task = tsk("iris")
 #' task$filter(1:10)
 #'
 #' # Instantiate Resampling
-#' rb = mlr_resamplings$get("bootstrap")
-#' rb$param_set$values = list(repeats = 2, ratio = 1)
+#' rb = rsmp("bootstrap", repeats = 2, ratio = 1)
 #' rb$instantiate(task)
 #'
 #' # Individual sets:
@@ -35,15 +43,15 @@
 #' rb$instance$M # Matrix of counts
 ResamplingBootstrap = R6Class("ResamplingBootstrap", inherit = Resampling,
   public = list(
-    initialize = function(id = "bootstrap", param_vals = list(ratio = 1, repeats = 30L)) {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "bootstrap",
         param_set = ParamSet$new(params = list(
           ParamUty$new("stratify", default = NULL),
           ParamInt$new("repeats", lower = 1L, tags = "required"),
           ParamDbl$new("ratio", lower = 0, upper = 1, tags = "required"))
         ),
-        param_vals = param_vals,
+        param_vals = list(ratio = 1, repeats = 30L),
         duplicated_ids = TRUE
       )
     }

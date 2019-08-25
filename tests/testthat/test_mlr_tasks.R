@@ -1,10 +1,11 @@
 context("mlr_tasks")
 
 test_that("mlr_tasks", {
+  expect_dictionary(mlr_tasks, min_items = 1L)
   keys = mlr_tasks$keys()
 
   for (key in keys) {
-    t = mlr_tasks$get(key)
+    t = tsk(key)
     expect_task_supervised(t)
   }
 })

@@ -1,10 +1,9 @@
 context("Resampling")
 
 test_that("param_vals", {
-  r = mlr_resamplings$get("bootstrap")
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
+  r = rsmp("bootstrap", repeats = 100L, ratio = 1)
 
-  r$param_set$values = insert_named(r$param_set$values, list(repeats = 100L))
   expect_identical(r$param_set$values$ratio, 1)
   expect_identical(r$param_set$values$repeats, 100L)
 
@@ -25,11 +24,11 @@ test_that("param_vals", {
 })
 
 test_that("hashing", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   keys = setdiff(mlr_resamplings$keys(), "custom")
 
   for (key in keys) {
-    r = mlr_resamplings$get(key)
+    r = rsmp(key)
 
     with_seed(123L, r$instantiate(task))
     hash = r$hash

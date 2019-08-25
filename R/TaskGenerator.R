@@ -1,4 +1,4 @@
-#' @title Generator Class
+#' @title TaskGenerator Class
 #'
 #' @usage NULL
 #' @format [R6::R6Class] object.
@@ -6,12 +6,12 @@
 #'
 #' @description
 #' Creates a [Task] of arbitrary size.
-#' Predefined task generators are stored in the [Dictionary] [mlr_generators],
-#' e.g. [`xor`][mlr_generators_xor].
+#' Predefined task generators are stored in the [Dictionary] [mlr_task_generators],
+#' e.g. [`xor`][mlr_task_generators_xor].
 #'
 #' @section Construction:
 #' ```
-#' g = Generator$new(id, task_type, packages = character(0L), param_set = ParamSet$new(), param_vals = list())
+#' g = TaskGenerator$new(id, task_type, packages = character(0L), param_set = ParamSet$new(), param_vals = list())
 #' ```
 #'
 #' * `id` :: `character(1)`\cr
@@ -42,16 +42,16 @@
 #'
 #' * `task_type` :: `character(1)`\cr
 #'   Stores the type of class this learner can operate on, e.g. `"classif"` or `"regr"`.
-#'   A complete list of task types is stored in [`mlr_reflections$task_types`][mlr_reflections].
+#'   A complete list of task types is stored in [`mlr_reflections$task_types$type`][mlr_reflections].
 #'
 #' @section Methods:
 #' * `generate(n)`\cr
 #'   `integer(1)` -> [Task]\cr
 #'   Creates a task of type `task_type` with `n` observations, possibly using additional settings stored in `param_set`.
 #'
-#' @family Generator
+#' @family TaskGenerator
 #' @export
-Generator = R6Class("Generator",
+TaskGenerator = R6Class("TaskGenerator",
   public = list(
     id = NULL,
     task_type = NULL,
@@ -62,7 +62,7 @@ Generator = R6Class("Generator",
       self$param_set = assert_param_set(param_set)
       self$param_set$values = param_vals
       self$packages = assert_set(packages)
-      self$task_type = assert_choice(task_type, mlr_reflections$task_types)
+      self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
     },
 
     generate = function(n) {

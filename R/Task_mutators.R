@@ -102,8 +102,13 @@ convert_matching_types = function(col_info, data) {
 # 4. Update col_info
 task_rbind = function(self, data) {
 
+  assert_data_frame(data)
+
+  if (all(dim(data) == 0L)) {
+    return(invisible(self))
+  }
+
   # 1. Check that an rbind is feasible
-  assert_data_frame(data, min.cols = 1L)
   data = as.data.table(data)
   pk = self$backend$primary_key
 
@@ -133,16 +138,16 @@ task_rbind = function(self, data) {
   ci = col_info(data, primary_key = pk)
 
   # 2. Overwrite self$backend with new backend
-  rows_self = unlist(self$row_roles, use.names = FALSE)
-  self$backend = DataBackendRbind$new(self$backend, DataBackendDataTable$new(data, pk), rows_self, data[[pk]])
+  self$backend = DataBackendRbind$new(self$backend, DataBackendDataTable$new(data, pk))
 
   # 3. Update row_roles
   self$row_roles$use = c(self$row_roles$use, data[[pk]])
 
   # 4. Update col_info
   vunion = function(x, y) Map(union, x, y)
+  i.levels = NULL
   self$col_info = self$col_info[ci[, c("id", "levels"), with = FALSE], on = "id", nomatch = 0L]
-  self$col_info[get("type") %in% c("factor", "ordered", "character"), "levels" := list(vunion(get("levels"), get("i.levels")))]
+  self$col_info[type %in% c("factor", "ordered", "character"), "levels" := list(vunion(levels, i.levels))]
   self$col_info[, "i.levels" := NULL]
 
   invisible(self)
@@ -154,8 +159,13 @@ task_rbind = function(self, data) {
 # 3. Update col_info
 task_cbind = function(self, data) {
 
+  assert_data_frame(data)
+
+  if (all(dim(data) == 0L)) {
+    return(invisible(self))
+  }
+
   # 1. Check that an cbind is feasible
-  assert_data_frame(data, nrows = self$nrow)
   data = as.data.table(data)
   pk = self$backend$primary_key
 
@@ -173,9 +183,7 @@ task_cbind = function(self, data) {
 
   # 2. Overwrite self$backend with new backend
   b2 = DataBackendDataTable$new(data, pk)
-  cols_b1 = unlist(self$col_roles, use.names = FALSE)
-  cols_b2 = setdiff(colnames(data), pk)
-  self$backend = DataBackendCbind$new(self$backend, b2, cols_b1, cols_b2)
+  self$backend = DataBackendCbind$new(self$backend, b2)
 
   # 3. Update col_info
   ci = col_info(data)
@@ -184,5 +192,12 @@ task_cbind = function(self, data) {
   setkeyv(self$col_info, "id")
   self$col_roles$feature = union(self$col_roles$feature, setdiff(names(data), pk))
 
+  invisible(self)
+}
+
+task_rename = function(self, old, new) {
+  self$backend = DataBackendRename$new(self$backend, old, new)
+  setkeyv(self$col_info[old, ("id") := new, on = "id"], "id")
+  self$col_roles = map(self$col_roles, map_values, old = old, new = new)
   invisible(self)
 }

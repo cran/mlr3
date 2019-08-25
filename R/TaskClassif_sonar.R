@@ -4,14 +4,17 @@
 #' @format [R6::R6Class] inheriting from [TaskClassif].
 #' @include mlr_tasks.R
 #'
-#' @section Usage:
+#' @section Construction:
 #' ```
 #' mlr_tasks$get("sonar")
+#' tsk("sonar")
 #' ```
 #'
 #' @description
 #' A classification task for the [mlbench::Sonar] data set.
 #' Positive class is set to "M" (Mine).
+#'
+#' @template seealso_task
 NULL
 
 load_task_sonar = function(id = "sonar") {

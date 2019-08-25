@@ -8,12 +8,13 @@
 #' This is the abstract base class for data backends.
 #'
 #' Data Backends provide a layer of abstraction for various data storage systems.
-#' The required set of operations to implement is listed in the Methods section.
-#'
-#' Note that all data access is handled transparently via the [Task].
 #' It is not recommended to work directly with the DataBackend.
+#' Instead, all data access is handled transparently via the [Task].
 #'
-#' See [DataBackendDataTable] or [DataBackendMatrix] for exemplary implementations of this interface.
+#' To connect to out-of-memory database management systems such as SQL servers, see \CRANpkg{mlr3db}.
+#'
+#' The required set of fields and methods to implement a custom DataBackend is listed in the respective sections.
+#' See [DataBackendDataTable] or [DataBackendMatrix] for exemplary implementations of the interface.
 #'
 #' @section Construction:
 #' Note: This object is typically constructed via a derived classes, e.g. [DataBackendDataTable] or [DataBackendMatrix],
@@ -53,22 +54,26 @@
 #'
 #' * `data_formats` :: `character()`\cr
 #'   Vector of supported data formats.
-#'   A specific format of these supported formats can be picked in the `$data()` method.
+#'   A specific format can be chosen in the `$data()` method.
 #'
 #' @section Methods:
 #' * `data(rows = NULL, cols = NULL, format = "data.table")`\cr
 #'   (`integer()` | `character()`, `character()`) -> `any`\cr
 #'   Returns a slice of the data in the specified format.
-#'   Currently, the only supported format is "data.table".
+#'   Currently, the only supported formats are `"data.table"` and `"Matrix"`.
 #'   The rows must be addressed as vector of primary key values, columns must be referred to via column names.
 #'   Queries for rows with no matching row id and queries for columns with no matching column name are silently ignored.
+#'   Rows are guaranteed to be returned in the same order as `rows`, columns may be returned in an arbitrary order.
+#'   Duplicated row ids result in duplicated rows, duplicated column names lead to an exception.
 #'
-#' * `distinct(rows, cols)`\cr
-#'   (`integer()` | `character()`, `character()`) -> named `list()`\cr
+#' * `distinct(rows, cols, na_rm = TRUE)`\cr
+#'   (`integer()` | `character()`, `character()`, `logical(1)`) -> named `list()`\cr
 #'   Returns a named list of vectors of distinct values for each column specified.
-#'   Non-existing columns are silently ignored.
-#'   If `rows` is `NULL`, all possible distinct values will be returned, even if they do not occur.
-#'   This affects factor-like variables with empty levels.
+#'   If `na_rm` is `TRUE`, missing values are removed from the returned vectors of distinct values.
+#'   Non-existing rows and columns are silently ignored.
+#'
+#'   If `rows` is `NULL`, all possible distinct values will be returned, even if the value is not present in the data.
+#'   This affects factor-like variables with empty levels, if supported by the backend.
 #'
 #' * `head(n = 6)`\cr
 #'   `integer(1)` -> [data.table::data.table()]\cr
@@ -80,6 +85,8 @@
 #'   Non-existing rows and columns are silently ignored.
 #'
 #' @family DataBackend
+#' @seealso
+#' Extension Packages: \CRANpkg{mlr3db}
 #' @export
 #' @examples
 #' data = data.table::data.table(id = 1:5, x = runif(5), y = sample(letters[1:3], 5, replace = TRUE))
@@ -98,7 +105,7 @@ DataBackend = R6Class("DataBackend", cloneable = FALSE,
     initialize = function(data, primary_key, data_formats = "data.table") {
       private$.data = data
       self$primary_key = assert_string(primary_key)
-      self$data_formats = assert_subset(data_formats, mlr_reflections$task_data_formats, empty.ok = FALSE)
+      self$data_formats = assert_subset(data_formats, mlr_reflections$data_formats, empty.ok = FALSE)
     },
 
     format = function() {
@@ -106,8 +113,12 @@ DataBackend = R6Class("DataBackend", cloneable = FALSE,
     },
 
     print = function() {
-      catf("%s (%ix%i)", format(self), self$nrow, self$ncol)
-      print(self$head(6L))
+      nr = self$nrow
+      catf("%s (%ix%i)", format(self), nr, self$ncol)
+      print(self$head(6L), row.names = FALSE)
+      if (nr > 6L) {
+        catf("[...] (%i rows omitted)", nr - 6L)
+      }
     }
   ),
 

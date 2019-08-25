@@ -1,8 +1,16 @@
 #' @title Classification Tree Learner
 #'
+#' @usage NULL
 #' @aliases mlr_learners_classif.rpart
 #' @format [R6::R6Class] inheriting from [LearnerClassif].
 #' @include LearnerClassif.R
+#'
+#' @section Construction:
+#' ```
+#' LearnerClassifRpart$new()
+#' mlr_learners$get("classif.rpart")
+#' lrn("classif.rpart")
+#' ```
 #'
 #' @description
 #' A [LearnerClassif] for a classification tree implemented in [rpart::rpart()] in package \CRANpkg{rpart}.
@@ -14,12 +22,13 @@
 #' New York: Routledge.
 #' \doi{10.1201/9781315139470}.
 #'
+#' @template seealso_learner
 #' @export
 LearnerClassifRpart = R6Class("LearnerClassifRpart", inherit = LearnerClassif,
   public = list(
-    initialize = function(id = "classif.rpart") {
+    initialize = function() {
       super$initialize(
-        id = id,
+        id = "classif.rpart",
         packages = "rpart",
         feature_types = c("logical", "integer", "numeric", "character", "factor", "ordered"),
         predict_types = c("response", "prob"),

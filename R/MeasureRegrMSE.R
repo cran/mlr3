@@ -1,12 +1,21 @@
 #' @title Mean Squared Error Regression Measure
 #'
+#' @usage NULL
 #' @aliases mlr_measures_regr.mse
 #' @format [R6::R6Class] inheriting from [MeasureClassif].
 #' @include MeasureRegr.R
 #'
+#' @section Construction:
+#' ```
+#' MeasureRegrMSE$new()
+#' mlr_measures$get("regr.mse")
+#' msr("regr.mse")
+#' ```
+#'
 #' @description
 #' Calls [Metrics::mse()].
 #'
+#' @template seealso_measure
 #' @export
 MeasureRegrMSE = R6Class("MeasureRegrMSE",
   inherit = MeasureRegr,

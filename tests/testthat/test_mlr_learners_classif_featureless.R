@@ -1,15 +1,15 @@
 context("mlr_learners_regr_featureless")
 
 test_that("autotest", {
-  learner = mlr_learners$get("classif.featureless")
+  learner = lrn("classif.featureless")
   expect_learner(learner)
   result = run_autotest(learner, exclude = "sanity")
   expect_true(result, info = result$error)
 })
 
 test_that("Simple training/predict", {
-  task = mlr_tasks$get("iris")
-  learner = mlr_learners$get("classif.featureless")
+  task = tsk("iris")
+  learner = lrn("classif.featureless")
   expect_learner(learner, task)
 
   learner$train(task)
@@ -18,12 +18,12 @@ test_that("Simple training/predict", {
   expect_numeric(learner$model$tab, len = 3L, any.missing = FALSE)
   prediction = learner$predict(task)
   expect_factor(prediction$response, any.missing = FALSE, levels = levels(iris$Species))
-  perf = prediction$score("classif.ce")
+  perf = prediction$score(msr("classif.ce"))
   expect_number(perf, lower = 0.6, upper = 0.7)
 })
 
 test_that("Predict with prob", {
-  task = mlr_tasks$get("iris")
+  task = tsk("iris")
   learner = mlr_learners$get("classif.featureless")
   learner$predict_type = "prob"
   expect_learner(learner, task)

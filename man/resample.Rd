@@ -4,7 +4,7 @@
 \alias{resample}
 \title{Resample a Learner on a Task}
 \usage{
-resample(task, learner, resampling, ctrl = list())
+resample(task, learner, resampling, store_models = FALSE)
 }
 \arguments{
 \item{task}{:: \link{Task}.}
@@ -13,8 +13,10 @@ resample(task, learner, resampling, ctrl = list())
 
 \item{resampling}{:: \link{Resampling}.}
 
-\item{ctrl}{:: named \code{list()}\cr
-Object to control learner execution. See \code{\link[=mlr_control]{mlr_control()}} for details.}
+\item{store_models}{:: \code{logical(1)}\cr
+Keep the fitted model after the test set has been predicted?
+Set to \code{TRUE} if you want to further analyse the models or want to
+extract information like variable importance.}
 }
 \value{
 \link{ResampleResult}.
@@ -24,25 +26,8 @@ Runs a resampling (possibly in parallel).
 }
 \note{
 The fitted models are discarded after the predictions have been scored in order to reduce memory consumption.
-If you need access to the models for later analysis, set \code{store_models} to \code{TRUE} via \code{\link[=mlr_control]{mlr_control()}}.
+If you need access to the models for later analysis, set \code{store_models} to \code{TRUE}.
 }
-\section{Syntactic Sugar}{
-
-
-The mlr3 package provides some shortcuts to ease the creation of its objects.
-
-First, instead of an object, it is possible to pass a string identifier which is used to lookup the object in a \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}:
-\itemize{
-\item \link{Task} in \link{mlr_tasks}.
-\item \link{Learner} in \link{mlr_learners}.
-\item \link{Resampling} in \link{mlr_resamplings}.
-\item \link{Measure} in \link{mlr_measures}.
-}
-
-Additionally, each task type has an associated default measure (stored in \link{mlr_reflections}) which is used as a fallback if no other measure is provided.
-Classification tasks default to the classification error in \link[=mlr_measures_classif.ce]{"classif.ce"}, regression tasks to the mean squared error in \link[=mlr_measures_regr.mse]{"regr.mse"}.
-}
-
 \section{Parallelization}{
 
 
@@ -52,10 +37,28 @@ from \CRANpkg{future.apply} in a single batch.
 To select a parallel backend, use \code{\link[future:plan]{future::plan()}}.
 }
 
+\section{Logging}{
+
+
+The \CRANpkg{mlr3} uses the \CRANpkg{lgr} package for logging.
+\CRANpkg{lgr} supports multiple log levels which can be queried with
+\code{getOption("lgr.log_levels")}.
+
+To suppress output and reduce verbosity, you can lower the log from the
+default level \code{"info"} to \code{"warn"}:\preformatted{lgr::get_logger("mlr3")$set_threshold("warn")
+}
+
+To get additional log output for debugging, increase the log level to \code{"debug"}
+or \code{"trace"}:\preformatted{lgr::get_logger("mlr3")$set_threshold("debug")
+}
+
+To log to a file or a data base, see the documentation of \link[lgr:lgr-package]{lgr::lgr-package}.
+}
+
 \examples{
-task = mlr_tasks$get("iris")
-learner = mlr_learners$get("classif.rpart")
-resampling = mlr_resamplings$get("cv")
+task = tsk("iris")
+learner = lrn("classif.rpart")
+resampling = rsmp("cv")
 
 # explicitly instantiate the resampling for this task for reproduciblity
 set.seed(123)
@@ -65,17 +68,18 @@ rr = resample(task, learner, resampling)
 print(rr)
 
 # retrieve performance
-rr$performance("classif.ce")
-rr$aggregate("classif.ce")
+rr$performance(msr("classif.ce"))
+rr$aggregate(msr("classif.ce"))
 
 # merged prediction objects of all resampling iterations
 pred = rr$prediction
 pred$confusion
 
 # Repeat resampling with featureless learner
-rr.featureless = resample(task, "classif.featureless", resampling)
+rr_featureless = resample(task, lrn("classif.featureless"), resampling)
 
-# Combine the ResampleResults into a BenchmarkResult
-bmr = rr$combine(rr.featureless)
-print(bmr)
+# Convert results to BenchmarkResult, then combine them
+bmr1 = as_benchmark_result(rr)
+bmr2 = as_benchmark_result(rr_featureless)
+print(bmr1$combine(bmr2))
 }
