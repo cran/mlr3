@@ -16,13 +16,13 @@ Learners consist of the following parts:
 \item Meta-information about the requirements and capabilities of the learner.
 }
 
-Predefined learners are stored in the \link{Dictionary} \link{mlr_learners},
+Predefined learners are stored in the \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} \link{mlr_learners},
 e.g. \code{\link[=mlr_learners_classif.rpart]{classif.rpart}} or \code{\link[=mlr_learners_regr.rpart]{regr.rpart}}.
 A guide on how to extend \CRANpkg{mlr3} with custom learners can be found in the \href{https://mlr3book.mlr-org.com}{mlr3book}.
 }
 \section{Construction}{
 
-Note: This object is typically constructed via a derived classes, e.g. \link{LearnerClassif} or \link{LearnerRegr}.\preformatted{l = Learner$new(id, task_type, param_set = ParamSet$new(), param_vals = list(), predict_types = character(),
+Note: This object is typically constructed via a derived classes, e.g. \link{LearnerClassif} or \link{LearnerRegr}.\preformatted{l = Learner$new(id, task_type, param_set = ParamSet$new(), predict_types = character(),
      feature_types = character(), properties = character(), packages = character())
 }
 \itemize{
@@ -32,14 +32,26 @@ Identifier for the learner.
 Type of the task the learner can operator on. E.g., \code{"classif"} or \code{"regr"}.
 \item \code{param_set} :: \link[paradox:ParamSet]{paradox::ParamSet}\cr
 Set of hyperparameters.
-\item \code{param_vals} :: named \code{list()}\cr
-List of hyperparameter settings.
 \item \code{predict_types} :: \code{character()}\cr
 Supported predict types. Must be a subset of \code{\link[=mlr_reflections]{mlr_reflections$learner_predict_types}}.
+\item \code{predict_sets} :: \code{character()}\cr
+Sets to predict on during \code{\link[=resample]{resample()}}/\code{\link[=benchmark]{benchmark()}}.
+Creates and stores a separate \link{Prediction} object for each set.
+The individual sets can be combined via getters in \link{ResampleResult}/\link{BenchmarkResult}, or \link{Measure}s can be set to operate on subsets of the calculated prediction sets.
+Must be a non-empty subset of \code{("train", "test")}.
+Default is \code{"test"}.
 \item \code{feature_types} :: \code{character()}\cr
 Feature types the learner operates on. Must be a subset of \code{\link[=mlr_reflections]{mlr_reflections$task_feature_types}}.
 \item \code{properties} :: \code{character()}\cr
 Set of properties of the learner. Must be a subset of \code{\link[=mlr_reflections]{mlr_reflections$learner_properties}}.
+The following properties are currently standardized and understood by learners in \CRANpkg{mlr3}:
+\itemize{
+\item \code{"missings"}: The learner can handle missing values in the data.
+\item \code{"weights"}: The learner supports observation weights.
+\item \code{"importance"}: The learner supports extraction of importance scores, i.e. comes with a \code{importance()} extractor function (see section on optional extractors).
+\item \code{"selected_features"}: The learner supports extraction of the set of selected features, i.e. comes with a \code{selected_features()} extractor function (see section on optional extractors).
+\item \code{"oob_error"}: The learner supports extraction of estimated out of bag error, i.e. comes with a \code{oob_error()} extractor function (see section on optional extractors).
+}
 \item \code{data_formats} :: \code{character()}\cr
 Vector of supported data formats which can be processed during \code{$train()} and \code{$predict()}.
 Defaults to \code{"data.table"}.
@@ -133,6 +145,7 @@ The higher the score, the more important the variable.
 The returned vector is named with feature names and sorted in decreasing order.
 Note that the model might omit features it has not used at all.
 The learner must be tagged with property \code{"importance"}.
+To filter variables using the importance scores, use package \CRANpkg{mlr3filters}.
 \item \code{selected_features(...)}: Returns a subset of selected features as \code{character()}.
 The learner must be tagged with property \code{"selected_features"}.
 \item \code{oob_error(...)}: Returns the out-of-bag error of the model as \code{numeric(1)}.

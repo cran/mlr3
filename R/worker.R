@@ -42,10 +42,10 @@ predict_wrapper = function(task, learner) {
       learner$id, task$id, as_short_string(result))
   }
 
-  unsupported = setdiff(names(result$data), c("row_ids", "truth", learner$predict_types))
-  if (length(unsupported)) {
-    stopf("Learner '%s' on task '%s' returned result for unsupported predict type '%s'", learner$id, task$id, head(unsupported, 1L))
-  }
+  # unsupported = setdiff(names(result$data), c("row_ids", "truth", learner$predict_types))
+  # if (length(unsupported)) {
+  #   stopf("Learner '%s' on task '%s' returned result for unsupported predict type '%s'", learner$id, task$id, head(unsupported, 1L))
+  # }
 
   return(result)
 }
@@ -78,10 +78,8 @@ learner_train = function(learner, task, row_ids = NULL) {
 
   learner$state = list(
     model = result$result,
-    train_log = result$log,
-    train_time = result$elapsed,
-    predict_log = NULL,
-    predict_time = NULL
+    log = append_log(NULL, "train", result$log$class, result$log$msg),
+    train_time = result$elapsed
   )
 
   # fit fallback learner
@@ -112,10 +110,6 @@ learner_predict = function(learner, task, row_ids = NULL) {
 
   if (is.null(learner$model)) {
     prediction = NULL
-    learner$state$predict_log = data.table(
-      class = factor("warning", levels = c("output", "warning", "error"), ordered = TRUE),
-      msg = "No model trained"
-    )
     learner$state$predict_time = NA_real_
   } else {
     # call predict with encapsulation
@@ -128,24 +122,27 @@ learner_predict = function(learner, task, row_ids = NULL) {
     )
 
     prediction = result$result
-    learner$state$predict_log = result$log
+    learner$state$log = append_log(learner$state$log, "predict", result$log$class, result$log$msg)
     learner$state$predict_time = result$elapsed
   }
 
-  predict_fb = function(row_ids) {
-    fb = assert_learner(as_learner(fb))
-    fb$predict_type = learner$predict_type
-    fb$state = learner$state$fallback_state
-    fb$predict(task, row_ids)
-  }
 
   fb = learner$fallback
   if (!is.null(fb)) {
+    predict_fb = function(row_ids) {
+      fb = assert_learner(as_learner(fb))
+      fb$predict_type = learner$predict_type
+      fb$state = learner$state$fallback_state
+      fb$predict(task, row_ids)
+    }
+
     if (is.null(prediction)) {
+      learner$state$log = append_log(learner$state$log, "predict", "output", "Using fallback learner for predictions")
       prediction = predict_fb(task$row_ids)
     } else {
       miss_ids = prediction$missing
       if (length(miss_ids)) {
+        learner$state$log = append_log(learner$state$log, "predict", "output", "Using fallback learner to impute predictions")
         prediction = c(prediction, predict_fb(miss_ids), keep_duplicates = FALSE)
       }
     }
@@ -156,16 +153,19 @@ learner_predict = function(learner, task, row_ids = NULL) {
 
 
 workhorse = function(iteration, task, learner, resampling, lgr_threshold = NULL, store_models = FALSE) {
-
   if (!is.null(lgr_threshold)) {
     lg$set_threshold(lgr_threshold)
   }
   lg$info("Applying learner '%s' on task '%s' (iter %i/%i)", learner$id, task$id, iteration, resampling$iters)
-  train_set = resampling$train_set(iteration)
-  test_set = resampling$test_set(iteration)
 
-  learner = learner_train(learner$clone(), task, train_set)
-  prediction = learner_predict(learner, task, test_set)
+  sets = list(train = resampling$train_set(iteration), test = resampling$test_set(iteration))
+  learner = learner_train(learner$clone(), task, sets[["train"]])
+
+  prediction = lapply(sets[learner$predict_sets], function(set) {
+    learner_predict(learner, task, set)
+  })
+  names(prediction) = learner$predict_sets
+  prediction = prediction[!vapply(prediction, is.null, NA)]
 
   if (!store_models) {
     learner$state$model = NULL
@@ -180,4 +180,20 @@ reassemble = function(result, learner) {
   learner = learner$clone()
   learner$state = result$learner_state
   list(learner = list(learner), prediction = list(result$prediction))
+}
+
+append_log = function(log = NULL, stage = NA_character_, class = NA_character_, msg = character()) {
+  if (is.null(log)) {
+    log = data.table(
+      stage = factor(levels = c("train", "predict")),
+      class = factor(levels = c("output", "warning", "error"), ordered = TRUE),
+      msg = character()
+    )
+  }
+
+  if (length(msg)) {
+    log = rbindlist(list(log, data.table(stage = stage, class = class, msg = msg)), use.names = TRUE)
+  }
+
+  log
 }

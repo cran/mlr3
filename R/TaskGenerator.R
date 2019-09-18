@@ -6,12 +6,12 @@
 #'
 #' @description
 #' Creates a [Task] of arbitrary size.
-#' Predefined task generators are stored in the [Dictionary] [mlr_task_generators],
+#' Predefined task generators are stored in the [mlr3misc::Dictionary] [mlr_task_generators],
 #' e.g. [`xor`][mlr_task_generators_xor].
 #'
 #' @section Construction:
 #' ```
-#' g = TaskGenerator$new(id, task_type, packages = character(0L), param_set = ParamSet$new(), param_vals = list())
+#' g = TaskGenerator$new(id, task_type, packages = character(), param_set = ParamSet$new())
 #' ```
 #'
 #' * `id` :: `character(1)`\cr
@@ -26,9 +26,6 @@
 #'
 #' * `param_set` :: [paradox::ParamSet]\cr
 #'   Set of hyperparameters.
-#'
-#' * `param_vals` :: named `list()`\cr
-#'   List of hyperparameter settings.
 #'
 #' @section Fields:
 #' * `id` :: `character(1)`\cr
@@ -57,10 +54,9 @@ TaskGenerator = R6Class("TaskGenerator",
     task_type = NULL,
     param_set = NULL,
     packages = NULL,
-    initialize = function(id, task_type, packages = character(0L), param_set = ParamSet$new(), param_vals = list()) {
+    initialize = function(id, task_type, packages = character(), param_set = ParamSet$new()) {
       self$id = assert_string(id, min.chars = 1L)
       self$param_set = assert_param_set(param_set)
-      self$param_set$values = param_vals
       self$packages = assert_set(packages)
       self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
     },

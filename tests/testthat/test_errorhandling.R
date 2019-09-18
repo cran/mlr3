@@ -71,7 +71,7 @@ test_that("encapsulation / resample", {
   expect_data_table(rr$errors, nrows = 3L)
 
   expect_equal(unname(rr$aggregate(msr("classif.ce"))), NA_real_)
-  expect_equal(rr$performance(msr("classif.ce"))$classif.ce, rep(NA_real_, 3L))
+  expect_equal(rr$score(msr("classif.ce"))$classif.ce, rep(NA_real_, 3L))
 })
 
 test_that("encapsulation / benchmark", {
@@ -81,13 +81,13 @@ test_that("encapsulation / benchmark", {
   learner$encapsulate = c(train = "evaluate", predict = "evaluate")
 
   bmr = benchmark(benchmark_grid(task, learner, rsmp("cv", folds = 3)))
-  aggr = bmr$aggregate(warnings = TRUE, errors = TRUE)
+  aggr = bmr$aggregate(conditions = TRUE)
   expect_equal(aggr$warnings, 3L)
   expect_equal(aggr$errors, 0L)
 
   learner$param_set$values = list(warning_train = 1, error_predict = 1)
   bmr = benchmark(benchmark_grid(task, learner, rsmp("cv", folds = 3)))
-  aggr = bmr$aggregate(warnings = TRUE, errors = TRUE)
+  aggr = bmr$aggregate(conditions = TRUE)
   expect_equal(aggr$warnings, 3L)
   expect_equal(aggr$errors, 3L)
 })

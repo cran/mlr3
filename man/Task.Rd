@@ -15,7 +15,7 @@ Tasks serve two purposes:
 For example, for a classification task a single column must be marked as target column, and others as features.
 }
 
-Predefined (toy) tasks are stored in the \link{Dictionary} \link{mlr_tasks},
+Predefined (toy) tasks are stored in the \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} \link{mlr_tasks},
 e.g. \code{\link[=mlr_tasks_iris]{iris}} or \code{\link[=mlr_tasks_boston_housing]{boston_housing}}.
 }
 \section{Construction}{
@@ -92,6 +92,11 @@ Stores the type of the \link{Task}.
 \item \code{properties} :: \code{character()}\cr
 Set of task properties. Possible properties are are stored in
 \link[=mlr_reflections]{mlr_reflections$task_properties}.
+The following properties are currently standardized and understood by tasks in \CRANpkg{mlr3}:
+\itemize{
+\item \code{"weights"}: The task comes with observation weights.
+\item \code{"groups"}: The task comes with grouping/blocking information.
+}
 \item \code{groups} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 If the task has a designated column role "groups", table with two columns:
 \code{row_id} (\code{integer()} | \code{character()}) and the grouping variable \code{group} (\code{vector()}).
@@ -222,7 +227,7 @@ task$feature_names
 task$formula()
 
 # Remove "Petal.Length"
-task$set_col_role("Petal.Length", character(0L))
+task$set_col_role("Petal.Length", character())
 
 # Remove "Petal.Width", alternative way
 task$select(setdiff(task$feature_names, "Petal.Width"))

@@ -42,20 +42,19 @@
 ResamplingCV = R6Class("ResamplingCV", inherit = Resampling,
   public = list(
     initialize = function() {
-      super$initialize(
-        id = "cv",
-        param_set = ParamSet$new(params = list(
-          ParamUty$new("stratify", default = NULL),
-          ParamInt$new("folds", lower = 1L, tags = "required")
-        )),
-        param_vals = list(folds = 10L)
-      )
+      ps = ParamSet$new(list(
+        ParamUty$new("stratify", default = NULL),
+        ParamInt$new("folds", lower = 1L, tags = "required")
+      ))
+      ps$values = list(folds = 10L)
+
+      super$initialize(id = "cv", param_set = ps)
     }
   ),
 
   active = list(
     iters = function() {
-      self$param_set$values$folds
+      as.integer(self$param_set$values$folds)
     }
   ),
 
@@ -63,7 +62,7 @@ ResamplingCV = R6Class("ResamplingCV", inherit = Resampling,
     .sample = function(ids) {
       data.table(
         row_id = ids,
-        fold = shuffle(seq_along0(ids) %% self$param_set$values$folds + 1L),
+        fold = shuffle(seq_along0(ids) %% as.integer(self$param_set$values$folds) + 1L),
         key = "fold"
       )
     },

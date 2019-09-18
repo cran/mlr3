@@ -9,7 +9,11 @@
 #' The target column is assumed to be a factor.
 #' The `task_type` is set to `"classif"`.
 #'
-#' Predefined tasks are stored in the [Dictionary] [mlr_tasks].
+#' Additional task properties include:
+#' * `"twoclass"`: The task is a binary classification problem.
+#' * `"multiclass"`: The task is a multiclass classification problem.
+#'
+#' Predefined tasks are stored in the [mlr3misc::Dictionary] [mlr_tasks].
 #'
 #' @section Construction:
 #' ```

@@ -7,11 +7,11 @@
 \format{\link[R6:R6Class]{R6::R6Class} object inheriting from \link{Measure}.}
 \description{
 This measure specializes \link{Measure} for regression problems.
-Predefined measures can be found in the \link{Dictionary} \link{mlr_measures}.
+Predefined measures can be found in the \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} \link{mlr_measures}.
 }
 \section{Construction}{
-\preformatted{m = MeasureRegr$new(id, range, minimize, predict_type = "response",
-     task_properties = character(0L), packages = character(0L))
+\preformatted{m = MeasureRegr$new(id, range, minimize = NA, aggregator = NULL, properties = character(),
+     predict_type = "response", task_properties = character(), packages = character())
 }
 
 For a description of the arguments, see \link{Measure}.

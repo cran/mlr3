@@ -10,12 +10,12 @@
 #' Measures are classes around tailored around two functions:
 #'
 #' 1. A function `score` which quantifies the performance by comparing true and predicted response.
-#' 2. A function `aggregator` which combines multiple performance values returned by
+#' 2. A function `aggregator` which combines multiple performance scores returned by
 #'    `calculate` to a single numeric value.
 #'
 #' In addition to these two functions, meta-information about the performance measure is stored.
 #'
-#' Predefined measures are stored in the [Dictionary] [mlr_measures],
+#' Predefined measures are stored in the [mlr3misc::Dictionary] [mlr_measures],
 #' e.g. [`classif.auc`][mlr_measures_classif.auc] or [`time_train`][mlr_measures_time_train].
 #' A guide on how to extend \CRANpkg{mlr3} with custom measures can be found in the [mlr3book](https://mlr3book.mlr-org.com).
 #'
@@ -23,8 +23,8 @@
 #' Note: This object is typically constructed via a derived classes, e.g. [MeasureClassif] or [MeasureRegr].
 #'
 #' ```
-#' m = Measure$new(id, task_type, range, minimize, predict_type = "response",
-#'      task_properties = character(), na_score = FALSE, packages = character())
+#' m = Measure$new(id, task_type = NA, range = c(-Inf, Inf), minimize = NA, aggregator = NULL, properties = character(), predict_type = "response", predict_sets = "test",
+#'      task_properties = character(), packages = character())
 #' ```
 #'
 #' * `id` :: `character(1)`\cr
@@ -40,58 +40,55 @@
 #' * `minimize` :: `logical(1)`\cr
 #'   Set to `TRUE` if good predictions correspond to small values,
 #'   and to `FALSE` if good predictions correspond to large values.
-#'   If set to `NA`, tuning with this measure is not possible.
+#'   If set to `NA` (default), tuning this measure is not possible.
 #'
 #' * `aggregator` :: `function(x)`\cr
-#'   Function to aggregate individual performance values `x` where `x` is a numeric vector.
+#'   Function to aggregate individual performance scores `x` where `x` is a numeric vector.
 #'   If `NULL`, defaults to [mean()].
+#'
+#' * `properties` :: `character()`\cr
+#'   Properties of the measure.
+#'   Must be a subset of [mlr_reflections$measure_properties][mlr_reflections].
+#'   Supported by `mlr3`:
+#'   * `"requires_task"` (requires the complete [Task]),
+#'   * `"requires_learner"` (requires the trained [Learner]),
+#'   * `"requires_train_set"` (requires the training indices from the [Resampling]), and
+#'   * `"na_score"` (the measure is expected to occasionally return `NA`).
 #'
 #' * `predict_type` :: `character(1)`\cr
 #'   Required predict type of the [Learner].
 #'   Possible values are stored in [mlr_reflections$learner_predict_types][mlr_reflections].
 #'
+#' * `predict_sets` :: `character()`\cr
+#'   Prediction sets to operate on, used in `aggregate()` to extract the matching `predict_sets` from the [ResampleResult].
+#'   Multiple predict sets are calculated by the respective [Learner] during [resample()]/[benchmark()].
+#'   Must be a non-empty subset of `c("train", "test")`.
+#'   If multiple sets are provided, these are first combined to a single prediction object.
+#'   Default is `"test"`.
+#'
 #' * `task_properties` :: `character()`\cr
 #'   Required task properties, see [Task].
-#'
-#' * `na_score` :: `logical(1)`\cr
-#'   Is the measure expected to return `NA` in some cases? Default is `FALSE`.
 #'
 #' * `packages` :: `character()`\cr
 #'   Set of required packages.
 #'   Note that these packages will be loaded via [requireNamespace()], and are not attached.
 #'
-#'
 #' @section Fields:
-#' * `id` :: `character(1)`\cr
-#'   Identifier of the measure.
-#'
-#' * `minimize` :: `logical(1)`\cr
-#'   Is `TRUE` if the best value is reached via minimization and `FALSE` by maximization.
-#'
-#' * `packages` :: `character()`\cr
-#'   Stores the names of required packages.
-#'
-#' * `range` :: `numeric(2)`\cr
-#'   Stores the feasible range of the measure.
-#'
-#' * `task_type` :: `character(1)`\cr
-#'   Stores the required type of the [Task].
-#'
-#' * `task_properties` :: `character()`\cr
-#'   Stores required properties of the [Task].
-#'
+#' All variables passed to the constructor.
 #'
 #' @section Methods:
 #' * `aggregate(rr)`\cr
 #'   [ResampleResult] -> `numeric(1)`\cr
 #'   Aggregates multiple performance scores into a single score using the `aggregator` function of the measure.
-#'   Operates on a [ResampleResult] as returned by [resample].
+#'   Operates on the [Prediction]s of [ResampleResult] with matching `predict_sets`.
 #'
-#' * `score(prediction, task = NULL, learner = NULL)`\cr
-#'   ([Prediction], [Task], [Learner]) -> `numeric(1)`\cr
-#'   Takes a [Prediction] and calculates a numeric score.
-#'   If the measure if flagged with the properties `"requires_task"` or `"requires_learner"`, you must additionally
-#'   pass the respective [Task] or the [Learner] for the measure to extract information from these objects.
+#' * `score(prediction, task = NULL, learner = NULL, train_set = NULL)`\cr
+#'   ((named list of) [Prediction], [Task], [Learner], `integer()` | `character()`) -> `numeric(1)`\cr
+#'   Takes a [Prediction] (or a list of [Prediction] objects named with valid `predict_sets`)
+#'   and calculates a numeric score.
+#'   If the measure if flagged with the properties `"requires_task"`, `"requires_learner"` or `"requires_train_set"`, you must additionally
+#'   pass the respective [Task], the trained [Learner] or the training set indices.
+#'   This is handled internally during [resample()]/[benchmark()].
 #'
 #' @family Measure
 #' @export
@@ -101,15 +98,15 @@ Measure = R6Class("Measure",
     id = NULL,
     task_type = NULL,
     predict_type = NULL,
+    predict_sets = NULL,
     aggregator = NULL,
     task_properties = NULL,
     range = NULL,
     properties = NULL,
     minimize = NULL,
-    na_score = NULL,
     packages = NULL,
 
-    initialize = function(id, task_type, range, minimize = NA, aggregator = NULL, properties = character(), predict_type = "response", task_properties = character(), na_score = FALSE, packages = character()) {
+    initialize = function(id, task_type = NA, range = c(-Inf, Inf), minimize = NA, aggregator = NULL, properties = character(), predict_type = "response", predict_sets = "test", task_properties = character(), packages = character()) {
 
       self$id = assert_string(id, min.chars = 1L)
       self$task_type = task_type
@@ -122,11 +119,12 @@ Measure = R6Class("Measure",
       if (!is_scalar_na(task_type)) {
         assert_choice(task_type, mlr_reflections$task_types$type)
         assert_choice(predict_type, names(mlr_reflections$learner_predict_types[[task_type]]))
-        self$properties = assert_subset(properties, mlr_reflections$measure_properties[[task_type]])
+        assert_subset(properties, mlr_reflections$measure_properties[[task_type]])
       }
+      self$properties = properties
       self$predict_type = predict_type
+      self$predict_sets = assert_subset(predict_sets, mlr_reflections$predict_sets, empty.ok = FALSE)
       self$task_properties = assert_subset(task_properties, mlr_reflections$task_properties[[task_type]])
-      self$na_score = assert_flag(na_score)
       self$packages = assert_set(packages)
     },
 
@@ -152,30 +150,48 @@ Measure = R6Class("Measure",
         stopf("Measure '%s' requires a learner", self$learner)
       }
 
-      if (is.null(train_set) && "requires_train" %in% self$properties) {
+      if (is.null(train_set) && "requires_train_set" %in% self$properties) {
         stopf("Measure '%s' requires the train_set", self$learner)
       }
 
-      self$score_internal(prediction = prediction, task = task, learner = learner, train_set = train_set)
+      measure_score(self, prediction, task, learner, train_set)
     },
 
     aggregate = function(rr) {
       aggregator = self$aggregator %??% mean
-      score = function(prediction, task, learner, resampling, iteration) {
-        if (is.null(prediction)) {
-          NA_real_
-        } else {
-          self$score(prediction, task = task, learner = learner, train_set = resampling$train_set(iteration))
-        }
-      }
-      performance = pmap_dbl(rr$data[, c("prediction", "task", "learner", "resampling", "iteration"), with = FALSE], score)
-      aggregator(performance)
+      aggregator(measure_score_data(self, rr$data))
     }
   ),
 
   active = list(
     hash = function() {
-      hash(list(class(self), self$id, as.character(body(self$score_internal))))
+      hash(class(self), self$id, self$predict_sets, as.character(body(self$score_internal)))
     }
   )
 )
+
+measure_score = function(measure, prediction, task = NULL, learner = NULL, train_set = NULL) {
+  if (is.null(prediction)) {
+    return(NaN)
+  }
+
+  if (is.list(prediction)) {
+    assert_list(prediction, "Prediction", names = "unique")
+    ii = match(measure$predict_sets, names(prediction))
+    if (anyMissing(ii)) {
+      return(NaN)
+    }
+    prediction = do.call(c, prediction[ii])
+  } else {
+    assert_prediction(prediction)
+  }
+
+  measure$score_internal(prediction = prediction, task = task, learner = learner, train_set = train_set)
+}
+
+measure_score_data = function(measure, data) {
+  score = function(prediction, task, learner, resampling, iteration) {
+    measure_score(measure, prediction, task, learner, resampling$train_set(iteration))
+  }
+  pmap_dbl(data[, c("prediction", "task", "learner", "resampling", "iteration"), with = FALSE], score)
+}

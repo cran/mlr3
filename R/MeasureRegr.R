@@ -6,12 +6,12 @@
 #'
 #' @description
 #' This measure specializes [Measure] for regression problems.
-#' Predefined measures can be found in the [Dictionary] [mlr_measures].
+#' Predefined measures can be found in the [mlr3misc::Dictionary] [mlr_measures].
 #'
 #' @section Construction:
 #' ```
-#' m = MeasureRegr$new(id, range, minimize, predict_type = "response",
-#'      task_properties = character(0L), packages = character(0L))
+#' m = MeasureRegr$new(id, range, minimize = NA, aggregator = NULL, properties = character(),
+#'      predict_type = "response", task_properties = character(), packages = character())
 #' ```
 #' For a description of the arguments, see [Measure].
 #' The `task_type` is set to `"regr"`.
@@ -29,9 +29,9 @@
 #' @export
 MeasureRegr = R6Class("MeasureRegr", inherit = Measure, cloneable = FALSE,
   public = list(
-    initialize = function(id, range, minimize = NA, aggregator = NULL, properties = character(), predict_type = "response", task_properties = character(0L), na_score = FALSE, packages = character(0L)) {
+    initialize = function(id, range, minimize = NA, aggregator = NULL, properties = character(), predict_type = "response", task_properties = character(), packages = character()) {
       super$initialize(id, task_type = "regr", range = range, minimize = minimize, aggregator = aggregator,
-        properties = properties, predict_type = predict_type, task_properties = task_properties, na_score = na_score, packages = packages)
+        properties = properties, predict_type = predict_type, task_properties = task_properties, packages = packages)
     }
   )
 )

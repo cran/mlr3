@@ -41,6 +41,9 @@
 #' * `learner_predict_types` :: list of list of `character()`\cr
 #'   List of lists of supported [Learner] predict_types, named by their task type.
 #'
+#' * `predict_sets` :: `character()`\cr
+#'   Vector of possible predict sets. Currently supported are `"train"` and `"test"`.
+#'
 #' * `measure_properties` :: list of `character()`\cr
 #'   List of vectors of supported [Measure] properties, named by their task type.
 #'
@@ -48,7 +51,7 @@
 #'   List of keys for the default [Measure]s, named by their task type.
 #'
 #' * `rr_names` :: `character()`\cr
-#'   Names of the elements of a [ResampleResult].
+#'   Names of the objects stored in a [ResampleResult].
 #'
 #' @keywords internal
 #' @export
@@ -91,9 +94,8 @@ local({
     regr = tmp
   )
 
-
   ### Learner
-  tmp = c("missings", "weights", "parallel", "importance", "selected_features", "oob_error")
+  tmp = c("missings", "weights", "importance", "selected_features", "oob_error")
   mlr_reflections$learner_properties = list(
     classif = c(tmp, "twoclass", "multiclass"),
     regr = tmp
@@ -104,8 +106,12 @@ local({
     regr = list(response = "response", se = c("response", "se"))
   )
 
+  ### Prediction
+  mlr_reflections$predict_sets = c("train", "test")
+
+
   ### Measures
-  tmp = c("requires_task", "requires_learner", "requires_train_set")
+  tmp = c("na_score", "requires_task", "requires_learner", "requires_train_set")
   mlr_reflections$measure_properties = list(
     classif = tmp,
     regr = tmp

@@ -15,7 +15,7 @@ test_that("Basic ops on iris task", {
 
 test_that("$class_names consider also inactive rows", {
   task = tsk("iris")
-  task$set_row_role(1:100, character(0L))
+  task$set_row_role(1:100, character())
 
   expect_set_equal(task$class_names, levels(iris$Species))
 })
@@ -58,7 +58,6 @@ test_that("0 feature task", {
   lrn = lrn("classif.featureless")
   p = lrn$train(task)$predict(task)
   expect_prediction(p)
-  # expect_number(e$performance, lower = 0.6, upper = 0.7)
 })
 
 test_that("Positive class always comes first", {

@@ -1,5 +1,6 @@
 #' @title Friedman1 Regression Task Generator
 #'
+#' @usage NULL
 #' @aliases mlr_task_generators_friedman1
 #' @format [R6::R6Class] inheriting from [TaskGenerator].
 #' @include TaskGenerator.R
@@ -22,10 +23,11 @@ TaskGeneratorFriedman1 = R6Class("TaskGeneratorFriedman1",
   inherit = TaskGenerator,
   public = list(
     initialize = function() {
-      param_set = ParamSet$new(list(
+      ps = ParamSet$new(list(
         ParamDbl$new("sd", lower = 0L, default = 1)
       ))
-      super$initialize(id = "friedman1", "regr", "mlbench", param_set)
+
+      super$initialize(id = "friedman1", "regr", "mlbench", ps)
     }
   ),
 

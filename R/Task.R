@@ -13,7 +13,7 @@
 #' 2. Tasks store meta-information, such as the role of the individual columns in the [DataBackend].
 #'    For example, for a classification task a single column must be marked as target column, and others as features.
 #'
-#' Predefined (toy) tasks are stored in the [Dictionary] [mlr_tasks],
+#' Predefined (toy) tasks are stored in the [mlr3misc::Dictionary] [mlr_tasks],
 #' e.g. [`iris`][mlr_tasks_iris] or [`boston_housing`][mlr_tasks_boston_housing].
 #'
 #' @section Construction:
@@ -97,6 +97,9 @@
 #' * `properties` :: `character()`\cr
 #'   Set of task properties. Possible properties are are stored in
 #'   [mlr_reflections$task_properties][mlr_reflections].
+#'   The following properties are currently standardized and understood by tasks in \CRANpkg{mlr3}:
+#'   * `"weights"`: The task comes with observation weights.
+#'   * `"groups"`: The task comes with grouping/blocking information.
 #'
 #' * `groups` :: [data.table::data.table()]\cr
 #'   If the task has a designated column role "groups", table with two columns:
@@ -229,7 +232,7 @@
 #' task$formula()
 #'
 #' # Remove "Petal.Length"
-#' task$set_col_role("Petal.Length", character(0L))
+#' task$set_col_role("Petal.Length", character())
 #'
 #' # Remove "Petal.Width", alternative way
 #' task$select(setdiff(task$feature_names, "Petal.Width"))
@@ -244,7 +247,7 @@ Task = R6Class("Task",
     id = NULL,
     task_type = NULL,
     backend = NULL,
-    properties = character(0L),
+    properties = character(),
     row_roles = NULL,
     col_roles = NULL,
     col_info = NULL,
@@ -271,7 +274,7 @@ Task = R6Class("Task",
 
       rn = self$backend$rownames
       self$row_roles = list(use = rn, validation = rn[0L])
-      self$col_roles = named_list(mlr_reflections$task_col_roles[[task_type]], character(0L))
+      self$col_roles = named_list(mlr_reflections$task_col_roles[[task_type]], character())
       self$col_roles$feature = setdiff(self$col_info$id, self$backend$primary_key)
     },
 
@@ -479,17 +482,16 @@ task_data = function(self, rows = NULL, cols = NULL, data_format = "data.table")
 }
 
 task_print = function(self) {
-
   catf("%s (%i x %i)", format(self), self$nrow, self$ncol)
   catf(str_indent("* Target:", self$target_names))
   catf(str_indent("* Properties:", self$properties))
 
   types = self$feature_types
   if (nrow(types)) {
-    catf("Features (%i):", nrow(types))
+    catf("* Features (%i):", nrow(types))
     types = types[, list(N = .N, feats = str_collapse(id, n = 100L)), by = "type"][, "type" := translate_types(type)]
     setorderv(types, "N", order = -1L)
-    pmap(types, function(type, N, feats) catf(str_indent(sprintf("* %s (%i):", type, N), feats)))
+    pmap(types, function(type, N, feats) catf(str_indent(sprintf("  - %s (%i):", type, N), feats, exdent = 4L)))
   }
 
   if (length(self$col_roles$order)) {
@@ -511,7 +513,7 @@ col_info = function(x, ...) {
   UseMethod("col_info")
 }
 
-col_info.data.table = function(x, primary_key = character(0L), ...) {
+col_info.data.table = function(x, primary_key = character(), ...) {
   types = map_chr(x, function(x) class(x)[1L])
   discrete = setdiff(names(types)[types %in% c("character", "factor", "ordered")], primary_key)
   levels = insert_named(named_list(names(types)), lapply(x[, discrete, with = FALSE], distinct_values, drop = FALSE))

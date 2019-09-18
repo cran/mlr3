@@ -6,8 +6,9 @@ learning. Successor of [mlr](https://github.com/mlr-org/mlr).
 
 [![Build
 Status](https://travis-ci.org/mlr-org/mlr3.svg?branch=master)](https://travis-ci.org/mlr-org/mlr3)
-[![CRAN](https://www.r-pkg.org/badges/version/mlr3)](https://cran.r-project.org/package=mlr3)
-[![codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
+[![CRAN Status
+Badge](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.org/package=mlr3)
+[![Codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
 [![StackOverflow](https://img.shields.io/badge/stackoverflow-mlr3-orange.svg)](https://stackoverflow.com/questions/tagged/mlr3)
 [![Dependencies](https://tinyverse.netlify.com/badge/mlr3)](https://cran.r-project.org/package=mlr3)
 
@@ -44,8 +45,8 @@ task_iris
     ## <TaskClassif:iris> (150 x 5)
     ## * Target: Species
     ## * Properties: multiclass
-    ## Features (4):
-    ## * dbl (4): Petal.Length, Petal.Width, Sepal.Length, Sepal.Width
+    ## * Features (4):
+    ##   - dbl (4): Petal.Length, Petal.Width, Sepal.Length, Sepal.Width
 
 ``` r
 # load learner and set hyperparamter
@@ -91,12 +92,12 @@ resampling = rsmp("cv", folds = 3L)
 rr = resample(task_iris, learner, resampling)
 ```
 
-    ## INFO  [11:45:23.583] Applying learner 'classif.rpart' on task 'iris' (iter 1/3) 
-    ## INFO  [11:45:23.775] Applying learner 'classif.rpart' on task 'iris' (iter 2/3) 
-    ## INFO  [11:45:23.804] Applying learner 'classif.rpart' on task 'iris' (iter 3/3)
+    ## INFO  [21:11:08.322] Applying learner 'classif.rpart' on task 'iris' (iter 1/3) 
+    ## INFO  [21:11:08.350] Applying learner 'classif.rpart' on task 'iris' (iter 2/3) 
+    ## INFO  [21:11:08.364] Applying learner 'classif.rpart' on task 'iris' (iter 3/3)
 
 ``` r
-rr$performance(measure)
+rr$score(measure)
 ```
 
     ##             task task_id               learner    learner_id
@@ -104,11 +105,11 @@ rr$performance(measure)
     ## 1: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
     ## 2: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
     ## 3: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
-    ##        resampling resampling_id iteration          prediction classif.acc
-    ##            <list>        <char>     <int>              <list>       <num>
-    ## 1: <ResamplingCV>            cv         1 <PredictionClassif>        0.92
-    ## 2: <ResamplingCV>            cv         2 <PredictionClassif>        0.92
-    ## 3: <ResamplingCV>            cv         3 <PredictionClassif>        0.94
+    ##        resampling resampling_id iteration prediction classif.acc
+    ##            <list>        <char>     <int>     <list>       <num>
+    ## 1: <ResamplingCV>            cv         1     <list>        0.92
+    ## 2: <ResamplingCV>            cv         2     <list>        0.92
+    ## 3: <ResamplingCV>            cv         3     <list>        0.94
 
 ``` r
 rr$aggregate(measure)
@@ -177,7 +178,7 @@ would result in non-trivial API changes.
         collection of machine learning data sets. No dependencies.
   - [Reflections](https://en.wikipedia.org/wiki/Reflection_%28computer_programming%29):
     Objects are queryable for properties and capabilities, allowing you
-    to programm on them.
+    to program on them.
   - Additional functionality that comes with extra dependencies:
       - For parallelization, `mlr3` utilizes the
         [`future`](https://cran.r-project.org/package=future) and
@@ -191,3 +192,8 @@ would result in non-trivial API changes.
 
 [mlr-outreach](https://github.com/mlr-org/mlr-outreach) holds all
 outreach activities related to *mlr* and *mlr3*.
+
+mlr3 talk at useR\! 2019 conference in Toulouse, France:
+
+[![Watch the
+video](https://img.youtube.com/vi/wsP2hiFnDQs/maxresdefault.jpg)](https://www.youtube.com/watch?v=wsP2hiFnDQs&feature=youtu.be)

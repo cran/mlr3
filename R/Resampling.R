@@ -12,13 +12,13 @@
 #' Resampling objects can be instantiated on a [Task], which applies the strategy on the task and manifests in a
 #' fixed partition of `row_ids` of the [Task].
 #'
-#' Predefined resamplings are stored in the [Dictionary] [mlr_resamplings],
+#' Predefined resamplings are stored in the [mlr3misc::Dictionary] [mlr_resamplings],
 #' e.g. [`cv`][mlr_resamplings_cv] or [`bootstrap`][mlr_resamplings_bootstrap].
 #'
 #' @section Construction:
 #' Note: This object is typically constructed via a derived classes, e.g. [ResamplingCV] or [ResamplingHoldout].
 #' ```
-#' r = Resampling$new(id, param_set, param_vals)
+#' r = Resampling$new(id, param_set)
 #' ```
 #'
 #' * `id` :: `character(1)`\cr
@@ -26,9 +26,6 @@
 #'
 #' * `param_set` :: [paradox::ParamSet]\cr
 #'   Set of hyperparameters.
-#'
-#' * `param_vals` :: named `list()`\cr
-#'   List of hyperparameter settings.
 #'
 #' @section Fields:
 #' * `id` :: `character(1)`\cr
@@ -110,10 +107,9 @@ Resampling = R6Class("Resampling",
     task_hash = NA_character_,
     duplicated_ids = NULL,
 
-    initialize = function(id, param_set = ParamSet$new(), param_vals = list(), duplicated_ids = FALSE) {
+    initialize = function(id, param_set = ParamSet$new(), duplicated_ids = FALSE) {
       self$id = assert_string(id, min.chars = 1L)
       self$param_set = assert_param_set(param_set)
-      self$param_set$values = param_vals
       self$duplicated_ids = assert_flag(duplicated_ids)
     },
 

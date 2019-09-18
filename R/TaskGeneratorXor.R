@@ -1,5 +1,6 @@
 #' @title XOR Classification Task Generator
 #'
+#' @usage NULL
 #' @aliases mlr_task_generators_xor
 #' @format [R6::R6Class] inheriting from [TaskGenerator].
 #' @include TaskGenerator.R
@@ -22,10 +23,11 @@ TaskGeneratorXor = R6Class("TaskGeneratorXor",
   inherit = TaskGenerator,
   public = list(
     initialize = function() {
-      param_set = ParamSet$new(list(
+      ps = ParamSet$new(list(
         ParamInt$new("d", lower = 1L)
       ))
-      super$initialize(id = "xor", "classif", "mlbench", param_set)
+
+      super$initialize(id = "xor", "classif", "mlbench", ps)
     }
   ),
 

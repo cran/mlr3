@@ -12,12 +12,16 @@
 #'
 #' @section Construction:
 #' ```
-#' rr = ResampleResult$new(data)
+#' rr = ResampleResult$new(data, uhash = NULL)
 #' ```
 #'
 #' * `data` :: [data.table::data.table()]\cr
 #'   Table with data for one resampling iteration per row:
 #'   [Task], [Learner], [Resampling], iteration (`integer(1)`), and [Prediction].
+#'
+#' * `uhash` :: `character(1)`\cr
+#'   Unique hash for this `ResampleResult`. If `NULL`, a new unique hash is generated.
+#'   This unique hash is primarily needed to group information in [BenchmarkResult]s.
 #'
 #' @section Fields:
 #' * `data` :: [data.table::data.table()]\cr
@@ -33,14 +37,6 @@
 #' * `resampling` :: [Resampling]\cr
 #'   Instantiated [Resampling] object which stores the splits into training and test.
 #'
-#' * `predictions` :: list of [Prediction]\cr
-#'   List of prediction objects, sorted by resampling iteration.
-#'
-#' * `prediction` :: [Prediction]\cr
-#'   Combined [Prediction] of all individual resampling iterations.
-#'   Note that the performance of measures is not calculated on this object,
-#'   but instead on each iterations separately and then combined with an aggregate function.
-#'
 #' * `warnings` :: [data.table::data.table()]\cr
 #'   Returns a table with all warning messages.
 #'   Column names are `"iteration"` and `"msg"`.
@@ -51,11 +47,23 @@
 #'   Column names are `"iteration"` and `"msg"`.
 #'   Note that there can be multiple rows per resampling iteration if multiple errors have been recorded.
 #'
-#' * `hash` :: `character(1)`\cr
-#'   Hash (unique identifier) for this object.
+#' * `uhash` :: `character(1)`\cr
+#'   Unique hash for this object.
 #'
 #' @section Methods:
-#' * `performance(measures = NULL, ids = TRUE)`\cr
+#' * `predictions(predict_sets = "test")`\cr
+#'   `character()` -> list of [Prediction]\cr
+#'   List of prediction objects, sorted by resampling iteration.
+#'   If multiple sets are given, these are combined to a single one for each iteration.
+#'
+#' * `prediction(predict_sets = "test")`\cr
+#'   `character()` -> [Prediction]\cr
+#'   Combined [Prediction] of all individual resampling iterations, and all provided predict sets.
+#'   Note that performance measures do not operate on this object,
+#'   but instead on each prediction object separately and then combine the performance scores
+#'   with the aggregate function of the respective [Measure].
+#'
+#' * `score(measures = NULL, ids = TRUE)`\cr
 #'   (list of [Measure], `logical(1)`) -> [data.table::data.table()]\cr
 #'   Returns a table with one row for each resampling iteration, including all involved objects:
 #'   [Task], [Learner], [Resampling], iteration number (`integer(1)`), and [Prediction].
@@ -81,19 +89,24 @@
 #' print(rr)
 #'
 #' rr$aggregate(msr("classif.acc"))
-#' rr$prediction
-#' rr$prediction$confusion
+#' rr$prediction()
+#' rr$prediction()$confusion
 #' rr$warnings
 #' rr$errors
 ResampleResult = R6Class("ResampleResult",
   public = list(
     data = NULL,
 
-    initialize = function(data) {
+    initialize = function(data, uhash = NULL) {
       assert_data_table(data)
       slots = mlr_reflections$rr_names
       assert_names(names(data), must.include = slots)
       self$data = setcolorder(setcolorder(data, "iteration"), slots)[]
+      if (is.null(uhash)) {
+        private$.uhash = UUIDgenerate()
+      } else {
+        private$.uhash = assert_string(uhash)
+      }
     },
 
     format = function() {
@@ -114,21 +127,24 @@ ResampleResult = R6Class("ResampleResult",
       catf(str_indent("* Errors:", sprintf("%i in %i iterations", nrow(errors), uniqueN(errors, by = "iteration"))))
     },
 
-    performance = function(measures = NULL, ids = TRUE) {
+    prediction = function(predict_sets = "test") {
+      do.call(c, self$predictions(predict_sets = predict_sets))
+    },
+
+    predictions = function(predict_sets = "test") {
+      map(self$data$prediction, function(li) {
+        do.call(c, li[predict_sets])
+      })
+    },
+
+    score = function(measures = NULL, ids = TRUE) {
       measures = as_measures(measures, task_type = self$task$task_type)
       assert_measures(measures, task = self$task, learner = self$learners[[1L]])
       assert_flag(ids)
       tab = copy(self$data)
 
-      if (length(measures)) {
-        score = function(prediction, task, learner, resampling, iteration) {
-          if (is.null(prediction)) {
-            set_names(list(NA_real_), ids(measures))
-          } else {
-            as.list(prediction$score(measures, task = task, learner = learner, train_set = resampling$train_set(iteration)))
-          }
-        }
-        tab = rcbind(tab, pmap_dtr(self$data[, c("prediction", "task", "learner", "resampling", "iteration"), with = FALSE], score))
+      for (m in measures) {
+        set(tab, j = m$id, value = measure_score_data(m, self$data))
       }
 
       if (ids) {
@@ -159,17 +175,11 @@ ResampleResult = R6Class("ResampleResult",
       self$data$resampling[[1L]]
     },
 
-    prediction = function() {
-      do.call(c, self$data$prediction)
-    },
-
-    predictions = function() {
-      self$data$prediction
-    },
-
-    hash = function() {
-      data = self$data
-      hash_resample_result(data$task[[1L]], data$learner[[1L]], data$resampling[[1L]])
+    uhash = function(rhs) {
+      if (missing(rhs)) {
+        return(private$.uhash)
+      }
+      private$.uhash = assert_string(rhs)
     },
 
     warnings = function() {
@@ -184,6 +194,8 @@ ResampleResult = R6Class("ResampleResult",
   ),
 
   private = list(
+    .uhash = NULL,
+
     deep_clone = function(name, value) {
       if (name == "data") copy(value) else value
     }
@@ -198,5 +210,5 @@ as.data.table.ResampleResult = function(x, ...) {
 #' @rdname as_benchmark_result
 #' @export
 as_benchmark_result.ResampleResult = function(x, ...) {
-  BenchmarkResult$new(cbind(x$data, data.table(hash = x$hash)))
+  BenchmarkResult$new(cbind(x$data, data.table(uhash = x$uhash)))
 }

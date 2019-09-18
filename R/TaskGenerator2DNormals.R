@@ -1,5 +1,6 @@
 #' @title 2d Normals Classification Task Generator
 #'
+#' @usage NULL
 #' @aliases mlr_task_generators_2dnormals
 #' @format [R6::R6Class] inheriting from [TaskGenerator].
 #' @include TaskGenerator.R
@@ -22,12 +23,13 @@ TaskGenerator2DNormals = R6Class("TaskGenerator2DNormals",
   inherit = TaskGenerator,
   public = list(
     initialize = function() {
-      param_set = ParamSet$new(list(
+      ps = ParamSet$new(list(
         ParamInt$new("cl", lower = 2L),
         ParamDbl$new("r", lower = 1L),
         ParamDbl$new("sd", lower = 0L)
       ))
-      super$initialize(id = "2dnormals", "classif", "mlbench", param_set)
+
+      super$initialize(id = "2dnormals", "classif", "mlbench", ps)
     }
   ),
 

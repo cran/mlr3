@@ -9,8 +9,7 @@ benchmark(design, store_models = FALSE)
 \arguments{
 \item{design}{:: \code{\link[=data.frame]{data.frame()}}\cr
 Data frame (or \code{\link[data.table:data.table]{data.table::data.table()}}) with three columns: "task", "learner", and "resampling".
-Each row defines a resampling by providing a \link{Task}, \link{Learner} and a \link{Resampling} strategy.
-All resamplings must be properly instantiated.
+Each row defines a resampling by providing a \link{Task}, \link{Learner} and an instantiated \link{Resampling} strategy.
 The helper function \code{\link[=benchmark_grid]{benchmark_grid()}} can assist in generating an exhaustive design (see examples) and
 instantiate the \link{Resampling}s per \link{Task}.}
 
@@ -23,12 +22,7 @@ extract information like variable importance.}
 \link{BenchmarkResult}.
 }
 \description{
-Runs a benchmark on arbitrary combinations of learners, tasks, and resampling strategies (possibly in parallel).
-Resamplings which are not already instantiated will be instantiated automatically.
-However, these auto-instantiated resamplings will not be synchronized per task, i.e. different learners will
-work on different splits of the same task.
-
-To generate exhaustive designs and automatically instantiate resampling strategies per task, use \code{\link[=benchmark_grid]{benchmark_grid()}}.
+Runs a benchmark on arbitrary combinations of tasks (\link{Task}), learners (\link{Learner}), and resampling strategies (\link{Resampling}), possibly in parallel.
 }
 \note{
 The fitted models are discarded after the predictions have been scored in order to reduce memory consumption.
@@ -82,7 +76,7 @@ print(aggr)
 
 ## Extract predictions of first resampling result
 rr = aggr$resample_result[[1]]
-as.data.table(rr$prediction)
+as.data.table(rr$prediction())
 
 # benchmarking with a custom design:
 # - fit classif.featureless on iris with a 3-fold CV
@@ -103,7 +97,7 @@ design$resampling = Map(
   task = design$task, resampling = design$resampling
 )
 
-## calculate benchmark
+## run benchmark
 bmr = benchmark(design)
 print(bmr)
 

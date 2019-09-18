@@ -14,7 +14,7 @@
 #' - A [paradox::ParamSet] which stores meta-information about available hyperparameters, and also stores hyperparameter settings.
 #' - Meta-information about the requirements and capabilities of the learner.
 #'
-#' Predefined learners are stored in the [Dictionary] [mlr_learners],
+#' Predefined learners are stored in the [mlr3misc::Dictionary] [mlr_learners],
 #' e.g. [`classif.rpart`][mlr_learners_classif.rpart] or [`regr.rpart`][mlr_learners_regr.rpart].
 #' A guide on how to extend \CRANpkg{mlr3} with custom learners can be found in the [mlr3book](https://mlr3book.mlr-org.com).
 #'
@@ -23,7 +23,7 @@
 #' Note: This object is typically constructed via a derived classes, e.g. [LearnerClassif] or [LearnerRegr].
 #'
 #' ```
-#' l = Learner$new(id, task_type, param_set = ParamSet$new(), param_vals = list(), predict_types = character(),
+#' l = Learner$new(id, task_type, param_set = ParamSet$new(), predict_types = character(),
 #'      feature_types = character(), properties = character(), packages = character())
 #' ```
 #'
@@ -36,17 +36,27 @@
 #' * `param_set` :: [paradox::ParamSet]\cr
 #'   Set of hyperparameters.
 #'
-#' * `param_vals` :: named `list()`\cr
-#'   List of hyperparameter settings.
-#'
 #' * `predict_types` :: `character()`\cr
 #'   Supported predict types. Must be a subset of [`mlr_reflections$learner_predict_types`][mlr_reflections].
+#'
+#' * `predict_sets` :: `character()`\cr
+#'   Sets to predict on during [resample()]/[benchmark()].
+#'   Creates and stores a separate [Prediction] object for each set.
+#'   The individual sets can be combined via getters in [ResampleResult]/[BenchmarkResult], or [Measure]s can be set to operate on subsets of the calculated prediction sets.
+#'   Must be a non-empty subset of `("train", "test")`.
+#'   Default is `"test"`.
 #'
 #' * `feature_types` :: `character()`\cr
 #'   Feature types the learner operates on. Must be a subset of [`mlr_reflections$task_feature_types`][mlr_reflections].
 #'
 #' * `properties` :: `character()`\cr
 #'   Set of properties of the learner. Must be a subset of [`mlr_reflections$learner_properties`][mlr_reflections].
+#'   The following properties are currently standardized and understood by learners in \CRANpkg{mlr3}:
+#'   * `"missings"`: The learner can handle missing values in the data.
+#'   * `"weights"`: The learner supports observation weights.
+#'   * `"importance"`: The learner supports extraction of importance scores, i.e. comes with a `importance()` extractor function (see section on optional extractors).
+#'   * `"selected_features"`: The learner supports extraction of the set of selected features, i.e. comes with a `selected_features()` extractor function (see section on optional extractors).
+#'   * `"oob_error"`: The learner supports extraction of estimated out of bag error, i.e. comes with a `oob_error()` extractor function (see section on optional extractors).
 #'
 #' * `data_formats` :: `character()`\cr
 #'   Vector of supported data formats which can be processed during `$train()` and `$predict()`.
@@ -149,6 +159,7 @@
 #'   The returned vector is named with feature names and sorted in decreasing order.
 #'   Note that the model might omit features it has not used at all.
 #'   The learner must be tagged with property `"importance"`.
+#'   To filter variables using the importance scores, use package \CRANpkg{mlr3filters}.
 #'
 #' * `selected_features(...)`: Returns a subset of selected features as `character()`.
 #'   The learner must be tagged with property `"selected_features"`.
@@ -189,16 +200,16 @@ Learner = R6Class("Learner",
     properties = NULL,
     data_formats = NULL,
     packages = NULL,
+    predict_sets = "test",
     fallback = NULL,
 
-    initialize = function(id, task_type, param_set = ParamSet$new(), param_vals = list(), predict_types = character(),
+    initialize = function(id, task_type, param_set = ParamSet$new(), predict_types = character(),
       feature_types = character(), properties = character(), data_formats = "data.table", packages = character()) {
 
       self$id = assert_string(id, min.chars = 1L)
       self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
       private$.param_set = assert_param_set(param_set)
       private$.encapsulate = c(train = "none", predict = "none")
-      self$param_set$values = param_vals
       self$feature_types = assert_subset(feature_types, mlr_reflections$task_feature_types)
       self$predict_types = assert_subset(predict_types, names(mlr_reflections$learner_predict_types[[task_type]]), empty.ok = FALSE)
       private$.predict_type = predict_types[1L]
@@ -255,24 +266,27 @@ Learner = R6Class("Learner",
     },
 
     log = function() {
-      tab = rbindlist(list(train = self$state$train_log, predict = self$state$predict_log), idcol = "stage", use.names = TRUE)
-      if (nrow(tab) == 0L) {
-        tab = data.table(stage = character(), class = character(), msg = character())
-      }
-      tab$stage = as_factor(tab$stage, levels = c("train", "predict"))
-      tab
+      self$state$log
     },
 
     warnings = function() {
-      self$log[class == "warning"]$msg
+      if (is.null(self$state$log)) {
+        character()
+      } else {
+        self$log[class == "warning", msg]
+      }
     },
 
     errors = function() {
-      self$log[class == "error"]$msg
+      if (is.null(self$state$log)) {
+        character()
+      } else {
+        self$log[class == "error", msg]
+      }
     },
 
     hash = function() {
-      hash(list(class(self), self$id, self$param_set$values, private$.predict_type))
+      hash(class(self), self$id, self$param_set$values, private$.predict_type, self$fallback$hash)
     },
 
     predict_type = function(rhs) {
@@ -306,13 +320,20 @@ Learner = R6Class("Learner",
   private = list(
     .encapsulate = NULL,
     .predict_type = NULL,
-    .param_set = NULL
+    .param_set = NULL,
+
+    deep_clone = function(name, value) {
+      switch(name,
+        .param_set = value$clone(deep = TRUE),
+        state = { value$log = copy(value$log); value },
+        value
+      )
+    }
   )
 )
 
 
 learner_print = function(self) {
-
   catf(format(self))
   catf(str_indent("* Model:", if (is.null(self$model)) "-" else class(self$model)[1L]))
   catf(str_indent("* Parameters:", as_short_string(self$param_set$values, 1000L)))

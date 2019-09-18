@@ -8,7 +8,7 @@
 #'   Object to coerce.
 #' @param clone :: `logical(1)`\cr
 #'   If `TRUE`, ensures that the returned object is not the same as the input `x`, e.g.
-#'   by cloning it or constructing it from a [Dictionary].
+#'   by cloning it or constructing it from a [mlr3misc::Dictionary].
 #'
 #' @return Coerced object. The default method will return the object as-is.
 #'   Failed coercions have to be handled by on of the assertions in [mlr_assertions].
@@ -57,7 +57,7 @@ as_learner = function(x, clone = FALSE) {
 #' @export
 #' @rdname mlr_coercions
 as_learner.Learner = function(x, clone = FALSE) {
-  if (clone) x$clone() else x
+  if (clone) x$clone(deep = TRUE) else x
 }
 
 #' @export
@@ -75,7 +75,7 @@ as_learners.list = function(x, clone = FALSE) {
 #' @export
 #' @rdname mlr_coercions
 as_learners.Learner = function(x, clone = FALSE) {
-  list(if (clone) x$clone() else x)
+  list(if (clone) x$clone(deep = TRUE) else x)
 }
 
 #' @export

@@ -81,3 +81,32 @@ test_that("predict on newdata works / titanic use case", {
   expect_factor(p$truth, levels = task$class_names)
   expect_true(allMissing(p$truth))
 })
+
+test_that("predict train + test set", {
+  task = tsk("iris")
+  m1 = msr("debug", id = "tr", predict_sets = "train")
+  m2 = msr("debug", id = "te", predict_sets = "test")
+  m3 = msr("debug", id = "trte", predict_sets = c("train", "test"))
+  measures = list(m1, m2, m3)
+  hout = rsmp("holdout")$instantiate(task)
+  n_train = length(hout$train_set(1))
+  n_test = length(hout$test_set(1))
+
+  learner = lrn("classif.rpart")
+  rr = resample(task, learner, hout)
+  aggr = rr$aggregate(measures = measures)
+  expect_equal(unname(is.nan(aggr)), c(TRUE, FALSE, TRUE))
+  expect_equal(aggr[["te"]], n_test)
+
+  learner = lrn("classif.rpart", predict_sets = "train")
+  rr = resample(task, learner, hout)
+  aggr = rr$aggregate(measures = measures)
+  expect_equal(unname(is.nan(aggr)), c(FALSE, TRUE, TRUE))
+  expect_equal(aggr[["tr"]], n_train)
+
+  learner = lrn("classif.rpart", predict_sets = c("train", "test"))
+  rr = resample(task, learner, hout)
+  aggr = rr$aggregate(measures = measures)
+  expect_equal(unname(is.nan(aggr)), c(FALSE, FALSE, FALSE))
+  expect_equal(unname(aggr), c(n_train, n_test, n_train + n_test))
+})
