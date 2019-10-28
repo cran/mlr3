@@ -22,6 +22,10 @@
 #' @section Methods:
 #' See [Resampling].
 #'
+#' @section Parameters:
+#' * `ratio` :: `numeric(1)`\cr
+#'   Ratio of observations to put into the training set.
+#'
 #' @template seealso_resampling
 #' @export
 #' @examples
@@ -44,12 +48,11 @@ ResamplingHoldout = R6Class("ResamplingHoldout", inherit = Resampling,
   public = list(
     initialize = function() {
       ps = ParamSet$new(list(
-        ParamUty$new("stratify", default = NULL),
         ParamDbl$new("ratio", lower = 0, upper = 1, tags = "required")
       ))
       ps$values = list(ratio = 2 / 3)
 
-      super$initialize(id = "holdout", param_set = ps)
+      super$initialize(id = "holdout", param_set = ps, man = "mlr3::mlr_resamplings_holdout")
     },
 
     iters = 1L

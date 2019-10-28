@@ -23,17 +23,16 @@
 #' Stefan Aeberhard, email: stefan@coral.cs.jcu.edu.au
 #'
 #' @references
-#' Dua, D. and Graff, C. (2019).
-#' \emph{UCI Machine Learning Repository} \url{http://archive.ics.uci.edu/ml}.
-#' Irvine, CA: University of California, School of Information and Computer Science.
+#' \cite{mlr3}{dua_2017}
 #'
 #' @template seealso_task
 NULL
 
 load_task_wine = function(id = "wine") {
   b = as_data_backend(readRDS(system.file("extdata", "wine.rds", package = "mlr3")))
-  b$hash = "_mlr3_tasks_wine_"
-  TaskClassif$new(id, b, target = "type")
+  task = TaskClassif$new(id, b, target = "type")
+  b$hash = task$man = "mlr3::mlr_tasks_wine"
+  task
 }
 
 #' @include mlr_tasks.R

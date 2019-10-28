@@ -19,37 +19,38 @@ e.g. \code{\link[=mlr_resamplings_cv]{cv}} or \code{\link[=mlr_resamplings_boots
 }
 \section{Construction}{
 
-Note: This object is typically constructed via a derived classes, e.g. \link{ResamplingCV} or \link{ResamplingHoldout}.\preformatted{r = Resampling$new(id, param_set)
+Note: This object is typically constructed via a derived classes, e.g. \link{ResamplingCV} or \link{ResamplingHoldout}.\preformatted{r = Resampling$new(id, param_set, duplicated_ids = FALSE, man = NA_character_)
 }
 \itemize{
 \item \code{id} :: \code{character(1)}\cr
 Identifier for the resampling strategy.
 \item \code{param_set} :: \link[paradox:ParamSet]{paradox::ParamSet}\cr
 Set of hyperparameters.
+\item \code{duplicated_ids} :: \code{logical(1)}\cr
+Set to \code{TRUE} if this resampling strategy may have duplicated row ids in a single training set or test set.
+\item \code{man} :: \code{character(1)}\cr
+String in the format \code{[pkg]::[topic]} pointing to a manual page for this object.
 }
 }
 
 \section{Fields}{
 
+All variables passed to the constructor, and additionally:
 \itemize{
-\item \code{id} :: \code{character(1)}\cr
-Identifier of the learner.
-\item \code{param_set} :: \link[paradox:ParamSet]{paradox::ParamSet}\cr
-Description of available hyperparameters and hyperparameter settings.
-\item \code{hash} :: \code{character(1)}\cr
-Hash (unique identifier) for this object.
+\item \code{iters} :: \code{integer(1)}\cr
+Return the number of resampling iterations, depending on the values stored in the \code{param_set}.
 \item \code{instance} :: \code{any}\cr
 During \code{instantiate()}, the instance is stored in this slot.
 The instance can be in any arbitrary format.
 \item \code{is_instantiated} :: \code{logical(1)}\cr
 Is \code{TRUE}, if the resampling has been instantiated.
-\item \code{duplicated_ids} :: \code{logical(1)}\cr
-Is \code{TRUE} if this resampling strategy may have duplicated row ids in a single training set or test set.
-E.g., this is \code{TRUE} for Bootstrap, and \code{FALSE} for cross validation.
-\item \code{iters} :: \code{integer(1)}\cr
-Return the number of resampling iterations, depending on the values stored in the \code{param_set}.
 \item \code{task_hash} :: \code{character(1)}\cr
 The hash of the task which was passed to \code{r$instantiate()}.
+\item \code{hash} :: \code{character(1)}\cr
+Hash (unique identifier) for this object.
+
+E.g., this is \code{TRUE} for Bootstrap, and \code{FALSE} for cross validation.
+Only used internally.
 }
 }
 
@@ -65,7 +66,38 @@ Returns the row ids of the i-th training set.
 \item \code{test_set(i)}\cr
 \code{integer(1)} -> (\code{integer()} | \code{character()})\cr
 Returns the row ids of the i-th test set.
+\item \code{help()}\cr
+() -> \code{NULL}\cr
+Opens the corresponding help page referenced by \code{$man}.
 }
+}
+
+\section{Stratification}{
+
+All derived classes support stratified sampling.
+The stratification variables are assumed to be discrete and must be stored in the \link{Task} with column role \code{"stratum"}.
+In case of multiple stratification variables, each combination of the values of the stratification variables forms a strata.
+
+First, the observations are divided into subpopulations based one or multiple stratification variables (assumed to be discrete), c.f. \code{task$strata}.
+
+Second, the sampling is performed in each of the \code{k} subpopulations separately.
+Each subgroup is divided into \code{iter} training sets and \code{iter} test sets by the derived \code{Resampling}.
+These sets are merged based on their iteration number: all training sets from all subpopulations with iteration 1 are combined, then all training sets with iteration 2, and so on.
+Same is done for all test sets.
+The merged sets can be accessed via \code{$train_set(i)} and \code{$test_set(i)}, respectively.
+}
+
+\section{Grouping / Blocking}{
+
+All derived classes support grouping of observations.
+The grouping variable is assumed to be discrete and must be stored in the \link{Task} with column role \code{"group"}.
+
+Observations in the same group are treated like a "block" of observations which must be kept together.
+These observations either all go together into the training set or together into the test set.
+
+The sampling is performed by the derived \link{Resampling} on the grouping variable.
+Next, the grouping information is replaced with the respective row ids to generate training and test sets.
+The sets can be accessed via \code{$train_set(i)} and \code{$test_set(i)}, respectively.
 }
 
 \examples{
@@ -94,12 +126,17 @@ r$train_set(1)
 # Stratification
 task = tsk("pima")
 prop.table(table(task$truth())) # moderately unbalanced
+task$col_roles$stratum = task$target_names
 
 r = rsmp("subsampling")
 r$instantiate(task)
 prop.table(table(task$truth(r$train_set(1)))) # roughly same proportion
 }
 \seealso{
+\link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
+
+\code{as.data.table(mlr_resamplings)} for a complete table of all (also dynamically created) \link{Resampling} implementations.
+
 Other Resampling: \code{\link{mlr_resamplings}}
 }
 \concept{Resampling}

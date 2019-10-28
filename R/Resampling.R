@@ -18,7 +18,7 @@
 #' @section Construction:
 #' Note: This object is typically constructed via a derived classes, e.g. [ResamplingCV] or [ResamplingHoldout].
 #' ```
-#' r = Resampling$new(id, param_set)
+#' r = Resampling$new(id, param_set, duplicated_ids = FALSE, man = NA_character_)
 #' ```
 #'
 #' * `id` :: `character(1)`\cr
@@ -27,15 +27,17 @@
 #' * `param_set` :: [paradox::ParamSet]\cr
 #'   Set of hyperparameters.
 #'
+#' * `duplicated_ids` :: `logical(1)`\cr
+#'   Set to `TRUE` if this resampling strategy may have duplicated row ids in a single training set or test set.
+#'
+#' * `man` :: `character(1)`\cr
+#'   String in the format `[pkg]::[topic]` pointing to a manual page for this object.
+#'
 #' @section Fields:
-#' * `id` :: `character(1)`\cr
-#'   Identifier of the learner.
+#' All variables passed to the constructor, and additionally:
 #'
-#' * `param_set` :: [paradox::ParamSet]\cr
-#'   Description of available hyperparameters and hyperparameter settings.
-#'
-#' * `hash` :: `character(1)`\cr
-#'   Hash (unique identifier) for this object.
+#' * `iters` :: `integer(1)`\cr
+#'   Return the number of resampling iterations, depending on the values stored in the `param_set`.
 #'
 #' * `instance` :: `any`\cr
 #'   During `instantiate()`, the instance is stored in this slot.
@@ -44,15 +46,14 @@
 #' * `is_instantiated` :: `logical(1)`\cr
 #'   Is `TRUE`, if the resampling has been instantiated.
 #'
-#' * `duplicated_ids` :: `logical(1)`\cr
-#'   Is `TRUE` if this resampling strategy may have duplicated row ids in a single training set or test set.
-#'   E.g., this is `TRUE` for Bootstrap, and `FALSE` for cross validation.
-#'
-#' * `iters` :: `integer(1)`\cr
-#'   Return the number of resampling iterations, depending on the values stored in the `param_set`.
-#'
 #' * `task_hash` :: `character(1)`\cr
 #'   The hash of the task which was passed to `r$instantiate()`.
+#'
+#' * `hash` :: `character(1)`\cr
+#'   Hash (unique identifier) for this object.
+#'
+#'   E.g., this is `TRUE` for Bootstrap, and `FALSE` for cross validation.
+#'   Only used internally.
 #'
 #' @section Methods:
 #' * `instantiate(task)`\cr
@@ -67,8 +68,39 @@
 #'   `integer(1)` -> (`integer()` | `character()`)\cr
 #'   Returns the row ids of the i-th test set.
 #'
-#' @export
+#' * `help()`\cr
+#'   () -> `NULL`\cr
+#'   Opens the corresponding help page referenced by `$man`.
+#'
+#' @section Stratification:
+#' All derived classes support stratified sampling.
+#' The stratification variables are assumed to be discrete and must be stored in the [Task] with column role `"stratum"`.
+#' In case of multiple stratification variables, each combination of the values of the stratification variables forms a strata.
+#'
+#' First, the observations are divided into subpopulations based one or multiple stratification variables (assumed to be discrete), c.f. `task$strata`.
+#'
+#'
+#' Second, the sampling is performed in each of the `k` subpopulations separately.
+#' Each subgroup is divided into `iter` training sets and `iter` test sets by the derived `Resampling`.
+#' These sets are merged based on their iteration number: all training sets from all subpopulations with iteration 1 are combined, then all training sets with iteration 2, and so on.
+#' Same is done for all test sets.
+#' The merged sets can be accessed via `$train_set(i)` and `$test_set(i)`, respectively.
+#'
+#'
+#' @section Grouping / Blocking:
+#' All derived classes support grouping of observations.
+#' The grouping variable is assumed to be discrete and must be stored in the [Task] with column role `"group"`.
+#'
+#' Observations in the same group are treated like a "block" of observations which must be kept together.
+#' These observations either all go together into the training set or together into the test set.
+#'
+#' The sampling is performed by the derived [Resampling] on the grouping variable.
+#' Next, the grouping information is replaced with the respective row ids to generate training and test sets.
+#' The sets can be accessed via `$train_set(i)` and `$test_set(i)`, respectively.
+#'
 #' @family Resampling
+#' @template seealso_resampling
+#' @export
 #' @examples
 #' r = rsmp("subsampling")
 #'
@@ -95,6 +127,7 @@
 #' # Stratification
 #' task = tsk("pima")
 #' prop.table(table(task$truth())) # moderately unbalanced
+#' task$col_roles$stratum = task$target_names
 #'
 #' r = rsmp("subsampling")
 #' r$instantiate(task)
@@ -106,11 +139,13 @@ Resampling = R6Class("Resampling",
     instance = NULL,
     task_hash = NA_character_,
     duplicated_ids = NULL,
+    man = NULL,
 
-    initialize = function(id, param_set = ParamSet$new(), duplicated_ids = FALSE) {
+    initialize = function(id, param_set = ParamSet$new(), duplicated_ids = FALSE, man = NA_character_) {
       self$id = assert_string(id, min.chars = 1L)
       self$param_set = assert_param_set(param_set)
       self$duplicated_ids = assert_flag(duplicated_ids)
+      self$man = assert_string(man, na.ok = TRUE)
     },
 
     format = function() {
@@ -126,10 +161,10 @@ Resampling = R6Class("Resampling",
 
     instantiate = function(task) {
       task = assert_task(as_task(task))
+      strata = task$strata
       groups = task$groups
 
-      stratify = self$param_set$values$stratify
-      if (length(stratify) == 0L || isFALSE(stratify)) {
+      if (is.null(strata)) {
         if (is.null(groups)) {
           instance = private$.sample(task$row_ids)
         } else {
@@ -140,8 +175,7 @@ Resampling = R6Class("Resampling",
         if (!is.null(groups)) {
           stopf("Cannot combine stratification with grouping")
         }
-        instances = stratify(task, stratify)
-        instance = private$.combine(lapply(instances$..row_id, private$.sample))
+        instance = private$.combine(lapply(strata$row_id, private$.sample))
       }
 
       self$instance = instance
@@ -183,12 +217,3 @@ Resampling = R6Class("Resampling",
   )
 )
 
-stratify = function(task, stratify) {
-  if (isTRUE(stratify)) {
-    stratify = task$target_names
-  } else {
-    assert_subset(stratify, c(task$target_names, task$feature_names), empty.ok = FALSE)
-  }
-  row_ids = task$row_ids
-  cbind(task$data(rows = row_ids, cols = stratify), ..row_id = row_ids)[, list(..N = .N, ..row_id = list(.SD$..row_id)), by = stratify]
-}

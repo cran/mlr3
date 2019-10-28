@@ -3,6 +3,7 @@
 \docType{data}
 \name{MeasureElapsedTime}
 \alias{MeasureElapsedTime}
+\alias{mlr_measures_elapsed_time}
 \alias{mlr_measures_time_train}
 \alias{mlr_measures_time_predict}
 \alias{mlr_measures_time_both}
@@ -33,5 +34,7 @@ The runtime of all stages will be summed.
 
 \seealso{
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
+
+\code{as.data.table(mlr_measures)} for a complete table of all (also dynamically created) \link{Measure} implementations.
 }
 \keyword{datasets}

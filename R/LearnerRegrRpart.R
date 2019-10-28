@@ -17,10 +17,7 @@
 #' Parameter `xval` is set to 0 in order to save some computation time.
 #'
 #' @references
-#' Breiman, L. (1984).
-#' Classification and Regression Trees.
-#' New York: Routledge.
-#' \doi{10.1201/9781315139470}.
+#' \cite{mlr3}{breiman_2017}
 #'
 #' @template seealso_learner
 #' @export
@@ -43,7 +40,8 @@ LearnerRegrRpart = R6Class("LearnerRegrRpart", inherit = LearnerRegr,
         predict_types = "response",
         packages = "rpart",
         param_set = ps,
-        properties = c("weights", "missings", "importance", "selected_features")
+        properties = c("weights", "missings", "importance", "selected_features"),
+        man = "mlr3::mlr_learners_regr.rpart"
       )
     },
 

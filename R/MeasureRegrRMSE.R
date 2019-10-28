@@ -2,7 +2,7 @@
 #'
 #' @usage NULL
 #' @aliases mlr_measures_regr.rmse
-#' @format [R6::R6Class] inheriting from [MeasureClassif].
+#' @format [R6::R6Class] inheriting from [MeasureRegr].
 #' @include MeasureRegr.R
 #'
 #' @section Construction:
@@ -25,7 +25,8 @@ MeasureRegrRMSE = R6Class("MeasureRegrRMSE",
         id = "regr.rmse",
         range = c(0, Inf),
         minimize = TRUE,
-        packages = "Metrics"
+        packages = "Metrics",
+        man = "mlr3::mlr_measures_regr.rmse"
       )
     },
 

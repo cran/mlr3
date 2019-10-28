@@ -27,8 +27,8 @@
 #' * `data` :: [data.table::data.table()]\cr
 #'   Internal data storage.
 #'   We discourage users to directly work with this field.
-#'
 #' * `task` :: [Task]\cr
+#'
 #'   The task [resample()] operated on.
 #'
 #' * `learners` :: list of [Learner]\cr
@@ -76,6 +76,10 @@
 #'   Calculates and aggregates performance values for all provided measures, according to the respective aggregation function in [Measure].
 #'   If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
 #'
+#' * `help()`\cr
+#'   () -> `NULL`\cr
+#'   Opens the help page for this object.
+#'
 #' @section S3 Methods:
 #' * `as.data.table(rr)`\cr
 #'   [ResampleResult] -> [data.table::data.table()]\cr
@@ -109,6 +113,10 @@ ResampleResult = R6Class("ResampleResult",
       }
     },
 
+    help = function() {
+      open_help("mlr3::BenchmarkResult")
+    },
+
     format = function() {
       sprintf("<%s>", class(self)[1L])
     },
@@ -117,8 +125,6 @@ ResampleResult = R6Class("ResampleResult",
       catf("%s of %i iterations", format(self), nrow(self$data))
       catf(str_indent("* Task:", self$task$id))
       catf(str_indent("* Learner:", self$data$learner[[1L]]$id))
-      perf = self$aggregate()
-      catf(str_indent("* Performance:", sprintf("%.3f [%s]", perf, names(perf))))
 
       warnings = self$warnings
       catf(str_indent("* Warnings:", sprintf("%i in %i iterations", nrow(warnings), uniqueN(warnings, by = "iteration"))))

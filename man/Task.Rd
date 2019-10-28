@@ -50,16 +50,17 @@ Each column (feature) can have an arbitrary number of the following roles:
 \itemize{
 \item \code{"feature"}: Regular feature used in the model fitting process.
 \item \code{"target"}: Target variable.
-\item \code{"label"}: Observation labels. May be used in plots.
+\item \code{"name"}: Row names / observation labels. To be used in plots.
 \item \code{"order"}: Data returned by \code{$data()} is ordered by this column (or these columns).
-\item \code{"groups"}: During resampling, observations with the same value of the variable with role "groups"
+\item \code{"group"}: During resampling, observations with the same value of the variable with role "group"
 are marked as "belonging together". They will be exclusively assigned to be either in the training set
 or in the test set for each resampling iteration. Only up to one column may have this role.
-\item \code{"weights"}: Observation weights. Only up to one column may have this role.
+\item \code{"stratum"}: Stratification variables. Multiple discrete columns may have this role.
+\item \code{"weight"}: Observation weights. Only up to one column (assumed to be discrete) may have this role.
 }
 
-\code{col_roles} keeps track of the roles with a named list of vectors of feature names.
-To alter the roles, use \code{t$set_col_role()}.
+\code{col_roles} keeps track of the roles with a named list, the elements are named by column role and each element is a character vector of column names.
+To alter the roles, just modify the list, e.g. with  \R's set functions (\code{\link[=intersect]{intersect()}}, \code{\link[=setdiff]{setdiff()}}, \code{\link[=union]{union()}}, \ldots).
 \item \code{row_roles} :: named \code{list()}\cr
 Each row (observation) can have an arbitrary number of roles in the learning task:
 \itemize{
@@ -68,8 +69,8 @@ Each row (observation) can have an arbitrary number of roles in the learning tas
 Validation sets are not yet completely integrated into the package.
 }
 
-\code{row_roles} keeps track of the roles with a named list of vectors of feature names.
-To alter the role, use \code{set_row_role()}.
+\code{row_roles} keeps track of the roles with a named list, elements are named by row role and each element is a \code{integer()} or \code{character()} vector of row ids.
+To alter the roles, just modify the list, e.g. with  \R's set functions (\code{\link[=intersect]{intersect()}}, \code{\link[=setdiff]{setdiff()}}, \code{\link[=union]{union()}}, \ldots).
 \item \code{feature_names} :: \code{character()}\cr
 Return all column names with \code{role == "feature"}.
 \item \code{feature_types} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
@@ -94,17 +95,30 @@ Set of task properties. Possible properties are are stored in
 \link[=mlr_reflections]{mlr_reflections$task_properties}.
 The following properties are currently standardized and understood by tasks in \CRANpkg{mlr3}:
 \itemize{
-\item \code{"weights"}: The task comes with observation weights.
-\item \code{"groups"}: The task comes with grouping/blocking information.
+\item \code{"strata"}: The task is resampled using one or more stratification variables (role \code{"stratum"}).
+\item \code{"groups"}: The task comes with grouping/blocking information (role \code{"group"}).
+\item \code{"weights"}: The task comes with observation weights (role \code{"weight"}).
+Note that above listed properties are calculated from the \code{$col_roles} and must not be set explicitly.
 }
+\item \code{strata} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
+If the task has columns designated with role \code{"stratum"}, returns a table with one subpopulation per row and two columns:
+\code{N} (\code{integer()}) with the number of observations in the subpopulation and \code{row_id} (list of \code{integer()} | list of \code{character()}) as list
+column with the row ids in the respective subpopulation.
+Returns \code{NULL} if there are is no stratification variable.
+
+See \link{Resampling} for more information on stratification.
 \item \code{groups} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
-If the task has a designated column role "groups", table with two columns:
+If the task has a column with designated role "group", table with two columns:
 \code{row_id} (\code{integer()} | \code{character()}) and the grouping variable \code{group} (\code{vector()}).
 Returns \code{NULL} if there are is no grouping column.
+
+See \link{Resampling} for more information on grouping.
 \item \code{weights} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
-If the task has a designated column role "weights", table with two columns:
+If the task has a column with designated role "weight", table with two columns:
 \code{row_id} (\code{integer()} | \code{character()}) and the observation weights \code{weight} (\code{numeric()}).
 Returns \code{NULL} if there are is no weight column.
+\item \code{man} :: \code{character(1)}\cr
+String in the format \code{[pkg]::[topic]} pointing to a manual page for this object.
 }
 }
 
@@ -142,14 +156,19 @@ Argument \code{cols} defaults to all columns with role "target" or "feature".
 \item \code{head(n = 6)}\cr
 \code{integer()} -> \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Get the first \code{n} observations with role \code{"use"}.
-\item \code{set_col_role(cols, new_roles, exclusive = TRUE)}\cr
-(\code{character()}, \code{character()}, \code{logical(1)}) -> \code{self}\cr
-Adds the roles \code{new_roles} to columns referred to by \code{cols}.
-If \code{exclusive} is \code{TRUE}, the referenced columns will be removed from all other roles.
 \item \code{set_row_role(rows, new_roles, exclusive = TRUE)}\cr
 (\code{character()}, \code{character()}, \code{logical(1)}) -> \code{self}\cr
 Adds the roles \code{new_roles} to rows referred to by \code{rows}.
 If \code{exclusive} is \code{TRUE}, the referenced rows will be removed from all other roles.
+
+This function is deprecated and will be removed in the next version in favor of directly modifying \code{$row_roles}.
+\item \code{set_col_role(cols, new_roles, exclusive = TRUE)}\cr
+
+(\code{character()}, \code{character()}, \code{logical(1)}) -> \code{self}\cr
+Adds the roles \code{new_roles} to columns referred to by \code{cols}.
+If \code{exclusive} is \code{TRUE}, the referenced columns will be removed from all other roles.
+
+This function is deprecated and will be removed in the next version in favor of directly modifying \code{$col_roles}.
 \item \code{filter(rows)}\cr
 (\code{integer()} | \code{character()}) -> \code{self}\cr
 Subsets the task, reducing it to only keep the rows specified in \code{rows}.
@@ -189,6 +208,9 @@ Renames columns by mapping column names in \code{old} to new column names in \co
 
 This operation mutates the task in-place.
 See the section on task mutators for more information.
+\item \code{help()}\cr
+() -> \code{NULL}\cr
+Opens the corresponding help page referenced by \code{$man}.
 }
 }
 
@@ -205,7 +227,7 @@ Returns the complete data as \code{\link[data.table:data.table]{data.table::data
 
 The following methods change the task in-place:
 \itemize{
-\item \code{set_row_role()} and \code{set_col_role()} alter the row or column information in \code{row_roles} or \code{col_roles}, respectively.
+\item Any modification to \code{$col_roles} and \code{row_roles}.
 This provides a different "view" on the data without altering the data itself.
 \item \code{filter()} and \code{select()} subset the set of active rows or features in \code{row_roles} or \code{col_roles}, respectively.
 This provides a different "view" on the data without altering the data itself.
@@ -226,10 +248,7 @@ task$ncol
 task$feature_names
 task$formula()
 
-# Remove "Petal.Length"
-task$set_col_role("Petal.Length", character())
-
-# Remove "Petal.Width", alternative way
+# de-select "Petal.Width"
 task$select(setdiff(task$feature_names, "Petal.Width"))
 
 task$feature_names

@@ -1,7 +1,3 @@
-ids = function(x) {
-  map_chr(unname(x), "id")
-}
-
 task_types = function(x) {
   unique(map_chr(unname(x), "task_type"))
 }
@@ -46,4 +42,15 @@ use_future = function() {
   }
 
   return(TRUE)
+}
+
+open_help = function(man) {
+  if (!test_string(man)) {
+    message("No help available")
+    return(invisible())
+  }
+
+  parts = strsplit(man, split = "::", fixed = TRUE)[[1L]]
+  # pkgload overloads help
+  match.fun("help")(parts[2L], parts[1L])
 }

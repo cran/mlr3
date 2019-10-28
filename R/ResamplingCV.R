@@ -21,6 +21,10 @@
 #' @section Methods:
 #' See [Resampling].
 #'
+#' @section Parameters:
+#' * `folds` :: `integer(1)`\cr
+#'   Number of folds.
+#'
 #' @template seealso_resampling
 #' @export
 #' @examples
@@ -43,12 +47,11 @@ ResamplingCV = R6Class("ResamplingCV", inherit = Resampling,
   public = list(
     initialize = function() {
       ps = ParamSet$new(list(
-        ParamUty$new("stratify", default = NULL),
         ParamInt$new("folds", lower = 1L, tags = "required")
       ))
       ps$values = list(folds = 10L)
 
-      super$initialize(id = "cv", param_set = ps)
+      super$initialize(id = "cv", param_set = ps, man = "mlr3::mlr_resamplings_cv")
     }
   ),
 

@@ -19,7 +19,7 @@ test_that("Rows return ordered", {
   x = task$data()
   expect_true(is.unsorted(x$t))
 
-  task$set_col_role("t", "order", exclusive = FALSE)
+  task$col_roles$order = "t"
   x = task$data()
   expect_integer(x$t, sorted = TRUE, any.missing = FALSE)
 
@@ -33,8 +33,7 @@ test_that("Rows return ordered with multiple order cols", {
   x = task$data()
   expect_true(is.unsorted(x$Petal.Length))
 
-  task$set_col_role("Petal.Length", "order", exclusive = FALSE)
-  task$set_col_role("Petal.Width", "order", exclusive = FALSE)
+  task$col_roles$order = c("Petal.Length", "Petal.Width")
   expect_equal(task$col_roles$order, c("Petal.Length", "Petal.Width"))
 
   x = task$data()
@@ -90,6 +89,11 @@ test_that("Task cbind", {
 
   task$cbind(data.table())
   expect_equal(task$ncol, 7L)
+
+  y = task$data(cols = task$target_names, rows = shuffle(task$row_ids))
+  task$cbind(y)
+  expect_equal(task$ncol, 7L)
+  expect_disjunct(task$feature_names, task$target_names)
 })
 
 test_that("cbind/rbind works", {
@@ -148,31 +152,45 @@ test_that("rename works", {
   expect_task_classif(task)
 })
 
+test_that("stratify works", {
+  task = tsk("iris")
+  expect_false("strata" %in% task$properties)
+  expect_null(task$strata)
+
+  task$col_roles$stratum = task$target_names
+  expect_true("strata" %in% task$properties)
+  tab = task$strata
+  expect_data_table(tab, ncols = 2, nrows = 3)
+  expect_list(tab$row_id, "integer")
+})
+
 test_that("groups/weights work", {
   b = as_data_backend(data.table(x = runif(20), y = runif(20), w = runif(20), g = sample(letters[1:2], 20, replace = TRUE)))
   task = TaskRegr$new("test", b, target = "y")
   task$set_row_role(16:20, character())
 
+  expect_false("groups" %in% task$properties)
+  expect_false("weights" %in% task$properties)
   expect_null(task$groups)
   expect_null(task$weights)
 
-  task$set_col_role("w", "weights")
+  task$col_roles$weight = "w"
   expect_subset("weights", task$properties)
   expect_data_table(task$weights, ncols = 2, nrows = 15)
   expect_numeric(task$weights$weight, any.missing = FALSE)
 
-  task$set_col_role("w", "feature", exclusive = TRUE)
+  task$col_roles$weight = character()
   expect_true("weights" %nin% task$properties)
 
-  task$set_col_role("g", "groups")
+  task$col_roles$group = "g"
   expect_subset("groups", task$properties)
   expect_data_table(task$groups, ncols = 2, nrows = 15)
   expect_subset(task$groups$group, c("a", "b"))
 
-  task$set_col_role("g", "feature", exclusive = TRUE)
+  task$col_roles$group = character()
   expect_true("groups" %nin% task$properties)
 
-  expect_error(task$set_col_role(c("w", "g"), "weights"), "Multiple columns with role")
+  expect_error({task$col_roles$weight = c("w", "g")}, "up to one")
 })
 
 test_that("ordered factors (#95)", {
@@ -226,9 +244,29 @@ test_that("task$feature_types preserves key (#193)", {
 })
 
 test_that("switch columns on and off (#301)", {
-  task = tsk("iris")$
-    set_col_role("Sepal.Length", character())$
-    cbind(data.table(x = 1:150))$
-    set_col_role("Sepal.Length", "feature")
+  task = tsk("iris")
+  task$col_roles$feature = setdiff(task$col_roles$feature, "Sepal.Length")
+  task$cbind(data.table(x = 1:150))
+  task$col_roles$feature = union(task$col_roles$feature, "Sepal.Length")
   expect_data_table(task$data(), ncols = 6, nrows = 150, any.missing = FALSE)
+})
+
+test_that("row roles setters", {
+  task = tsk("iris")
+
+  expect_error({ task$row_roles$use = "foo" })
+  expect_error({ task$row_roles$foo = 1L })
+
+  task$row_roles$use = 1:20
+  expect_equal(task$nrow, 20L)
+})
+
+test_that("col roles getters/setters", {
+  task = tsk("iris")
+
+  expect_error({ task$col_roles$feature = "foo" })
+  expect_error({ task$col_roles$foo = "Species" })
+
+  task$col_roles$feature = setdiff(task$col_roles$feature, "Sepal.Length")
+  expect_false("Sepal.Length" %in% task$feature_names)
 })

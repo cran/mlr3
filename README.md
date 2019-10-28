@@ -1,14 +1,18 @@
 
-# mlr3 <img src="man/figures/logo_navbar.png" align="right" />
+# mlr3 <img src="man/figures/logo.png" align="right" width = "120" />
 
 Efficient, object-oriented programming on the building blocks of machine
 learning. Successor of [mlr](https://github.com/mlr-org/mlr).
 
 [![Build
-Status](https://travis-ci.org/mlr-org/mlr3.svg?branch=master)](https://travis-ci.org/mlr-org/mlr3)
+Status](https://img.shields.io/travis/mlr-org/mlr3/master?label=Linux&logo=travis&style=flat-square)](https://travis-ci.org/mlr-org/mlr3)
+[![CircleCI](https://img.shields.io/circleci/build/gh/mlr-org/mlr3/master?label=Linux&logo=circle&logoColor=green&style=flat-square)](https://circleci.com/gh/mlr-org/mlr3)
+[![cran
+checks](https://cranchecks.info/badges/worst/mlr3)](https://cran.r-project.org/web/checks/check_results_mlr3.html)
+
 [![CRAN Status
 Badge](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.org/package=mlr3)
-[![Codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
+[![codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
 [![StackOverflow](https://img.shields.io/badge/stackoverflow-mlr3-orange.svg)](https://stackoverflow.com/questions/tagged/mlr3)
 [![Dependencies](https://tinyverse.netlify.com/badge/mlr3)](https://cran.r-project.org/package=mlr3)
 
@@ -92,21 +96,19 @@ resampling = rsmp("cv", folds = 3L)
 rr = resample(task_iris, learner, resampling)
 ```
 
-    ## INFO  [21:11:08.322] Applying learner 'classif.rpart' on task 'iris' (iter 1/3) 
-    ## INFO  [21:11:08.350] Applying learner 'classif.rpart' on task 'iris' (iter 2/3) 
-    ## INFO  [21:11:08.364] Applying learner 'classif.rpart' on task 'iris' (iter 3/3)
+    ## INFO  [13:33:15.014] Applying learner 'classif.rpart' on task 'iris' (iter 1/3) 
+    ## INFO  [13:33:15.039] Applying learner 'classif.rpart' on task 'iris' (iter 2/3) 
+    ## INFO  [13:33:15.057] Applying learner 'classif.rpart' on task 'iris' (iter 3/3)
 
 ``` r
 rr$score(measure)
 ```
 
     ##             task task_id               learner    learner_id
-    ##           <list>  <char>                <list>        <char>
     ## 1: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
     ## 2: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
     ## 3: <TaskClassif>    iris <LearnerClassifRpart> classif.rpart
     ##        resampling resampling_id iteration prediction classif.acc
-    ##            <list>        <char>     <int>     <list>       <num>
     ## 1: <ResamplingCV>            cv         1     <list>        0.92
     ## 2: <ResamplingCV>            cv         2     <list>        0.92
     ## 3: <ResamplingCV>            cv         3     <list>        0.94
@@ -141,7 +143,7 @@ would result in non-trivial API changes.
   - Overcome the limitations of R’s [S3
     classes](https://adv-r.hadley.nz/s3.html) with the help of
     [R6](https://cran.r-project.org/package=R6).
-  - Embrace [R6](https://cran.r-project.org/package=R6), clean
+  - Embrace [R6](https://cran.r-project.org/package=R6) for a clean
     OO-design, object state-changes and reference semantics. This might
     be less “traditional R”, but seems to fit `mlr` nicely.
   - Embrace
@@ -149,28 +151,31 @@ would result in non-trivial API changes.
     fast and convenient data frame computations.
   - Combine `data.table` and `R6`, for this we will make heavy use of
     list columns in data.tables.
-  - Be light on dependencies. `mlr3` requires the following packages:
+  - Be light on dependencies. `mlr3` requires the following packages at
+    runtime:
       - [`backports`](https://cran.r-project.org/package=backports):
         Ensures backward compatibility with older R releases. Developed
         by members of the `mlr` team. No recursive dependencies.
       - [`checkmate`](https://cran.r-project.org/package=checkmate):
         Fast argument checks. Developed by members of the `mlr` team. No
         extra recursive dependencies.
-      - [`mlr3misc`](https://github.com/mlr-org/mlr3misc) Miscellaneous
-        functions used in multiple mlr3 [extension
+      - [`mlr3misc`](https://cran.r-project.org/package=mlr3misc):
+        Miscellaneous functions used in multiple mlr3 [extension
         packages](https://github.com/mlr-org/mlr3/wiki/Extension-Packages).
         Developed by the `mlr` team. No extra recursive dependencies.
-      - [`paradox`](https://github.com/mlr-org/paradox): Descriptions
-        for parameters and parameter sets. Developed by the `mlr` team.
-        No extra recursive dependencies.
+      - [`paradox`](https://cran.r-project.org/package=paradox):
+        Descriptions for parameters and parameter sets. Developed by the
+        `mlr` team. No extra recursive dependencies.
       - [`R6`](https://cran.r-project.org/package=R6): Reference class
         objects. No recursive dependencies.
       - [`data.table`](https://cran.r-project.org/package=data.table):
         Extension of R’s `data.frame`. No recursive dependencies.
       - [`digest`](https://cran.r-project.org/package=digest): Hash
         digests. No recursive dependencies.
-      - [`lgr`](https://github.com/s-fleck/lgr): Logging facility. No
-        extra recursive dependencies.
+      - [`uuid`](https://cran.r-project.org/package=uuid): Create unique
+        string identifiers. No recursive dependencies.
+      - [`lgr`](https://cran.r-project.org/package=lgr): Logging
+        facility. No extra recursive dependencies.
       - [`Metrics`](https://cran.r-project.org/package=Metrics): Package
         which implements performance measures. No recursive
         dependencies.

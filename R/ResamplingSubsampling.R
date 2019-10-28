@@ -22,6 +22,12 @@
 #' @section Methods:
 #' See [Resampling].
 #'
+#' @section Parameters:
+#' * `repeats` :: `integer(1)`\cr
+#'   Number of repetitions.
+#' * `ratio` :: `numeric(1)`\cr
+#'   Ratio of observations to put into the training set.
+#'
 #' @template seealso_resampling
 #' @export
 #' @examples
@@ -44,13 +50,12 @@ ResamplingSubsampling = R6Class("ResamplingSubsampling", inherit = Resampling,
   public = list(
     initialize = function() {
       ps = ParamSet$new(list(
-        ParamUty$new("stratify", default = NULL),
         ParamInt$new("repeats", lower = 1, tags = "required"),
         ParamDbl$new("ratio", lower = 0, upper = 1, tags = "required")
       ))
       ps$values = list(repeats = 30L, ratio = 2 / 3)
 
-      super$initialize(id = "subsampling", param_set = ps)
+      super$initialize(id = "subsampling", param_set = ps, man = "mlr3::mlr_resamplings_subsampling")
     }
   ),
 

@@ -28,6 +28,16 @@ See \link{Resampling}.
 See \link{Resampling}.
 }
 
+\section{Parameters}{
+
+\itemize{
+\item \code{repeats} :: \code{integer(1)}\cr
+Number of repetitions.
+\item \code{ratio} :: \code{numeric(1)}\cr
+Ratio of observations to put into the training set.
+}
+}
+
 \examples{
 # Create a task with 10 observations
 task = tsk("iris")
@@ -47,5 +57,7 @@ rb$instance$M # Matrix of counts
 }
 \seealso{
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Resampling]{Resamplings}: \link{mlr_resamplings}
+
+\code{as.data.table(mlr_resamplings)} for a complete table of all (also dynamically created) \link{Resampling} implementations.
 }
 \keyword{datasets}
