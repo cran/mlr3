@@ -121,7 +121,10 @@ PredictionClassif = R6Class("PredictionClassif", inherit = Prediction,
       if (!is.null(prob)) {
         assert_matrix(prob, nrows = n, ncols = length(lvls))
         assert_numeric(prob, lower = 0, upper = 1)
-        assert_names(colnames(prob), permutation.of = lvls)
+        if (!identical(colnames(prob), lvls)) {
+          assert_names(colnames(prob), permutation.of = lvls)
+          prob = prob[, match(colnames(prob), lvls), drop = FALSE]
+        }
         if (!is.null(rownames(prob))) {
           rownames(prob) = NULL
         }
@@ -151,7 +154,7 @@ PredictionClassif = R6Class("PredictionClassif", inherit = Prediction,
       if (!is.matrix(self$data$prob)) {
         stopf("Cannot set threshold, no probabilities available")
       }
-      lvls = colnames(self$data$prob)
+      lvls = levels(self$truth)
 
       if (length(threshold) == 1L) {
         assert_number(threshold, lower = 0, upper = 1)

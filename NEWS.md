@@ -1,3 +1,15 @@
+# mlr3 0.1.6
+
+* We have published an article about mlr3 in the Journal of Open Source
+  Software: <https://joss.theoj.org/papers/10.21105/joss.01903>.
+  See `citation("mlr3")` for the citation info.
+* New method `Learner$reset()`.
+* New method `BenchmarkResult$filter()`.
+* Learners returned by `BenchmarkResult$learners` are reset to encourage the
+  safer alternative `BenchmarkResult$score()` to access trained models.
+* Fix ordering of levels in `PredictionClassif$set_threshold()` (triggered an
+  assertion).
+
 # mlr3 0.1.5
 
 * Switched from package `Metrics` to package `mlr3measures`.

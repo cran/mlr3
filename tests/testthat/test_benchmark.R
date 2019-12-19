@@ -28,6 +28,7 @@ test_that("Basic benchmarking", {
   expect_data_table(tab, nrows = 2, any.missing = FALSE)
   expect_names(names(tab), permutation.of = c("learner_hash", "learner", "learner_id"))
   expect_hash(tab$learner_hash, len = 2L)
+  qexpectr(map(tab$learner, "state"), "0")
 
   tab = bmr$resamplings
   expect_data_table(tab, nrows = 2, any.missing = FALSE)
@@ -222,4 +223,24 @@ test_that("benchmark_grid", {
   tasks = tsks(c("iris", "sonar"))
   resamp = rsmp("cv")$instantiate(tasks[[1]])
   expect_error(benchmark_grid(tasks, learner, resamp), "rows")
+})
+
+test_that("filter", {
+  tasks = lapply(c("iris", "sonar"), tsk)
+  learners = lapply(c("classif.featureless", "classif.rpart"), lrn)
+  resamplings = list(rsmp("cv", folds = 3), rsmp("holdout"))
+
+  design = benchmark_grid(tasks, learners, resamplings)
+  bmr = benchmark(design)
+
+  expect_data_table(bmr$data, nrows = 16)
+
+  bmr$filter(task_ids = "sonar")
+  expect_data_table(bmr$data, nrows = 8)
+
+  bmr$filter(learner_ids = "classif.rpart")
+  expect_data_table(bmr$data, nrows = 4)
+
+  bmr$filter(resampling_ids = "cv")
+  expect_data_table(bmr$data, nrows = 3)
 })

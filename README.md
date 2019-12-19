@@ -13,6 +13,7 @@ Status](https://img.shields.io/travis/mlr-org/mlr3/master?label=Linux&logo=travi
 [![cran
 checks](https://cranchecks.info/badges/worst/mlr3)](https://cran.r-project.org/web/checks/check_results_mlr3.html)
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01903/status.svg)](https://doi.org/10.21105/joss.01903)
 [![CRAN Status
 Badge](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.org/package=mlr3)
 [![codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
@@ -51,7 +52,6 @@ remotes::install_github("mlr-org/mlr3")
 
 ``` r
 library(mlr3)
-set.seed(1)
 
 # create learning task
 task_iris = TaskClassif$new(id = "iris", backend = iris, target = "Species")
@@ -106,13 +106,6 @@ prediction$score(measure)
 # automatic resampling
 resampling = rsmp("cv", folds = 3L)
 rr = resample(task_iris, learner, resampling)
-```
-
-    ## INFO  [17:40:07.709] Applying learner 'classif.rpart' on task 'iris' (iter 1/3) 
-    ## INFO  [17:40:07.744] Applying learner 'classif.rpart' on task 'iris' (iter 2/3) 
-    ## INFO  [17:40:07.762] Applying learner 'classif.rpart' on task 'iris' (iter 3/3)
-
-``` r
 rr$score(measure)
 ```
 
@@ -232,3 +225,18 @@ Please consult the [wiki](https://github.com/mlr-org/mlr3/wiki/) for a
 [roxygen guide](https://github.com/mlr-org/mlr3/wiki/Roxygen-Guide) and
 a [pull request
 guide](https://github.com/mlr-org/mlr3/wiki/PR-Guidelines).
+
+## Citing mlr3
+
+If you use mlr3, please cite our [JOSS
+article](https://doi.org/10.21105/joss.01903):
+
+    @Article{mlr3,
+      title = {{mlr3}: A modern object-oriented machine learning framework in {R}},
+      author = {Michel Lang and Martin Binder and Jakob Richter and Patrick Schratz and Florian Pfisterer and Stefan Coors and Quay Au and Giuseppe Casalicchio and Lars Kotthoff and Bernd Bischl},
+      journal = {Journal of Open Source Software},
+      year = {2019},
+      month = {dec},
+      doi = {10.21105/joss.01903},
+      url = {https://joss.theoj.org/papers/10.21105/joss.01903},
+    }

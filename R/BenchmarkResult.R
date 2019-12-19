@@ -51,6 +51,8 @@
 #' * `learners` :: [data.table::data.table()]\cr
 #'   Table of used learners with three columns:
 #'   `"learner_hash"` (`character(1)`), `"learner_id"` (`character(1)`) and `"learner"` ([Learner]).
+#'   Note that it is not feasible to access learnt models via this getter, as the training task would be ambiguous.
+#'   Instead, select a row from the table returned by `$score()`.
 #'
 #' * `resamplings` :: [data.table::data.table()]\cr
 #'   Table of used resamplings with three columns:
@@ -97,6 +99,12 @@
 #'   ([BenchmarkResult] | `NULL`) -> `self`\cr
 #'   Fuses a second [BenchmarkResult] into itself, mutating the [BenchmarkResult] in-place.
 #'   If `bmr` is `NULL`, simply returns `self`.
+#'
+#' * `filter(task_ids = NULL, learner_ids = NULL, resampling_ids = NULL)`\cr
+#'   (`character()`, `character()`, `character()`) -> `self`\cr
+#'   Subsets the benchmark result.
+#'   If `task_ids` is not `NULL`, keeps all tasks with provided task ids while discards all others.
+#'   Same procedure for `learner_ids` and `resampling_ids`.
 #'
 #' * `help()`\cr
 #'   () -> `NULL`\cr
@@ -228,7 +236,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
       }
 
       # move iters to last column
-      setcolorder(res, names(res)[-3L])
+      setcolorder(res, setdiff(names(res), "iters"))
 
       if (assert_flag(params)) {
         res[, "params" := list(map(resample_result, function(x) x$learners[[1L]]$param_set$values))]
@@ -254,6 +262,25 @@ BenchmarkResult = R6Class("BenchmarkResult",
       }
 
       return(res[])
+    },
+
+    filter = function(task_ids = NULL, learner_ids = NULL, resampling_ids = NULL) {
+      if (!is.null(task_ids)) {
+        assert_character(task_ids, any.missing = FALSE)
+        self$data = self$data[ids(task) %in% task_ids]
+      }
+
+      if (!is.null(learner_ids)) {
+        assert_character(learner_ids, any.missing = FALSE)
+        self$data = self$data[ids(learner) %in% learner_ids]
+      }
+
+      if (!is.null(resampling_ids)) {
+        assert_character(resampling_ids, any.missing = FALSE)
+        self$data = self$data[ids(resampling) %in% resampling_ids]
+      }
+
+      invisible(self)
     },
 
     resample_result = function(i = NULL, uhash = NULL) {
@@ -284,7 +311,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     },
 
     learners = function() {
-      unique(self$data[, list(learner_hash = hashes(learner), learner_id = ids(learner), learner = learner)], by = "learner_hash")
+      tab = unique(self$data[, list(learner_hash = hashes(learner), learner_id = ids(learner), learner = learner)], by = "learner_hash")
+      tab[, learner := lapply(learner, function(x) x$clone(deep = TRUE)$reset())][]
     },
 
     resamplings = function() {

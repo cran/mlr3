@@ -50,6 +50,8 @@ Table of used tasks with three columns:
 \item \code{learners} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Table of used learners with three columns:
 \code{"learner_hash"} (\code{character(1)}), \code{"learner_id"} (\code{character(1)}) and \code{"learner"} (\link{Learner}).
+Note that it is not feasible to access learnt models via this getter, as the training task would be ambiguous.
+Instead, select a row from the table returned by \verb{$score()}.
 \item \code{resamplings} :: \code{\link[data.table:data.table]{data.table::data.table()}}\cr
 Table of used resamplings with three columns:
 \code{"resampling_hash"} (\code{character(1)}), \code{"resampling_id"} (\code{character(1)}) and \code{"resampling"} (\link{Resampling}).
@@ -96,6 +98,11 @@ Retrieve the i-th \link{ResampleResult}, by position or by unique hash \code{uha
 (\link{BenchmarkResult} | \code{NULL}) -> \code{self}\cr
 Fuses a second \link{BenchmarkResult} into itself, mutating the \link{BenchmarkResult} in-place.
 If \code{bmr} is \code{NULL}, simply returns \code{self}.
+\item \code{filter(task_ids = NULL, learner_ids = NULL, resampling_ids = NULL)}\cr
+(\code{character()}, \code{character()}, \code{character()}) -> \code{self}\cr
+Subsets the benchmark result.
+If \code{task_ids} is not \code{NULL}, keeps all tasks with provided task ids while discards all others.
+Same procedure for \code{learner_ids} and \code{resampling_ids}.
 \item \code{help()}\cr
 () -> \code{NULL}\cr
 Opens the help page for this object.
