@@ -1,7 +1,5 @@
 #' @title Classification Task
 #'
-#' @usage NULL
-#' @format [R6::R6Class] object inheriting from [Task]/[TaskSupervised].
 #' @include TaskSupervised.R
 #'
 #' @description
@@ -13,47 +11,13 @@
 #' * `"twoclass"`: The task is a binary classification problem.
 #' * `"multiclass"`: The task is a multiclass classification problem.
 #'
-#' Predefined tasks are stored in the [mlr3misc::Dictionary] [mlr_tasks].
+#' Predefined tasks are stored in the [dictionary][mlr3misc::Dictionary] [mlr_tasks].
 #'
-#' @section Construction:
-#' ```
-#' t = TaskClassif$new(id, backend, target, positive = NULL)
-#' ```
-#'
-#' * `id` :: `character(1)`\cr
-#'   Identifier for the task.
-#'
-#' * `backend` :: [DataBackend]\cr
-#'   Either a [DataBackend], or any object which is convertible to a DataBackend with `as_data_backend()`.
-#'   E.g., a `data.frame()` will be converted to a [DataBackendDataTable].
-#'
-#' * `target` :: `character(1)`\cr
-#'   Name of the target column.
-#'
-#' * `positive` :: `character(1)`\cr
-#'   Only for binary classification: Name of the positive class.
-#'   The levels of the target columns are reordered accordingly, so that the first element of `$class_names` is the
-#'   positive class, and the second element is the negative class.
-#'
-#' @section Fields:
-#' All methods from [TaskSupervised], and additionally:
-#'
-#' * `class_names` :: `character()`\cr
-#'   Returns all class labels of the target column.
-#'
-#' * `positive` :: `character(1)`\cr
-#'   Stores the positive class for binary classification tasks, and `NA` for multiclass tasks.
-#'   To switch the positive class, assign a level to this field.
-#'
-#' * `negative` :: `character(1)`\cr
-#'   Stores the negative class for binary classification tasks, and `NA` for multiclass tasks.
-#'
-#' @section Methods:
-#' See [TaskSupervised].
+#' @template param_rows
+#' @template param_id
+#' @template param_backend
 #'
 #' @family Task
-#' @seealso
-#' Example classification tasks: [`iris`][mlr_tasks_iris]
 #' @export
 #' @examples
 #' data("Sonar", package = "mlbench")
@@ -70,8 +34,17 @@
 TaskClassif = R6Class("TaskClassif",
   inherit = TaskSupervised,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
+    #'
+    #' @param target (`character(1)`)\cr
+    #'   Name of the target column.
+    #'
+    #' @param positive (`character(1)`)\cr
+    #'   Only for binary classification: Name of the positive class.
+    #'   The levels of the target columns are reordered accordingly, so that the first element of `$class_names` is the
+    #'   positive class, and the second element is the negative class.
     initialize = function(id, backend, target, positive = NULL) {
-
       assert_string(target)
       super$initialize(id = id, task_type = "classif", backend = backend, target = target)
 
@@ -91,6 +64,10 @@ TaskClassif = R6Class("TaskClassif",
       }
     },
 
+    #' @description
+    #' True response for specified `row_ids`. Format depends on the task type.
+    #' Defaults to all rows with role `"use"`.
+    #' @return `factor()`.
     truth = function(rows = NULL) {
       truth = super$truth(rows)[[1L]]
       as_factor(truth, levels = self$class_names)
@@ -98,10 +75,16 @@ TaskClassif = R6Class("TaskClassif",
   ),
 
   active = list(
-    class_names = function() {
+    #' @field class_names (`character()`)\cr
+    #' Returns all class labels of the target column.
+    class_names = function(rhs) {
+      assert_ro_binding(rhs)
       self$col_info[list(self$target_names), "levels", on = "id", with = FALSE][[1L]][[1L]]
     },
 
+    #' @field positive (`character(1)`)\cr
+    #' Stores the positive class for binary classification tasks, and `NA` for multiclass tasks.
+    #' To switch the positive class, assign a level to this field.
     positive = function(rhs) {
       lvls = self$class_names
       if (missing(rhs)) {
@@ -119,7 +102,10 @@ TaskClassif = R6Class("TaskClassif",
       self$col_info[list(self$target_names), levels := list(list(c(positive, negative))), on = "id"][]
     },
 
-    negative = function() {
+    #' @field negative (`character(1)`)\cr
+    #' Stores the negative class for binary classification tasks, and `NA` for multiclass tasks.
+    negative = function(rhs) {
+      assert_ro_binding(rhs)
       lvls = self$class_names
       if (length(lvls) != 2L) {
         return(NA_character_)

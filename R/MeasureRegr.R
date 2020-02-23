@@ -1,34 +1,35 @@
 #' @title Regression Measure
 #'
-#' @usage NULL
-#' @format [R6::R6Class] object inheriting from [Measure].
 #' @include Measure.R
 #'
 #' @description
-#' This measure specializes [Measure] for regression problems.
-#' Predefined measures can be found in the [mlr3misc::Dictionary] [mlr_measures].
+#' This measure specializes [Measure] for regression problems:
 #'
-#' @section Construction:
-#' ```
-#' m = MeasureRegr$new(id, range, minimize = NA, average = "macro", aggregator = NULL, properties = character(), predict_type = "response",
-#'     predict_sets = "test", task_properties = character(), packages = character())
-#' ```
-#' For a description of the arguments, see [Measure].
-#' The `task_type` is set to `"regr"`.
-#' Possible values for `predict_type` are `"response"` and `"se"`.
+#' * `task_type` is set to `"regr"`.
+#' * Possible values for `predict_type` are `"response"` and `"se"`.
 #'
-#' @section Fields:
-#' See [Measure].
+#' Predefined measures can be found in the [dictionary][mlr3misc::Dictionary] [mlr_measures].
 #'
-#' @section Methods:
-#' See [Measure].
+#' @template param_id
+#' @template param_range
+#' @template param_minimize
+#' @template param_average
+#' @template param_aggregator
+#' @template param_predict_type
+#' @template param_measure_properties
+#' @template param_predict_sets
+#' @template param_task_properties
+#' @template param_packages
+#' @template param_man
 #'
 #' @family Measure
 #' @seealso
-#' Example regression measures: [`regr.mse`][mlr_measures_regr.mse]
+#' Default regression measures: [`regr.mse`][mlr_measures_regr.mse]
 #' @export
 MeasureRegr = R6Class("MeasureRegr", inherit = Measure, cloneable = FALSE,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function(id, range, minimize = NA, average = "macro", aggregator = NULL, properties = character(), predict_type = "response",
       predict_sets = "test", task_properties = character(), packages = character(), man = NA_character_) {
       super$initialize(id, task_type = "regr", range = range, minimize = minimize, average = average, aggregator = aggregator,

@@ -9,7 +9,7 @@
 #'
 #' This dictionary can get populated with additional resampling strategies by add-on packages.
 #'
-#' For a more convenient way to retrieve and construct resampling strategies, see [rsmp()].
+#' For a more convenient way to retrieve and construct resampling strategies, see [rsmp()]/[rsmps()].
 #'
 #' @section Methods:
 #' See [mlr3misc::Dictionary].
@@ -22,9 +22,7 @@
 #' @family Dictionary
 #' @family Resampling
 #' @seealso
-#' Example resamplings: [`cv`][mlr_resamplings_cv], [`bootstrap`][mlr_resamplings_bootstrap]
-#'
-#' Sugar function: [rsmp()]
+#' Sugar functions: [rsmp()], [rsmps()]
 #' @export
 #' @examples
 #' as.data.table(mlr_resamplings)

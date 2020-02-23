@@ -1,4 +1,3 @@
-#' @include DataBackend.R
 DataBackendCbind = R6Class("DataBackendCbind", inherit = DataBackend, cloneable = FALSE,
   public = list(
     initialize = function(b1, b2) {
@@ -18,11 +17,10 @@ DataBackendCbind = R6Class("DataBackendCbind", inherit = DataBackend, cloneable 
 
       super$initialize(list(b1 = b1, b2 = b2), pk, "data.table")
     },
-
     data = function(rows, cols, data_format = self$data_formats[1L]) {
 
       pk = self$primary_key
-      qrows = unique(assert_atomic_vector(rows))
+      qrows = unique(assert_numeric(rows))
       qcols = union(assert_names(cols, type = "unique"), self$primary_key)
       assert_choice(data_format, self$data_formats)
 
@@ -34,7 +32,7 @@ DataBackendCbind = R6Class("DataBackendCbind", inherit = DataBackend, cloneable 
       }
 
       # duplicate rows / reorder columns
-      data[list(rows), intersect(cols, names(data)), on = pk, with = FALSE, nomatch = 0L]
+      data[list(rows), intersect(cols, names(data)), on = pk, with = FALSE, nomatch = NULL]
     },
 
     head = function(n = 6L) {

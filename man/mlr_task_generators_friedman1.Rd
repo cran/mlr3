@@ -4,13 +4,12 @@
 \alias{mlr_task_generators_friedman1}
 \alias{TaskGeneratorFriedman1}
 \title{Friedman1 Regression Task Generator}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskGenerator}.}
 \description{
 A \link{TaskGenerator} for the friedman1 task in \code{\link[mlbench:mlbench.friedman1]{mlbench::mlbench.friedman1()}}.
 }
-\section{Construction}{
-\preformatted{TaskGeneratorFriedman1$new()
-mlr_task_generators$get("friedman1")
+\section{Dictionary}{
+
+This \link{TaskGenerator} can be instantiated via the \link[mlr3misc:Dictionary]{dictionary} \link{mlr_task_generators} or with the associated sugar function \code{\link[=tgen]{tgen()}}:\preformatted{mlr_task_generators$get("friedman1")
 tgen("friedman1")
 }
 }
@@ -22,4 +21,55 @@ tgen("friedman1")$generate(10)$data()
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=TaskGenerator]{TaskGenerators}: \link{mlr_task_generators}
 
 \code{as.data.table(mlr_resamplings)} for a complete table of all (also dynamically created) \link{TaskGenerator} implementations.
+
+Other TaskGenerator: 
+\code{\link{TaskGenerator}},
+\code{\link{mlr_task_generators_2dnormals}},
+\code{\link{mlr_task_generators_smiley}},
+\code{\link{mlr_task_generators_xor}},
+\code{\link{mlr_task_generators}}
+}
+\concept{TaskGenerator}
+\section{Super class}{
+\code{\link[mlr3:TaskGenerator]{mlr3::TaskGenerator}} -> \code{TaskGeneratorFriedman1}
+}
+\section{Methods}{
+\subsection{Public methods}{
+\itemize{
+\item \href{#method-new}{\code{TaskGeneratorFriedman1$new()}}
+\item \href{#method-clone}{\code{TaskGeneratorFriedman1$clone()}}
+}
+}
+\if{html}{
+\out{<details open ><summary>Inherited methods</summary>}
+\itemize{
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="TaskGenerator" data-id="generate">}\href{../../mlr3/html/TaskGenerator.html#method-generate}{\code{mlr3::TaskGenerator$generate()}}\out{</span>}
+}
+\out{</details>}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\subsection{Method \code{new()}}{
+Creates a new instance of this \link[R6:R6Class]{R6} class.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TaskGeneratorFriedman1$new()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TaskGeneratorFriedman1$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
 }

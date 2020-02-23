@@ -55,7 +55,7 @@ test_that("Task rbind", {
   task$rbind(iris[integer(), ])
   expect_equal(task$nrow, 160)
 
-  # 185
+  # #185
   task = tsk("iris")
   task$select("Petal.Length")
   task$rbind(task$data())
@@ -63,6 +63,16 @@ test_that("Task rbind", {
 
   task$rbind(data.table())
   expect_equal(task$nrow, 300L)
+
+  # #437
+  task = tsk("zoo")
+  data = task$data()
+  data$foo = 101:1
+  nt = task$clone()$rbind(data)
+  expect_task(nt)
+  expect_set_equal(nt$row_ids, 1:202)
+  expect_equal(nt$row_names$row_name, c(task$row_names$row_name, rep(NA, 101)))
+  expect_equal(nt$col_info[list("foo"), .N, nomatch = NULL], 0L)
 })
 
 test_that("Task cbind", {
@@ -110,11 +120,12 @@ test_that("cbind/rbind works", {
   expect_set_equal(task$row_ids, c(1:150, 201:210))
   expect_data_table(task$data(), ncols = 6, nrows = 160, any.missing = FALSE)
 
-  # auto generate char ids
+  # auto generated ids
   task = tsk("zoo")
-  newdata = task$data("wasp")
+  newdata = task$data(1)
+  newdata$animal = "boy"
   task$rbind(newdata)
-  expect_equal(sum(grepl("^rbind_[0-9a-z]+_1", task$row_ids)), 1L)
+  expect_set_equal(task$row_ids, 1:102)
 })
 
 test_that("filter works", {
@@ -126,6 +137,10 @@ test_that("filter works", {
   expect_equal(task$nrow, 10L)
 
   expect_equal(task$row_ids, 91:100)
+
+  task$filter(91)
+  expect_equal(task$nrow, 1L)
+  expect_data_table(task$data(), nrows = 1L, any.missing = FALSE)
 })
 
 test_that("select works", {
@@ -194,7 +209,12 @@ test_that("groups/weights work", {
 })
 
 test_that("ordered factors (#95)", {
-  df = data.frame(x = c(1, 2, 3), y = factor(letters[1:3], ordered = TRUE), z = c("M", "R", "R"))
+  df = data.frame(
+    x = c(1, 2, 3),
+    y = factor(letters[1:3], ordered = TRUE),
+    z = factor(c("M", "R", "R")),
+    stringsAsFactors = FALSE
+  )
   b = as_data_backend(df)
   task = TaskClassif$new(id = "id", backend = b, target = "z")
   expect_subset(c("numeric", "ordered", "factor"), task$col_info$type)
@@ -269,4 +289,17 @@ test_that("col roles getters/setters", {
 
   task$col_roles$feature = setdiff(task$col_roles$feature, "Sepal.Length")
   expect_false("Sepal.Length" %in% task$feature_names)
+})
+
+test_that("Task$row_names", {
+  task = tsk("mtcars")
+  tab = task$row_names
+  expect_data_table(tab, any.missing = FALSE, ncols = 2, nrows = task$nrow)
+  expect_integer(tab$row_id, unique = TRUE)
+  expect_character(tab$row_name)
+
+  tab = task$filter(1:10)$row_names
+  expect_data_table(tab, any.missing = FALSE, ncols = 2, nrows = task$nrow)
+  expect_integer(tab$row_id, unique = TRUE)
+  expect_character(tab$row_name)
 })

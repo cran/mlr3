@@ -9,7 +9,7 @@
 #'
 #' This dictionary can get populated with additional measures by add-on packages.
 #'
-#' For a more convenient way to retrieve and construct measures, see [msr()].
+#' For a more convenient way to retrieve and construct measures, see [msr()]/[msrs()].
 #'
 #' @section Methods:
 #' See [mlr3misc::Dictionary].
@@ -23,8 +23,9 @@
 #' @family Dictionary
 #' @family Measure
 #' @seealso
-#' Example measures: [`classif.auc`][mlr_measures_classif.auc], [`time_train`][mlr_measures_time_train]
-#' Sugar function: [msr()]
+#' Sugar functions: [msr()], [msrs()]
+#'
+#' Implementation of most measures: \CRANpkg{mlr3measures}
 #' @export
 #' @examples
 #' as.data.table(mlr_measures)

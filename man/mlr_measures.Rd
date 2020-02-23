@@ -11,7 +11,7 @@ Each measure has an associated help page, see \code{mlr_measures_[id]}.
 
 This dictionary can get populated with additional measures by add-on packages.
 
-For a more convenient way to retrieve and construct measures, see \code{\link[=msr]{msr()}}.
+For a more convenient way to retrieve and construct measures, see \code{\link[=msr]{msr()}}/\code{\link[=msrs]{msrs()}}.
 }
 \section{Methods}{
 
@@ -34,8 +34,9 @@ mlr_measures$get("classif.ce")
 msr("regr.mse")
 }
 \seealso{
-Example measures: \code{\link[=mlr_measures_classif.auc]{classif.auc}}, \code{\link[=mlr_measures_time_train]{time_train}}
-Sugar function: \code{\link[=msr]{msr()}}
+Sugar functions: \code{\link[=msr]{msr()}}, \code{\link[=msrs]{msrs()}}
+
+Implementation of most measures: \CRANpkg{mlr3measures}
 
 Other Dictionary: 
 \code{\link{mlr_learners}},
@@ -46,7 +47,12 @@ Other Dictionary:
 Other Measure: 
 \code{\link{MeasureClassif}},
 \code{\link{MeasureRegr}},
-\code{\link{Measure}}
+\code{\link{Measure}},
+\code{\link{mlr_measures_classif.costs}},
+\code{\link{mlr_measures_debug}},
+\code{\link{mlr_measures_elapsed_time}},
+\code{\link{mlr_measures_oob_error}},
+\code{\link{mlr_measures_selected_features}}
 }
 \concept{Dictionary}
 \concept{Measure}

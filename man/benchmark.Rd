@@ -7,13 +7,13 @@
 benchmark(design, store_models = FALSE)
 }
 \arguments{
-\item{design}{:: \code{\link[=data.frame]{data.frame()}}\cr
+\item{design}{(\code{\link[=data.frame]{data.frame()}})\cr
 Data frame (or \code{\link[data.table:data.table]{data.table::data.table()}}) with three columns: "task", "learner", and "resampling".
 Each row defines a resampling by providing a \link{Task}, \link{Learner} and an instantiated \link{Resampling} strategy.
 The helper function \code{\link[=benchmark_grid]{benchmark_grid()}} can assist in generating an exhaustive design (see examples) and
 instantiate the \link{Resampling}s per \link{Task}.}
 
-\item{store_models}{:: \code{logical(1)}\cr
+\item{store_models}{(\code{logical(1)})\cr
 Keep the fitted model after the test set has been predicted?
 Set to \code{TRUE} if you want to further analyse the models or want to
 extract information like variable importance.}
@@ -35,6 +35,14 @@ This function can be parallelized with the \CRANpkg{future} package.
 One job is one resampling iteration, and all jobs are send to an apply function
 from \CRANpkg{future.apply} in a single batch.
 To select a parallel backend, use \code{\link[future:plan]{future::plan()}}.
+}
+
+\section{Progress Bars}{
+
+This function supports progress bars via the package \CRANpkg{progressr}.
+Simply wrap the function in \code{\link[progressr:with_progress]{progressr::with_progress()}} to enable them.
+We recommend to use package \CRANpkg{progress} as backend; enable with
+\code{progressr::handlers("progress")}.
 }
 
 \section{Logging}{
@@ -67,10 +75,10 @@ print(design)
 set.seed(123)
 bmr = benchmark(design)
 
-## data of all resamplings
+## Data of all resamplings
 head(as.data.table(bmr))
 
-## aggregated performance values
+## Aggregated performance values
 aggr = bmr$aggregate()
 print(aggr)
 
@@ -78,7 +86,7 @@ print(aggr)
 rr = aggr$resample_result[[1]]
 as.data.table(rr$prediction())
 
-# benchmarking with a custom design:
+# Benchmarking with a custom design:
 # - fit classif.featureless on iris with a 3-fold CV
 # - fit classif.rpart on sonar using a holdout
 tasks = list(tsk("iris"), tsk("sonar"))
@@ -91,17 +99,17 @@ design = data.table::data.table(
   resampling = resamplings
 )
 
-## instantiate resamplings
+## Instantiate resamplings
 design$resampling = Map(
   function(task, resampling) resampling$clone()$instantiate(task),
   task = design$task, resampling = design$resampling
 )
 
-## run benchmark
+## Run benchmark
 bmr = benchmark(design)
 print(bmr)
 
-## get the training set of the 2nd iteration of the featureless learner on iris
+## Get the training set of the 2nd iteration of the featureless learner on iris
 rr = bmr$aggregate()[learner_id == "classif.featureless"]$resample_result[[1]]
 rr$resampling$train_set(2)
 }

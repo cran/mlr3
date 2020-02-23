@@ -1,7 +1,5 @@
 #' @title Container for Results of `resample()`
 #'
-#' @usage NULL
-#' @format [R6::R6Class] object.
 #' @include mlr_reflections.R
 #'
 #' @description
@@ -10,80 +8,13 @@
 #' Note that all stored objects are accessed by reference.
 #' Do not modify any object without cloning it first.
 #'
-#' @section Construction:
-#' ```
-#' rr = ResampleResult$new(data, uhash = NULL)
-#' ```
-#'
-#' * `data` :: [data.table::data.table()]\cr
-#'   Table with data for one resampling iteration per row:
-#'   [Task], [Learner], [Resampling], iteration (`integer(1)`), and [Prediction].
-#'
-#' * `uhash` :: `character(1)`\cr
-#'   Unique hash for this `ResampleResult`. If `NULL`, a new unique hash is generated.
-#'   This unique hash is primarily needed to group information in [BenchmarkResult]s.
-#'
-#' @section Fields:
-#' * `data` :: [data.table::data.table()]\cr
-#'   Internal data storage.
-#'   We discourage users to directly work with this field.
-#' * `task` :: [Task]\cr
-#'
-#'   The task [resample()] operated on.
-#'
-#' * `learners` :: list of [Learner]\cr
-#'   List of trained learners, sorted by resampling iteration.
-#'
-#' * `resampling` :: [Resampling]\cr
-#'   Instantiated [Resampling] object which stores the splits into training and test.
-#'
-#' * `warnings` :: [data.table::data.table()]\cr
-#'   Returns a table with all warning messages.
-#'   Column names are `"iteration"` and `"msg"`.
-#'   Note that there can be multiple rows per resampling iteration if multiple warnings have been recorded.
-#'
-#' * `errors` :: [data.table::data.table()]\cr
-#'   Returns a table with all error messages.
-#'   Column names are `"iteration"` and `"msg"`.
-#'   Note that there can be multiple rows per resampling iteration if multiple errors have been recorded.
-#'
-#' * `uhash` :: `character(1)`\cr
-#'   Unique hash for this object.
-#'
-#' @section Methods:
-#' * `predictions(predict_sets = "test")`\cr
-#'   `character()` -> list of [Prediction]\cr
-#'   List of prediction objects, sorted by resampling iteration.
-#'   If multiple sets are given, these are combined to a single one for each iteration.
-#'
-#' * `prediction(predict_sets = "test")`\cr
-#'   `character()` -> [Prediction]\cr
-#'   Combined [Prediction] of all individual resampling iterations, and all provided predict sets.
-#'   Note that performance measures do not operate on this object,
-#'   but instead on each prediction object separately and then combine the performance scores
-#'   with the aggregate function of the respective [Measure].
-#'
-#' * `score(measures = NULL, ids = TRUE)`\cr
-#'   (list of [Measure], `logical(1)`) -> [data.table::data.table()]\cr
-#'   Returns a table with one row for each resampling iteration, including all involved objects:
-#'   [Task], [Learner], [Resampling], iteration number (`integer(1)`), and [Prediction].
-#'   A column with the individual (per resampling iteration) performance is added for each [Measure], named with the id of the respective measure.
-#'   If `ids` is `TRUE`, extra columns with the ids of objects (`"task_id"`, `"learner_id"`, `"resampling_id"`) are binded to the table to allow a more convenient subsetting.
-#'   If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
-#'
-#' * `aggregate(measures = NULL)`\cr
-#'   list of [Measure] -> named `numeric()`\cr
-#'   Calculates and aggregates performance values for all provided measures, according to the respective aggregation function in [Measure].
-#'   If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
-#'
-#' * `help()`\cr
-#'   () -> `NULL`\cr
-#'   Opens the help page for this object.
+#' @template param_measures
 #'
 #' @section S3 Methods:
 #' * `as.data.table(rr)`\cr
 #'   [ResampleResult] -> [data.table::data.table()]\cr
 #'   Returns a copy of the internal data.
+#'
 #' @export
 #' @examples
 #' task = tsk("iris")
@@ -99,8 +30,21 @@
 #' rr$errors
 ResampleResult = R6Class("ResampleResult",
   public = list(
+    #' @field data ([data.table::data.table()])\cr
+    #'   Internal data storage.
+    #'   We discourage users to directly work with this field.
     data = NULL,
 
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
+    #'
+    #' @param data ([data.table::data.table()])\cr
+    #'   Table with data for one resampling iteration per row:
+    #'   [Task], [Learner], [Resampling], iteration (`integer(1)`), and [Prediction].
+    #'
+    #' @param uhash (`character(1)`)\cr
+    #'   Unique hash for this `ResampleResult`. If `NULL`, a new unique hash is generated.
+    #'   This unique hash is primarily needed to group information in [BenchmarkResult]s.
     initialize = function(data, uhash = NULL) {
       assert_data_table(data)
       slots = mlr_reflections$rr_names
@@ -113,14 +57,15 @@ ResampleResult = R6Class("ResampleResult",
       }
     },
 
-    help = function() {
-      open_help("mlr3::BenchmarkResult")
-    },
-
+    #' @description
+    #' Helper for print outputs.
     format = function() {
       sprintf("<%s>", class(self)[1L])
     },
 
+    #' @description
+    #' Printer.
+    #' @param ... (ignored).
     print = function() {
       catf("%s of %i iterations", format(self), nrow(self$data))
       catf(str_indent("* Task:", self$task$id))
@@ -133,16 +78,50 @@ ResampleResult = R6Class("ResampleResult",
       catf(str_indent("* Errors:", sprintf("%i in %i iterations", nrow(errors), uniqueN(errors, by = "iteration"))))
     },
 
+    #' @description
+    #' Opens the corresponding help page referenced by field `$man`.
+    help = function() {
+      open_help("mlr3::BenchmarkResult")
+    },
+
+    #' @description
+    #' Combined [Prediction] of all individual resampling iterations, and all provided predict sets.
+    #' Note that performance measures do not operate on this object,
+    #' but instead on each prediction object separately and then combine the performance scores
+    #' with the aggregate function of the respective [Measure].
+    #'
+    #' @param predict_sets (`character()`)\cr
+    #'   Subset of `{"train", "test"}`.
+    #' @return [Prediction].
     prediction = function(predict_sets = "test") {
       do.call(c, self$predictions(predict_sets = predict_sets))
     },
 
+    #' @description
+    #' List of prediction objects, sorted by resampling iteration.
+    #' If multiple sets are given, these are combined to a single one for each iteration.
+    #'
+    #' @param predict_sets (`character()`)\cr
+    #'   Subset of `{"train", "test"}`.
+    #' @return List of [Prediction] objects, one per element in `predict_sets`.
     predictions = function(predict_sets = "test") {
       map(self$data$prediction, function(li) {
         do.call(c, li[predict_sets])
       })
     },
 
+    #' @description
+    #' Returns a table with one row for each resampling iteration, including all involved objects:
+    #' [Task], [Learner], [Resampling], iteration number (`integer(1)`), and [Prediction].
+    #' Additionally, a column with the individual (per resampling iteration) performance is added for each [Measure] in `measures`,
+    #' named with the id of the respective measure id.
+    #' If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
+    #'
+    #' @param ids (`logical(1)`)\cr
+    #'   If `ids` is `TRUE`, extra columns with the ids of objects (`"task_id"`, `"learner_id"`, `"resampling_id"`) are added to the returned table.
+    #'   These allow to subset more conveniently.
+    #'
+    #' @return [data.table::data.table()].
     score = function(measures = NULL, ids = TRUE) {
       measures = as_measures(measures, task_type = self$task$task_type)
       assert_measures(measures, task = self$task, learner = self$learners[[1L]])
@@ -161,26 +140,60 @@ ResampleResult = R6Class("ResampleResult",
       tab[]
     },
 
+    #' @description
+    #' Calculates and aggregates performance values for all provided measures, according to the respective aggregation function in [Measure].
+    #' If `measures` is `NULL`, `measures` defaults to the return value of [default_measures()].
+    #'
+    #' @return Named `numeric()`.
     aggregate = function(measures = NULL) {
       measures = as_measures(measures, task_type = self$task$task_type)
       assert_measures(measures, task = self$task, learner = self$learners[[1L]])
       set_names(map_dbl(measures, function(m) m$aggregate(self)), ids(measures))
+    },
+
+    #' @description
+    #' Subsets the [ResampleResult], reducing it to only keep the iterations specified in `iters`.
+    #'
+    #' @param iters (`integer()`)\cr
+    #'   Resampling iterations to keep.
+    #'
+    #' @return
+    #' Returns the object itself, but modified **by reference**.
+    #' You need to explicitly `$clone()` the object beforehand if you want to keeps
+    #' the object in its previous state.
+    filter = function(iters) {
+      resampling = self$resampling
+      iters = assert_integerish(iters, min.len = 1L, lower = 1L, upper = resampling$iters, any.missing = FALSE, coerce = TRUE)
+
+      self$data = self$data[list(unique(iters)), on = "iteration"]
+      invisible(self)
     }
   ),
 
   active = list(
-    task = function() {
+    #' @field task ([Task])\cr
+    #' The task [resample()] operated on.
+    task = function(rhs) {
+      assert_ro_binding(rhs)
       self$data$task[[1L]]
     },
 
-    learners = function() {
+    #' @field learners (list of [Learner])\cr
+    #' List of trained learners, sorted by resampling iteration.
+    learners = function(rhs) {
+      assert_ro_binding(rhs)
       self$data$learner
     },
 
-    resampling = function() {
+    #' @field resampling ([Resampling])\cr
+    #' Instantiated [Resampling] object which stores the splits into training and test.
+    resampling = function(rhs) {
+      assert_ro_binding(rhs)
       self$data$resampling[[1L]]
     },
 
+    #' @field uhash (`character(1)`)\cr
+    #' Unique hash for this object.
     uhash = function(rhs) {
       if (missing(rhs)) {
         return(private$.uhash)
@@ -188,12 +201,22 @@ ResampleResult = R6Class("ResampleResult",
       private$.uhash = assert_string(rhs)
     },
 
-    warnings = function() {
+    #' @field warnings ([data.table::data.table()])\cr
+    #' A table with all warning messages.
+    #' Column names are `"iteration"` and `"msg"`.
+    #' Note that there can be multiple rows per resampling iteration if multiple warnings have been recorded.
+    warnings = function(rhs) {
+      assert_ro_binding(rhs)
       extract = function(learner) list(msg = learner$warnings)
       rbindlist(map(self$data$learner, extract), idcol = "iteration", use.names = TRUE)
     },
 
-    errors = function() {
+    #' @field errors ([data.table::data.table()])\cr
+    #' A table with all error messages.
+    #' Column names are `"iteration"` and `"msg"`.
+    #' Note that there can be multiple rows per resampling iteration if multiple errors have been recorded.
+    errors = function(rhs) {
+      assert_ro_binding(rhs)
       extract = function(learner) list(msg = learner$errors)
       rbindlist(map(self$data$learner, extract), idcol = "iteration", use.names = TRUE)
     }

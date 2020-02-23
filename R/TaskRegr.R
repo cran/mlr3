@@ -1,40 +1,19 @@
 #' @title Regression Task
 #'
-#' @usage NULL
-#' @format [R6::R6Class] object inheriting from [Task]/[TaskSupervised].
 #' @include TaskSupervised.R
 #'
 #' @description
 #' This task specializes [Task] and [TaskSupervised] for regression problems.
 #' The target column is assumed to be numeric.
-#' The `task_type` is set to `"classif"`.
+#' The `task_type` is set to `"regr"`.
 #'
-#' Predefined tasks are stored in the [mlr3misc::Dictionary] [mlr_tasks].
+#' Predefined tasks are stored in the [dictionary][mlr3misc::Dictionary] [mlr_tasks].
 #'
-#' @section Construction:
-#' ```
-#' t = TaskRegr$new(id, backend, target)
-#' ```
-#'
-#' * `id` :: `character(1)`\cr
-#'   Identifier for the task.
-#'
-#' * `backend` :: ([DataBackend] | `data.frame()` | ...)\cr
-#'   Either a [DataBackend], or any object which is convertible to a DataBackend with `as_data_backend()`.
-#'   E.g., a `data.frame()` will be converted to a [DataBackendDataTable].
-#'
-#' * `target` :: `character(1)`\cr
-#'   Name of the target column.
-#'
-#' @section Fields:
-#' See [TaskSupervised].
-#'
-#' @section Methods:
-#' See [TaskSupervised].
+#' @template param_rows
+#' @template param_id
+#' @template param_backend
 #'
 #' @family Task
-#' @seealso
-#' Example regression tasks: [`boston_housing`][mlr_tasks_boston_housing]
 #' @export
 #' @examples
 #' task = TaskRegr$new("iris", backend = iris, target = "Sepal.Length")
@@ -47,6 +26,11 @@
 TaskRegr = R6Class("TaskRegr",
   inherit = TaskSupervised,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
+    #'
+    #' @param target (`character(1)`)\cr
+    #'   Name of the target column.
     initialize = function(id, backend, target) {
       assert_string(target)
       super$initialize(id = id, task_type = "regr", backend = backend, target = target)
@@ -57,6 +41,10 @@ TaskRegr = R6Class("TaskRegr",
       }
     },
 
+    #' @description
+    #' True response for specified `row_ids`. Format depends on the task type.
+    #' Defaults to all rows with role "use".
+    #' @return `numeric()`.
     truth = function(rows = NULL) {
       super$truth(rows)[[1L]]
     }

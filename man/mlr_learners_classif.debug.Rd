@@ -4,31 +4,30 @@
 \alias{mlr_learners_classif.debug}
 \alias{LearnerClassifDebug}
 \title{Classification Learner for Debugging}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{LearnerClassif}.}
 \description{
 A simple \link{LearnerClassif} used primarily in the unit tests and for debugging purposes.
 If no hyperparameter is set, it simply constantly predicts a randomly selected label.
 The following hyperparameters trigger the following actions:
 \describe{
-\item{message_train:}{Outputs a message during train if the parameter value exceeds \code{runif(1)}.}
-\item{message_predict:}{Outputs a message during predict if the parameter value exceeds \code{runif(1)}.}
-\item{warning_train:}{Signals a warning during train if the parameter value exceeds \code{runif(1)}.}
-\item{warning_predict:}{Signals a warning during predict if the parameter value exceeds \code{runif(1)}.}
-\item{error_train:}{Raises an exception during train if the parameter value exceeds \code{runif(1)}.}
-\item{error_predict:}{Raises an exception during predict if the parameter value exceeds \code{runif(1)}.}
-\item{segfault_train:}{Provokes a segfault during train if the parameter value exceeds \code{runif(1)}.}
-\item{segfault_predict:}{Provokes a segfault during predict if the parameter value exceeds \code{runif(1)}.}
+\item{message_train:}{Probability to output a message during train.}
+\item{message_predict:}{Probability to output a message during predict.}
+\item{warning_train:}{Probability to signal a warning during train.}
+\item{warning_predict:}{Probability to signal a warning during predict.}
+\item{error_train:}{Probability to raises an exception during train.}
+\item{error_predict:}{Probability to raise an exception during predict.}
+\item{segfault_train:}{Probability to provokes a segfault during train.}
+\item{segfault_predict:}{Probability to provokes a segfault during predict.}
 \item{predict_missing}{Ratio of predictions which will be NA.}
 \item{save_tasks:}{Saves input task in \code{model} slot during training and prediction.}
-\item{x:}{Numeric parameter. Has no effect.}
+\item{x:}{Numeric tuning parameter. Has no effect.}
 }
-Note that segfaults may not work on your operating system.
+Note that segfaults may not be triggered on your operating system.
 Also note that if they work, they will tear down your R session immediately!
 }
-\section{Construction}{
-\preformatted{LearnerClassifDebug$new()
-mlr_learners$get("classif.debug")
-lrn("classif.debug")
+\section{Dictionary}{
+
+This \link{Learner} can be instantiated via the \link[mlr3misc:Dictionary]{dictionary} \link{mlr_learners} or with the associated sugar function \code{\link[=lrn]{lrn()}}:\preformatted{mlr_learners$get("classif.featureless")
+lrn("classif.featureless")
 }
 }
 
@@ -48,4 +47,64 @@ names(learner$model)
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
 
 \code{as.data.table(mlr_learners)} for a complete table of all (also dynamically created) \link{Learner} implementations.
+
+Other Learner: 
+\code{\link{LearnerClassif}},
+\code{\link{LearnerRegr}},
+\code{\link{Learner}},
+\code{\link{mlr_learners_classif.featureless}},
+\code{\link{mlr_learners_classif.rpart}},
+\code{\link{mlr_learners_regr.featureless}},
+\code{\link{mlr_learners_regr.rpart}},
+\code{\link{mlr_learners}}
+}
+\concept{Learner}
+\section{Super classes}{
+\code{\link[mlr3:Learner]{mlr3::Learner}} -> \code{\link[mlr3:LearnerClassif]{mlr3::LearnerClassif}} -> \code{LearnerClassifDebug}
+}
+\section{Methods}{
+\subsection{Public methods}{
+\itemize{
+\item \href{#method-new}{\code{LearnerClassifDebug$new()}}
+\item \href{#method-clone}{\code{LearnerClassifDebug$clone()}}
+}
+}
+\if{html}{
+\out{<details ><summary>Inherited methods</summary>}
+\itemize{
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="format">}\href{../../mlr3/html/Learner.html#method-format}{\code{mlr3::Learner$format()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="help">}\href{../../mlr3/html/Learner.html#method-help}{\code{mlr3::Learner$help()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="predict">}\href{../../mlr3/html/Learner.html#method-predict}{\code{mlr3::Learner$predict()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="predict_newdata">}\href{../../mlr3/html/Learner.html#method-predict_newdata}{\code{mlr3::Learner$predict_newdata()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="print">}\href{../../mlr3/html/Learner.html#method-print}{\code{mlr3::Learner$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="reset">}\href{../../mlr3/html/Learner.html#method-reset}{\code{mlr3::Learner$reset()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="train">}\href{../../mlr3/html/Learner.html#method-train}{\code{mlr3::Learner$train()}}\out{</span>}
+}
+\out{</details>}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\subsection{Method \code{new()}}{
+Creates a new instance of this \link[R6:R6Class]{R6} class.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{LearnerClassifDebug$new()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-clone"></a>}}
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{LearnerClassifDebug$clone(deep = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
 }

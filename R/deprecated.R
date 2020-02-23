@@ -1,59 +1,59 @@
-#' @export
-#' @rdname mlr_coercions
-as_task.character = function(x, clone = FALSE) {
-  .Deprecated("tsk", old = "Automatic object creation from strings in `mlr3`")
-  assert_string(x)
-  mlr_tasks$get(x)
+# old, deprecated, will be removed soon
+task_set_row_role = function(self, private, rows, new_roles, exclusive = TRUE) {
+  rows = assert_row_ids(rows)
+  assert_subset(rows, self$backend$rownames)
+  assert_subset(new_roles, mlr_reflections$task_row_roles)
+  assert_flag(exclusive)
+
+  for (role in new_roles) {
+    private$.row_roles[[role]] = union(private$.row_roles[[role]], rows)
+  }
+
+  if (exclusive) {
+    for (role in setdiff(names(self$row_roles), new_roles)) {
+      private$.row_roles[[role]] = setdiff(private$.row_roles[[role]], rows)
+    }
+  }
 }
 
-#' @export
-#' @rdname mlr_coercions
-as_tasks.character = function(x, clone = FALSE) {
-  .Deprecated("tsk", old = "Automatic object creation from strings in `mlr3`")
-  mlr_tasks$mget(x)
-}
+# old, deprecated, will be removed soon
+task_set_col_role = function(self, private, cols, new_roles, exclusive = TRUE) {
+  assert_character(cols, any.missing = FALSE)
+  assert_subset(cols, self$col_info$id)
+  assert_subset(new_roles, mlr_reflections$task_col_roles[[self$task_type]])
+  assert_flag(exclusive)
 
-#' @rdname mlr_coercions
-#' @export
-as_learner.character = function(x, clone = FALSE)  {
-  .Deprecated("lrn", old = "Automatic object creation from strings in `mlr3`")
-  assert_string(x)
-  mlr_learners$get(x)
-}
+  col_roles = self$col_roles
 
-#' @export
-#' @rdname mlr_coercions
-as_learners.character = function(x, clone = FALSE)  {
-  .Deprecated("lrn", old = "Automatic object creation from strings in `mlr3`")
-  mlr_learners$mget(x)
-}
+  for (role in new_roles) {
+    col_roles[[role]] = union(col_roles[[role]], cols)
+  }
 
-#' @export
-#' @rdname mlr_coercions
-as_resampling.character = function(x, clone = FALSE) {
-  .Deprecated("rsmp", old = "Automatic object creation from strings in `mlr3`")
-  assert_string(x)
-  mlr_resamplings$get(x)
-}
+  if (exclusive) {
+    for (role in setdiff(names(col_roles), new_roles)) {
+      col_roles[[role]] = setdiff(col_roles[[role]], cols)
+    }
+  }
 
-#' @export
-#' @rdname mlr_coercions
-as_resamplings.character = function(x, clone = FALSE) {
-  .Deprecated("rsmp", old = "Automatic object creation from strings in `mlr3`")
-  mlr_resamplings$mget(x)
-}
+  if (inherits(self, "TaskSupervised") && length(col_roles[["target"]]) == 0L) {
+    stopf("Supervised tasks need a target column")
+  }
 
-#' @export
-#' @rdname mlr_coercions
-as_measure.character = function(x, task_type = NULL, clone = FALSE) {
-  .Deprecated("msr", old = "Automatic object creation from strings in `mlr3`")
-  assert_string(x)
-  mlr_measures$get(x)
-}
+  for (role in c("group", "weight")) {
+    if (length(col_roles[[role]]) > 1L)
+      stopf("Multiple columns with role '%s' not supported", role)
+  }
 
-#' @export
-#' @rdname mlr_coercions
-as_measures.character = function(x, task_type = NULL, clone = FALSE) {
-  .Deprecated("msr", old = "Automatic object creation from strings in `mlr3`")
-  mlr_measures$mget(x)
+  role = c("stratum", "group", "weight")
+  property = c("strata", "groups", "weights")
+  for (i in seq_along(role)) {
+    n = length(col_roles[[role[i]]])
+    if (n == 0L) {
+      private$.properties = setdiff(private$.properties, property[i])
+    } else if (n == 1L) {
+      private$.properties = union(private$.properties, property[i])
+    }
+  }
+
+  self$col_roles = col_roles
 }

@@ -1,16 +1,7 @@
 #' @title Repeated Cross Validation Resampling
 #'
-#' @usage NULL
 #' @name mlr_resamplings_repeated_cv
-#' @format [R6::R6Class()] inheriting from [Resampling].
 #' @include Resampling.R
-#'
-#' @section Construction:
-#' ```
-#' ResamplingRepeatedCV$new()
-#' mlr_resamplings$get("repeated_cv")
-#' rsmp("repeated_cv")
-#' ```
 #'
 #' @description
 #' Splits data `repeats` (default: 10) times using a `folds`-fold (default: 10) cross-validation.
@@ -19,26 +10,19 @@
 #' cross-validations, i.e., the first `folds` iterations belong to
 #' a single cross-validation.
 #'
-#' @section Fields:
-#' See [Resampling].
+#' Iteration numbers can be translated into folds or repeats with provided methods.
 #'
-#' @section Methods:
-#' See [Resampling].
-#' Additionally, the class provides two helper function to translate iteration numbers to folds / repeats:
-#'
-#' * `folds(iters)`\cr
-#'   `integer()` -> `integer()`\cr
-#'   Translates iteration numbers to fold number.
-#'
-#' * `repeats(iters)`\cr
-#'   `integer()` -> `integer()`\cr
-#'   Translates iteration numbers to repetition number.
+#' @templateVar id holdout
+#' @template section_dictionary_resampling
 #'
 #' @section Parameters:
-#' * `repeats` :: `integer(1)`\cr
+#' * `repeats` (`integer(1)`)\cr
 #'   Number of repetitions.
-#' * `folds` :: `integer(1)`\cr
+#' * `folds` (`integer(1)`)\cr
 #'   Number of folds.
+#'
+#' @references
+#' \cite{mlr3}{bischl_2012}
 #'
 #' @template seealso_resampling
 #' @export
@@ -63,6 +47,8 @@
 #' rrcv$instance # table
 ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
       ps = ParamSet$new(list(
         ParamInt$new("repeats", lower = 1),
@@ -72,11 +58,21 @@ ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
       super$initialize(id = "repeated_cv", param_set = ps, man = "mlr3::mlr_resamplings_repeated_cv")
     },
 
+    #' @description
+    #' Translates iteration numbers to fold numbers.
+    #' @param iters (`integer()`)\cr
+    #'   Iteration number.
+    #' @return `integer()` of fold numbers.
     folds = function(iters) {
       iters = assert_integerish(iters, any.missing = FALSE, coerce = TRUE)
       ((iters - 1L) %% as.integer(self$param_set$values$repeats)) + 1L
     },
 
+    #' @description
+    #' Translates iteration numbers to repetition numbers.
+    #' @param iters (`integer()`)\cr
+    #'   Iteration number.
+    #' @return `integer()` of repetition numbers.
     repeats = function(iters) {
       iters = assert_integerish(iters, any.missing = FALSE, coerce = TRUE)
       ((iters - 1L) %/% as.integer(self$param_set$values$folds)) + 1L
@@ -84,7 +80,9 @@ ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
   ),
 
   active = list(
-    iters = function() {
+    #' @template field_iters
+    iters = function(rhs) {
+      assert_ro_binding(rhs)
       pv = self$param_set$values
       as.integer(pv$repeats) * as.integer(pv$folds)
     }
@@ -106,7 +104,7 @@ ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
       rep = i %/% folds + 1L
       fold = i %% folds + 1L
       ii = data.table(rep = rep, fold = seq_len(folds)[-fold])
-      self$instance[ii, "row_id", on = names(ii), nomatch = 0L][[1L]]
+      self$instance[ii, "row_id", on = names(ii), nomatch = NULL][[1L]]
     },
 
     .get_test = function(i) {
@@ -115,7 +113,7 @@ ResamplingRepeatedCV = R6Class("ResamplingRepeatedCV", inherit = Resampling,
       rep = i %/% folds + 1L
       fold = i %% folds + 1L
       ii = data.table(rep = rep, fold = fold)
-      self$instance[ii, "row_id", on = names(ii), nomatch = 0L][[1L]]
+      self$instance[ii, "row_id", on = names(ii), nomatch = NULL][[1L]]
     },
 
     .combine = function(instances) {

@@ -11,7 +11,7 @@ Each task generator has an associated help page, see \code{mlr_task_generators_[
 
 This dictionary can get populated with additional task generators by add-on packages.
 
-For a more convenient way to retrieve and construct task generators, see \code{\link[=tgen]{tgen()}}.
+For a more convenient way to retrieve and construct task generators, see \code{\link[=tgen]{tgen()}}/\code{\link[=tgens]{tgens()}}.
 }
 \section{Methods}{
 
@@ -32,9 +32,7 @@ mlr_task_generators$get("smiley")
 tgen("2dnormals")
 }
 \seealso{
-Example generators: \code{\link[=mlr_task_generators_xor]{xor}}
-
-Sugar function: \code{\link[=tgen]{tgen()}}
+Sugar functions: \code{\link[=tgen]{tgen()}}, \code{\link[=tgens]{tgens()}}
 
 Other Dictionary: 
 \code{\link{mlr_learners}},
@@ -43,7 +41,11 @@ Other Dictionary:
 \code{\link{mlr_tasks}}
 
 Other TaskGenerator: 
-\code{\link{TaskGenerator}}
+\code{\link{TaskGenerator}},
+\code{\link{mlr_task_generators_2dnormals}},
+\code{\link{mlr_task_generators_friedman1}},
+\code{\link{mlr_task_generators_smiley}},
+\code{\link{mlr_task_generators_xor}}
 }
 \concept{Dictionary}
 \concept{TaskGenerator}

@@ -9,9 +9,10 @@
 A simple \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} storing objects of class \link{Task}.
 Each task has an associated help page, see \code{mlr_tasks_[id]}.
 
-This dictionary can get populated with additional tasks by add-on packages.
+This dictionary can get populated with additional tasks by add-on packages,
+e.g. \CRANpkg{mlr3data}.
 
-For a more convenient way to retrieve and construct tasks, see \code{\link[=tsk]{tsk()}}.
+For a more convenient way to retrieve and construct tasks, see \code{\link[=tsk]{tsk()}}/\code{\link[=tsks]{tsks()}}.
 }
 \section{Methods}{
 
@@ -51,9 +52,9 @@ mlr_tasks$get("iris.binary")
 mlr_tasks$remove("iris.binary")
 }
 \seealso{
-Example tasks: \code{\link[=mlr_tasks_iris]{iris}} (multi-class classification), \code{\link[=mlr_tasks_spam]{spam}} (binary classification), \code{\link[=mlr_tasks_boston_housing]{boston_housing}} (regression)
+Sugar functions: \code{\link[=tsk]{tsk()}}, \code{\link[=tsks]{tsks()}}
 
-Sugar function: \code{\link[=tsk]{tsk()}}
+Extension Packages: \CRANpkg{mlr3data}
 
 Other Dictionary: 
 \code{\link{mlr_learners}},
@@ -65,7 +66,16 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
-\code{\link{Task}}
+\code{\link{Task}},
+\code{\link{mlr_tasks_boston_housing}},
+\code{\link{mlr_tasks_german_credit}},
+\code{\link{mlr_tasks_iris}},
+\code{\link{mlr_tasks_mtcars}},
+\code{\link{mlr_tasks_pima}},
+\code{\link{mlr_tasks_sonar}},
+\code{\link{mlr_tasks_spam}},
+\code{\link{mlr_tasks_wine}},
+\code{\link{mlr_tasks_zoo}}
 }
 \concept{Dictionary}
 \concept{Task}

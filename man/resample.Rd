@@ -7,13 +7,13 @@
 resample(task, learner, resampling, store_models = FALSE)
 }
 \arguments{
-\item{task}{:: \link{Task}.}
+\item{task}{(\link{Task}).}
 
-\item{learner}{:: \link{Learner}.}
+\item{learner}{(\link{Learner}).}
 
-\item{resampling}{:: \link{Resampling}.}
+\item{resampling}{(\link{Resampling}).}
 
-\item{store_models}{:: \code{logical(1)}\cr
+\item{store_models}{(\code{logical(1)})\cr
 Keep the fitted model after the test set has been predicted?
 Set to \code{TRUE} if you want to further analyse the models or want to
 extract information like variable importance.}
@@ -22,10 +22,13 @@ extract information like variable importance.}
 \link{ResampleResult}.
 }
 \description{
-Runs a resampling (possibly in parallel).
+Runs a resampling (possibly in parallel):
+Repeatedly apply \link{Learner} \code{learner} on a training set of \link{Task} \code{task} to train a model,
+then use the trained model to predict observations of a test set.
+Training and test sets are defined by the \link{Resampling} \code{resampling}.
 }
 \note{
-The fitted models are discarded after the predictions have been scored in order to reduce memory consumption.
+The fitted models are discarded after the predictions have been computed in order to reduce memory consumption.
 If you need access to the models for later analysis, set \code{store_models} to \code{TRUE}.
 }
 \section{Parallelization}{
@@ -35,6 +38,14 @@ This function can be parallelized with the \CRANpkg{future} package.
 One job is one resampling iteration, and all jobs are send to an apply function
 from \CRANpkg{future.apply} in a single batch.
 To select a parallel backend, use \code{\link[future:plan]{future::plan()}}.
+}
+
+\section{Progress Bars}{
+
+This function supports progress bars via the package \CRANpkg{progressr}.
+Simply wrap the function in \code{\link[progressr:with_progress]{progressr::with_progress()}} to enable them.
+We recommend to use package \CRANpkg{progress} as backend; enable with
+\code{progressr::handlers("progress")}.
 }
 
 \section{Logging}{
@@ -60,14 +71,14 @@ task = tsk("iris")
 learner = lrn("classif.rpart")
 resampling = rsmp("cv")
 
-# explicitly instantiate the resampling for this task for reproduciblity
+# Explicitly instantiate the resampling for this task for reproduciblity
 set.seed(123)
 resampling$instantiate(task)
 
 rr = resample(task, learner, resampling)
 print(rr)
 
-# retrieve performance
+# Retrieve performance
 rr$score(msr("classif.ce"))
 rr$aggregate(msr("classif.ce"))
 

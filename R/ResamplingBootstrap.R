@@ -1,33 +1,24 @@
 #' @title Bootstrap Resampling
 #'
-#' @usage NULL
 #' @name mlr_resamplings_bootstrap
-#' @format [R6::R6Class] inheriting from [Resampling].
 #' @include Resampling.R
-#'
-#' @section Construction:
-#' ```
-#' ResamplingBootstrap$new()
-#' mlr_resamplings$get("bootstrap")
-#' rsmp("bootstrap")
-#' ```
 #'
 #' @description
 #' Splits data into bootstrap samples (sampling with replacement).
 #' Hyperparameters are the number of bootstrap iterations (`repeats`, default: 30)
 #' and the ratio of observations to draw per iteration (`ratio`, default: 1) for the training set.
 #'
-#' @section Fields:
-#' See [Resampling].
-#'
-#' @section Methods:
-#' See [Resampling].
+#' @templateVar id bootstrap
+#' @template section_dictionary_resampling
 #'
 #' @section Parameters:
-#' * `repeats` :: `integer(1)`\cr
+#' * `repeats` (`integer(1)`)\cr
 #'   Number of repetitions.
-#' * `ratio` :: `numeric(1)`\cr
+#' * `ratio` (`numeric(1)`)\cr
 #'   Ratio of observations to put into the training set.
+#'
+#' @references
+#' \cite{mlr3}{bischl_2012}
 #'
 #' @template seealso_resampling
 #' @export
@@ -49,6 +40,8 @@
 #' rb$instance$M # Matrix of counts
 ResamplingBootstrap = R6Class("ResamplingBootstrap", inherit = Resampling,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
       ps = ParamSet$new(list(
         ParamInt$new("repeats", lower = 1L, tags = "required"),
@@ -61,7 +54,9 @@ ResamplingBootstrap = R6Class("ResamplingBootstrap", inherit = Resampling,
   ),
 
   active = list(
-    iters = function() {
+    #' @template field_iters
+    iters = function(rhs) {
+      assert_ro_binding(rhs)
       as.integer(self$param_set$values$repeats)
     }
   ),

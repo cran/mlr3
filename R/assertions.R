@@ -2,11 +2,11 @@
 #'
 #' @description
 #' Functions intended to be used in packages extending \pkg{mlr3}.
-#' Most functions assert on the respective class, and optionally additional properties.
+#' Most assertion functions ensure the right class attrbiture, and optionally additional properties.
 #' Additionally, the following compound assertions are implemented:
 #'
-#' * assert_learnable(task, learner)\cr
-#'   ([Task], [Learner]) -> NULL\cr
+#' * `assert_learnable(task, learner)`\cr
+#'   ([Task], [Learner]) -> `NULL`\cr
 #'   Checks if the learner is applicable to the task.
 #'   This includes type checks on the type, the feature types, and properties.
 #'
@@ -19,17 +19,16 @@ NULL
 
 
 #' @export
-#' @param b :: [DataBackend].
+#' @param b ([DataBackend]).
 #' @rdname mlr_assertions
 assert_backend = function(b, .var.name = vname(b)) {
   assert_class(b, "DataBackend", .var.name = .var.name)
 }
 
 
-#' @param task :: [Task].
-#' @param feature_types :: `character()`\cr
-#'   Set of allowed feature types.
-#' @param task_properties :: `character()`\cr
+#' @param task ([Task]).
+#' @template param_feature_types
+#' @param task_properties (`character()`)\cr
 #'   Set of required task properties.
 #' @rdname mlr_assertions
 #' @export
@@ -59,7 +58,7 @@ assert_task = function(task, task_type = NULL, feature_types = NULL, task_proper
 
 
 #' @export
-#' @param tasks :: list of [Task].
+#' @param tasks (list of [Task]).
 #' @rdname mlr_assertions
 assert_tasks = function(tasks, task_type = NULL, feature_types = NULL, task_properties = NULL, .var.name = vname(tasks)) {
   invisible(lapply(tasks, assert_task, task_type = task_type, feature_types = feature_types, task_properties = task_properties, .var.name = .var.name))
@@ -67,7 +66,7 @@ assert_tasks = function(tasks, task_type = NULL, feature_types = NULL, task_prop
 
 
 #' @export
-#' @param learner :: [Learner].
+#' @param learner ([Learner]).
 #' @rdname mlr_assertions
 assert_learner = function(learner, task = NULL, properties = character(), .var.name = vname(learner)) {
   assert_class(learner, "Learner", .var.name = .var.name)
@@ -88,7 +87,7 @@ assert_learner = function(learner, task = NULL, properties = character(), .var.n
 
 
 #' @export
-#' @param learners :: list of [Learner].
+#' @param learners (list of [Learner]).
 #' @rdname mlr_assertions
 assert_learners = function(learners, task = NULL, properties = character(), .var.name = vname(learners)) {
   invisible(lapply(learners, assert_learner, task = task, properties = properties, .var.name = .var.name))
@@ -109,7 +108,7 @@ assert_learnable = function(task, learner) {
 }
 
 #' @export
-#' @param measure :: [Measure].
+#' @param measure ([Measure]).
 #' @rdname mlr_assertions
 assert_measure = function(measure, task = NULL, learner = NULL, .var.name = vname(measure)) {
   assert_class(measure, "Measure", .var.name = .var.name)
@@ -141,7 +140,8 @@ assert_measure = function(measure, task = NULL, learner = NULL, .var.name = vnam
 
     miss = setdiff(measure$predict_sets, learner$predict_sets)
     if (length(miss)) {
-      stopf("Measure '%s' needs predict set '%s'", measure$id, str_collapse(miss))
+      stopf("Measure '%s' needs predict set '%s', but learner '%s' only predicted on sets '%s'",
+        measure$id, str_collapse(miss), learner$id, str_collapse(learner$predict_sets))
     }
   }
 
@@ -150,7 +150,7 @@ assert_measure = function(measure, task = NULL, learner = NULL, .var.name = vnam
 
 
 #' @export
-#' @param measures :: list of [Measure].
+#' @param measures (list of [Measure]).
 #' @rdname mlr_assertions
 assert_measures = function(measures, task = NULL, learner = NULL, .var.name = vname(measures)) {
   lapply(measures, assert_measure, task = task, learner = learner, .var.name = .var.name)
@@ -160,7 +160,7 @@ assert_measures = function(measures, task = NULL, learner = NULL, .var.name = vn
 }
 
 #' @export
-#' @param resampling :: [Resampling].
+#' @param resampling ([Resampling]).
 #' @rdname mlr_assertions
 assert_resampling = function(resampling, instantiated = NULL, .var.name = vname(resampling)) {
   assert_class(resampling, "Resampling", .var.name = .var.name)
@@ -179,7 +179,7 @@ assert_resampling = function(resampling, instantiated = NULL, .var.name = vname(
 
 
 #' @export
-#' @param resamplings :: list of [Resampling].
+#' @param resamplings (list of [Resampling]).
 #' @rdname mlr_assertions
 assert_resamplings = function(resamplings, instantiated = NULL, .var.name = vname(resamplings)) {
   invisible(lapply(resamplings, assert_resampling, instantiated = instantiated, .var.name = .var.name))
@@ -187,7 +187,7 @@ assert_resamplings = function(resamplings, instantiated = NULL, .var.name = vnam
 
 
 #' @export
-#' @param prediction :: [Prediction].
+#' @param prediction ([Prediction]).
 #' @rdname mlr_assertions
 assert_prediction = function(prediction, .var.name = vname(prediction)) {
   assert_class(prediction, "Prediction", .var.name = .var.name)
@@ -195,7 +195,7 @@ assert_prediction = function(prediction, .var.name = vname(prediction)) {
 
 
 #' @export
-#' @param resample_result :: [ResampleResult].
+#' @param resample_result ([ResampleResult]).
 #' @rdname mlr_assertions
 assert_resample_result = function(rr, .var.name = vname(rr)) {
   assert_class(rr, "ResampleResult", .var.name = .var.name)
@@ -203,7 +203,7 @@ assert_resample_result = function(rr, .var.name = vname(rr)) {
 
 
 #' @export
-#' @param bmr :: [BenchmarkResult].
+#' @param bmr ([BenchmarkResult]).
 #' @rdname mlr_assertions
 assert_benchmark_result = function(bmr, .var.name = vname(bmr)) {
   assert_class(bmr, "BenchmarkResult", .var.name = .var.name)
@@ -227,18 +227,18 @@ assert_range = function(range, .var.name = vname(range)) {
 
 
 #' @export
-#' @param row_ids :: `vector()`.
+#' @param row_ids (`numeric()`).
 #' @rdname mlr_assertions
-assert_row_ids = function(row_ids, type = NULL, .var.name = vname(row_ids)) {
-  # TODO: make this a proper check function
-  # TODO: coercion in checkmate does not work here
-  qassert(row_ids, c("X", "S[1,]"), .var.name = .var.name)
-  if (is.double(row_ids)) {
-    row_ids = as.integer(row_ids)
+assert_row_ids = function(row_ids, null.ok = FALSE, .var.name = vname(row_ids)) {
+  # TODO: remove workaround for mlr3filters after 0.1.7 has been released
+  if (is.character(row_ids) && length(row_ids) == 0L) {
+    return(integer())
   }
-  if (!is.null(type) && typeof(row_ids) != type) {
-    stopf("Assertion on '%s' failed: Must be of type '%s', not '%s'", .var.name, type, typeof(row_ids))
-  }
+  assert_integerish(row_ids, coerce = TRUE, null.ok = null.ok)
+}
 
-  invisible(row_ids)
+assert_ro_binding = function(rhs) {
+  if (!missing(rhs)) {
+    stopf("Field/Binding is read-only")
+  }
 }

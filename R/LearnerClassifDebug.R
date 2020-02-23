@@ -1,36 +1,30 @@
 #' @title Classification Learner for Debugging
 #'
-#' @usage NULL
 #' @name mlr_learners_classif.debug
-#' @format [R6::R6Class] inheriting from [LearnerClassif].
 #' @include LearnerClassif.R
-#'
-#' @section Construction:
-#' ```
-#' LearnerClassifDebug$new()
-#' mlr_learners$get("classif.debug")
-#' lrn("classif.debug")
-#' ```
 #'
 #' @description
 #' A simple [LearnerClassif] used primarily in the unit tests and for debugging purposes.
 #' If no hyperparameter is set, it simply constantly predicts a randomly selected label.
 #' The following hyperparameters trigger the following actions:
 #' \describe{
-#'    \item{message_train:}{Outputs a message during train if the parameter value exceeds `runif(1)`.}
-#'    \item{message_predict:}{Outputs a message during predict if the parameter value exceeds `runif(1)`.}
-#'    \item{warning_train:}{Signals a warning during train if the parameter value exceeds `runif(1)`.}
-#'    \item{warning_predict:}{Signals a warning during predict if the parameter value exceeds `runif(1)`.}
-#'    \item{error_train:}{Raises an exception during train if the parameter value exceeds `runif(1)`.}
-#'    \item{error_predict:}{Raises an exception during predict if the parameter value exceeds `runif(1)`.}
-#'    \item{segfault_train:}{Provokes a segfault during train if the parameter value exceeds `runif(1)`.}
-#'    \item{segfault_predict:}{Provokes a segfault during predict if the parameter value exceeds `runif(1)`.}
+#'    \item{message_train:}{Probability to output a message during train.}
+#'    \item{message_predict:}{Probability to output a message during predict.}
+#'    \item{warning_train:}{Probability to signal a warning during train.}
+#'    \item{warning_predict:}{Probability to signal a warning during predict.}
+#'    \item{error_train:}{Probability to raises an exception during train.}
+#'    \item{error_predict:}{Probability to raise an exception during predict.}
+#'    \item{segfault_train:}{Probability to provokes a segfault during train.}
+#'    \item{segfault_predict:}{Probability to provokes a segfault during predict.}
 #'    \item{predict_missing}{Ratio of predictions which will be NA.}
 #'    \item{save_tasks:}{Saves input task in `model` slot during training and prediction.}
-#'    \item{x:}{Numeric parameter. Has no effect.}
+#'    \item{x:}{Numeric tuning parameter. Has no effect.}
 #' }
-#' Note that segfaults may not work on your operating system.
+#' Note that segfaults may not be triggered on your operating system.
 #' Also note that if they work, they will tear down your R session immediately!
+#'
+#' @templateVar id classif.featureless
+#' @template section_dictionary_learner
 #'
 #' @template seealso_learner
 #' @export
@@ -47,6 +41,8 @@
 #' names(learner$model)
 LearnerClassifDebug = R6Class("LearnerClassifDebug", inherit = LearnerClassif,
   public = list(
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
       super$initialize(
         id = "classif.debug",
@@ -70,25 +66,26 @@ LearnerClassifDebug = R6Class("LearnerClassifDebug", inherit = LearnerClassif,
         properties = c("twoclass", "multiclass", "missings"),
         man = "mlr3::mlr_learners_classif.debug"
       )
-    },
+    }
+  ),
 
-    train_internal = function(task) {
-
+  private = list(
+    .train = function(task) {
       pv = self$param_set$get_values(tags = "train")
-      lookup = function(name) {
+      roll = function(name) {
         name %in% names(pv) && pv[[name]] > runif(1L)
       }
 
-      if (lookup("message_train")) {
+      if (roll("message_train")) {
         message("Message from classif.debug->train()")
       }
-      if (lookup("warning_train")) {
+      if (roll("warning_train")) {
         warning("Warning from classif.debug->train()")
       }
-      if (lookup("error_train")) {
+      if (roll("error_train")) {
         stop("Error from classif.debug->train()")
       }
-      if (lookup("segfault_train")) {
+      if (roll("segfault_train")) {
         get("attach")(structure(list(), class = "UserDefinedDatabase"))
       }
 
@@ -99,8 +96,7 @@ LearnerClassifDebug = R6Class("LearnerClassifDebug", inherit = LearnerClassif,
       set_class(model, "classif.debug_model")
     },
 
-    predict_internal = function(task) {
-
+    .predict = function(task) {
       n = task$nrow
       pv = self$param_set$get_values(tags = "predict")
       lookup = function(name) {

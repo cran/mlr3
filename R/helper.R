@@ -1,7 +1,3 @@
-task_types = function(x) {
-  unique(map_chr(unname(x), "task_type"))
-}
-
 hashes = function(x) {
   map_chr(unname(x), "hash")
 }
@@ -44,13 +40,17 @@ use_future = function() {
   return(TRUE)
 }
 
-open_help = function(man) {
-  if (!test_string(man)) {
-    message("No help available")
-    return(invisible())
+get_progressor = function(n, label = NA_character_) {
+  if (!isNamespaceLoaded("progressr")) {
+    return(NULL)
   }
 
-  parts = strsplit(man, split = "::", fixed = TRUE)[[1L]]
-  # pkgload overloads help
-  match.fun("help")(parts[2L], parts[1L])
+  progressr::progressor(steps = n, label = label)
+}
+
+
+replace_with = function(x, needle, replacement) {
+  ii = (x == needle)
+  x = rep(x, 1L + (length(replacement) - 1L) * ii)
+  replace(x, ii, replacement)
 }
