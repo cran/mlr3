@@ -68,7 +68,9 @@ Stores the negative class for binary classification tasks, and \code{NA} for mul
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{TaskClassif$new()}}
+\item \href{#method-data}{\code{TaskClassif$data()}}
 \item \href{#method-truth}{\code{TaskClassif$truth()}}
+\item \href{#method-droplevels}{\code{TaskClassif$droplevels()}}
 \item \href{#method-clone}{\code{TaskClassif$clone()}}
 }
 }
@@ -76,8 +78,6 @@ Stores the negative class for binary classification tasks, and \code{NA} for mul
 \out{<details ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="cbind">}\href{../../mlr3/html/Task.html#method-cbind}{\code{mlr3::Task$cbind()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="data">}\href{../../mlr3/html/Task.html#method-data}{\code{mlr3::Task$data()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="droplevels">}\href{../../mlr3/html/Task.html#method-droplevels}{\code{mlr3::Task$droplevels()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="filter">}\href{../../mlr3/html/Task.html#method-filter}{\code{mlr3::Task$filter()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="format">}\href{../../mlr3/html/Task.html#method-format}{\code{mlr3::Task$format()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Task" data-id="formula">}\href{../../mlr3/html/Task.html#method-formula}{\code{mlr3::Task$formula()}}\out{</span>}
@@ -124,6 +124,33 @@ positive class, and the second element is the negative class.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-data"></a>}}
+\subsection{Method \code{data()}}{
+Calls \verb{$data} from parent class \link{Task} and ensures that levels of the target column
+are in the right order.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TaskClassif$data(rows = NULL, cols = NULL, data_format = "data.table")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rows}}{\code{integer()}\cr
+Row indices.}
+
+\item{\code{cols}}{\code{character()}\cr
+Column names.}
+
+\item{\code{data_format}}{(\code{character(1)})\cr
+Desired data format, e.g. \code{"data.table"} or \code{"Matrix"}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Depending on the \link{DataBackend}, but usually a \code{\link[data.table:data.table]{data.table::data.table()}}.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-truth"></a>}}
 \subsection{Method \code{truth()}}{
 True response for specified \code{row_ids}. Format depends on the task type.
@@ -142,6 +169,28 @@ Row indices.}
 }
 \subsection{Returns}{
 \code{factor()}.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-droplevels"></a>}}
+\subsection{Method \code{droplevels()}}{
+Updates the cache of stored factor levels, removing all levels not present in the current set of active rows.
+\code{cols} defaults to all columns with storage type "factor" or "ordered".
+Also updates the task property \code{"twoclass"}/\code{"multiclass"}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TaskClassif$droplevels(cols = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{cols}}{\code{character()}\cr
+Column names.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Modified \code{self}.
 }
 }
 \if{html}{\out{<hr>}}

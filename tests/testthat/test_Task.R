@@ -46,7 +46,7 @@ test_that("Rows return ordered with multiple order cols", {
 
 test_that("Task rbind", {
   task = tsk("iris")
-  expect_error(task$rbind(task), "data.frame")
+  # expect_error(task$rbind(task), "data.frame")
   data = iris[1:10, ]
   task$rbind(iris[1:10, ])
   expect_task(task)
@@ -73,11 +73,19 @@ test_that("Task rbind", {
   expect_set_equal(nt$row_ids, 1:202)
   expect_equal(nt$row_names$row_name, c(task$row_names$row_name, rep(NA, 101)))
   expect_equal(nt$col_info[list("foo"), .N, nomatch = NULL], 0L)
+
+  # #423
+  task = tsk("iris")
+  task$row_roles$use = 1:10
+  task$row_roles$validation = 11:150
+
+  task$rbind(iris[sample(nrow(iris), 5), ])
+  expect_set_equal(task$row_ids, c(1:10, 151:155))
 })
 
 test_that("Task cbind", {
   task = tsk("iris")
-  expect_error(task$cbind(task), "data.frame")
+  # expect_error(task$cbind(task), "data.frame")
   data = cbind(data.frame(foo = 150:1), data.frame(..row_id = task$row_ids))
   task$cbind(data)
   expect_task(task)
@@ -104,6 +112,11 @@ test_that("Task cbind", {
   task$cbind(y)
   expect_equal(task$ncol, 7L)
   expect_disjunct(task$feature_names, task$target_names)
+
+  # cbind to subsetted task
+  task = tsk("iris")$filter(1:120)
+  backend = data.table(x = runif(120))
+  task$cbind(backend)
 })
 
 test_that("cbind/rbind works", {
@@ -211,9 +224,8 @@ test_that("groups/weights work", {
 test_that("ordered factors (#95)", {
   df = data.frame(
     x = c(1, 2, 3),
-    y = factor(letters[1:3], ordered = TRUE),
-    z = factor(c("M", "R", "R")),
-    stringsAsFactors = FALSE
+    y = factor(letters[1:3], levels = letters[1:3], ordered = TRUE),
+    z = factor(c("M", "R", "R"), levels = c("M", "R"))
   )
   b = as_data_backend(df)
   task = TaskClassif$new(id = "id", backend = b, target = "z")

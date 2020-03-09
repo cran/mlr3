@@ -237,7 +237,7 @@ Task = R6Class("Task",
     #' and virtually overwrite the rows in the [DataBackend].
     #'
     #' All columns with the roles `"target"`, `"feature"`, `"weight"`, `"group"`, `"stratum"`, and `"order"` must be present in `data`.
-    #' Columns only present in `newdata` but not in the task will be stored in the new backend, but are ignored and unaccessible by the task.
+    #' Columns only present in `data` but not in the [DataBackend] of `task` will be discarded.
     #'
     #' This operation mutates the task in-place.
     #' See the section on task mutators for more information.
@@ -249,7 +249,7 @@ Task = R6Class("Task",
     #' You need to explicitly `$clone()` the object beforehand if you want to keeps
     #' the object in its previous state.
     rbind = function(data) {
-      task_rbind(self, data)
+      task_rbind(data, self)
     },
 
     #' @description
@@ -265,7 +265,7 @@ Task = R6Class("Task",
     #' See the section on task mutators for more information.
     #' @param data (`data.frame()`).
     cbind = function(data) {
-      task_cbind(self, data)
+      task_cbind(data, self)
     },
 
 
@@ -286,7 +286,10 @@ Task = R6Class("Task",
     #' You need to explicitly `$clone()` the object beforehand if you want to keeps
     #' the object in its previous state.
     rename = function(old, new) {
-      task_rename(self, old, new)
+      self$backend = DataBackendRename$new(self$backend, old, new)
+      setkeyv(self$col_info[old, ("id") := new, on = "id"], "id")
+      self$col_roles = map(self$col_roles, map_values, old = old, new = new)
+      invisible(self)
     },
 
     #' @description
@@ -332,10 +335,21 @@ Task = R6Class("Task",
     #' `cols` defaults to all columns with storage type "factor" or "ordered".
     #' @return Modified `self`.
     droplevels = function(cols = NULL) {
-      ids = self$col_info[type %in% c("factor", "ordered"), "id", with = FALSE][[1L]]
-      cols = if (is.null(cols)) ids else intersect(cols, ids)
-      lvls = self$backend$distinct(rows = self$row_ids, cols = cols)
-      self$col_info = ujoin(self$col_info, enframe(lvls, "id", "levels"), key = "id")
+      tab = self$col_info[type %in% c("factor", "ordered"), c("id", "levels"), with = FALSE]
+      if (!is.null(cols)) {
+        tab = tab[list(cols), on = "id", nomatch = NULL]
+      }
+
+      # query new levels
+      new_levels = self$backend$distinct(rows = self$row_ids, cols = tab$id)
+
+      # update levels column with new levels:
+      # * first "known" levels in the original order of levels,
+      # * then new levels order of occurrence in new_levels
+      tab$levels = Map(function(x, y) c(intersect(x, y), setdiff(y, x)),
+        x = tab$levels, y = new_levels)
+
+      self$col_info = ujoin(self$col_info, tab, key = "id")
       invisible(self)
     }
   ),
@@ -455,7 +469,17 @@ Task = R6Class("Task",
       assert_names(names(rhs), "unique", permutation.of = mlr_reflections$task_col_roles[[self$task_type]], .var.name = "names of col_roles")
       assert_subset(unlist(rhs, use.names = FALSE), setdiff(self$col_info$id, self$backend$primary_key), .var.name = "elements of col_roles")
 
-      task_set_col_roles(self, private, rhs)
+      for (role in c("group", "weight", "name")) {
+        if (length(rhs[[role]]) > 1L) {
+          stopf("There may only be up to one column with role '%s'", role)
+        }
+      }
+
+      if (inherits(self, "TaskSupervised") && length(rhs$target) == 0L) {
+        stopf("Supervised tasks need at least one target column")
+      }
+
+      private$.col_roles = rhs
     },
 
     #' @field nrow (`integer(1)`)\cr

@@ -14,9 +14,13 @@ dense columns are converted to numeric columns.
 requireNamespace("Matrix")
 data = Matrix::Matrix(sample(0:1, 20, replace = TRUE), ncol = 2)
 colnames(data) = c("x1", "x2")
-dense = data.frame(..row_id = 1:10, num = runif(10), fact = sample(c("a", "b"), 10, replace = TRUE))
+dense = data.frame(
+  ..row_id = 1:10,
+  num = runif(10),
+  fact = factor(sample(c("a", "b"), 10, replace = TRUE), levels = c("a", "b"))
+)
 
-b = as_data_backend(data, dense, "..row_id")
+b = as_data_backend(data, dense = dense, primary_key = "..row_id")
 b$head()
 b$data(1:3, b$colnames, data_format = "Matrix")
 b$data(1:3, b$colnames, data_format = "data.table")
@@ -83,8 +87,8 @@ The input \code{\link[Matrix:Matrix]{Matrix::Matrix()}}.}
 \item{\code{dense}}{\code{\link[=data.frame]{data.frame()}}.
 Dense data, converted to \code{\link[data.table:data.table]{data.table::data.table()}}.}
 
-\item{\code{primary_key}}{\code{character(1)}\cr
-Name of the primary key column.}
+\item{\code{primary_key}}{(\code{character(1)} | \code{integer()})\cr
+Name of the primary key column, or integer vector of row ids.}
 }
 \if{html}{\out{</div>}}
 }
@@ -133,6 +137,9 @@ Number of rows.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+\code{\link[data.table:data.table]{data.table::data.table()}} of the first \code{n} rows.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-distinct"></a>}}
@@ -159,6 +166,9 @@ Whether to remove NAs or not.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+Named \code{list()} of distinct values.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-missings"></a>}}
@@ -179,6 +189,9 @@ Row indices.}
 Column names.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Total of missing values per column (named \code{numeric()}).
 }
 }
 }

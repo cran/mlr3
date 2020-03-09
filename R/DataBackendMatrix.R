@@ -19,9 +19,13 @@
 #' requireNamespace("Matrix")
 #' data = Matrix::Matrix(sample(0:1, 20, replace = TRUE), ncol = 2)
 #' colnames(data) = c("x1", "x2")
-#' dense = data.frame(..row_id = 1:10, num = runif(10), fact = sample(c("a", "b"), 10, replace = TRUE))
+#' dense = data.frame(
+#'   ..row_id = 1:10,
+#'   num = runif(10),
+#'   fact = factor(sample(c("a", "b"), 10, replace = TRUE), levels = c("a", "b"))
+#' )
 #'
-#' b = as_data_backend(data, dense, "..row_id")
+#' b = as_data_backend(data, dense = dense, primary_key = "..row_id")
 #' b$head()
 #' b$data(1:3, b$colnames, data_format = "Matrix")
 #' b$data(1:3, b$colnames, data_format = "data.table")
@@ -106,6 +110,8 @@ DataBackendMatrix = R6Class("DataBackendMatrix", inherit = DataBackend, cloneabl
     #'
     #' @param n (`integer(1)`)\cr
     #'   Number of rows.
+    #'
+    #' @return [data.table::data.table()] of the first `n` rows.
     head = function(n = 6L) {
       self$data(head(self$rownames, n), self$colnames)
     },
@@ -115,6 +121,8 @@ DataBackendMatrix = R6Class("DataBackendMatrix", inherit = DataBackend, cloneabl
     #' specified. If `na_rm` is `TRUE`, missing values are removed from the
     #' returned vectors of distinct values. Non-existing rows and columns are
     #' silently ignored.
+    #'
+    #' @return Named `list()` of distinct values.
     distinct = function(rows, cols, na_rm = TRUE) {
       rows = if (is.null(rows)) self$rownames else private$.translate_rows(rows)
       cols_sparse = intersect(cols, colnames(private$.data$sparse))
@@ -131,6 +139,8 @@ DataBackendMatrix = R6Class("DataBackendMatrix", inherit = DataBackend, cloneabl
     #' @description
     #' Returns the number of missing values per column in the specified slice
     #' of data. Non-existing rows and columns are silently ignored.
+    #'
+    #' @return Total of missing values per column (named `numeric()`).
     missings = function(rows, cols) {
       rows = private$.translate_rows(rows)
       cols_sparse = intersect(cols, colnames(private$.data$sparse))
@@ -188,27 +198,32 @@ DataBackendMatrix = R6Class("DataBackendMatrix", inherit = DataBackend, cloneabl
 
 #' @param data ([Matrix::Matrix()])\cr
 #'   The input [Matrix::Matrix()].
+#'
 #' @param dense ([data.frame()]).
-#'   Dense data, converted to [data.table::data.table()].
-#' @template param_primary_key
+#'   Dense data.
+#'
 #' @rdname as_data_backend
 #' @export
-as_data_backend.Matrix = function(data, dense = NULL, primary_key = NULL, ...) {
+as_data_backend.Matrix = function(data, primary_key = NULL, dense = NULL, ...) {
   require_namespaces("Matrix")
-  assert_data_frame(dense, null.ok = TRUE)
-  assert_string(primary_key, null.ok = TRUE)
+  assert_data_frame(dense, nrows = nrow(data), null.ok = TRUE)
+  assert_disjunct(colnames(data), colnames(dense))
 
-  if (is.null(dense)) {
-    if (!is.null(primary_key)) {
-      stopf("Primary key '%s' must be provided in 'dense'", primary_key)
-    }
-    primary_key = "..row_id"
-    dense = setnames(data.table(seq_row(data)), primary_key)
+  if (is.character(primary_key)) {
+    assert_string(primary_key)
+    assert_choice(primary_key, colnames(dense))
+    assert_integer(dense[[primary_key]], any.missing = FALSE, unique = TRUE)
   } else {
     if (is.null(primary_key)) {
-      stopf("Primary key '%s' must be specified as column name of 'dense'", primary_key)
+      row_ids = seq_row(data)
+    } else if (is.integer(primary_key)) {
+      row_ids = assert_integer(primary_key, len = nrow(data), any.missing = FALSE, unique = TRUE)
+    } else {
+      stopf("Argument 'primary_key' must be NULL, a column name or a vector of ids")
     }
-    assert_choice(primary_key, colnames(dense))
+
+    primary_key = "..row_id"
+    dense = insert_named(dense %??% data.table(), list("..row_id" = row_ids))
   }
 
   DataBackendMatrix$new(data, dense, primary_key)
