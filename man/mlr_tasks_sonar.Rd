@@ -3,7 +3,9 @@
 \name{mlr_tasks_sonar}
 \alias{mlr_tasks_sonar}
 \title{Sonar Classification Task}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.
+}
 \description{
 A classification task for the \link[mlbench:Sonar]{mlbench::Sonar} data set.
 Positive class is set to "M" (Mine).
@@ -23,6 +25,7 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},

@@ -33,6 +33,7 @@ mlr_reflections$task_properties$classif
 Other Task: 
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},
@@ -96,6 +97,7 @@ Stores the negative class for binary classification tasks, and \code{NA} for mul
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 Creates a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
@@ -125,6 +127,7 @@ positive class, and the second element is the negative class.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-data"></a>}}
+\if{latex}{\out{\hypertarget{method-data}{}}}
 \subsection{Method \code{data()}}{
 Calls \verb{$data} from parent class \link{Task} and ensures that levels of the target column
 are in the right order.
@@ -152,6 +155,7 @@ Depending on the \link{DataBackend}, but usually a \code{\link[data.table:data.t
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-truth"></a>}}
+\if{latex}{\out{\hypertarget{method-truth}{}}}
 \subsection{Method \code{truth()}}{
 True response for specified \code{row_ids}. Format depends on the task type.
 Defaults to all rows with role \code{"use"}.
@@ -173,6 +177,7 @@ Row indices.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-droplevels"></a>}}
+\if{latex}{\out{\hypertarget{method-droplevels}{}}}
 \subsection{Method \code{droplevels()}}{
 Updates the cache of stored factor levels, removing all levels not present in the current set of active rows.
 \code{cols} defaults to all columns with storage type "factor" or "ordered".
@@ -195,6 +200,7 @@ Modified \code{self}.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

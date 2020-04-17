@@ -4,7 +4,9 @@
 \name{mlr_resamplings}
 \alias{mlr_resamplings}
 \title{Dictionary of Resampling Strategies}
-\format{\link[R6:R6Class]{R6::R6Class} object inheriting from \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} object inheriting from \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}.
+}
 \description{
 A simple \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} storing objects of class \link{Resampling}.
 Each resampling has an associated help page, see \code{mlr_resamplings_[id]}.
@@ -47,6 +49,7 @@ Other Resampling:
 \code{\link{mlr_resamplings_custom}},
 \code{\link{mlr_resamplings_cv}},
 \code{\link{mlr_resamplings_holdout}},
+\code{\link{mlr_resamplings_insample}},
 \code{\link{mlr_resamplings_repeated_cv}},
 \code{\link{mlr_resamplings_subsampling}}
 }

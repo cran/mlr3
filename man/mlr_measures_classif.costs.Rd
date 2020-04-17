@@ -71,6 +71,7 @@ Other classification measures:
 \code{\link{mlr_measures_classif.acc}},
 \code{\link{mlr_measures_classif.auc}},
 \code{\link{mlr_measures_classif.bacc}},
+\code{\link{mlr_measures_classif.bbrier}},
 \code{\link{mlr_measures_classif.ce}},
 \code{\link{mlr_measures_classif.dor}},
 \code{\link{mlr_measures_classif.fbeta}},
@@ -81,6 +82,7 @@ Other classification measures:
 \code{\link{mlr_measures_classif.fpr}},
 \code{\link{mlr_measures_classif.fp}},
 \code{\link{mlr_measures_classif.logloss}},
+\code{\link{mlr_measures_classif.mbrier}},
 \code{\link{mlr_measures_classif.mcc}},
 \code{\link{mlr_measures_classif.npv}},
 \code{\link{mlr_measures_classif.ppv}},
@@ -97,7 +99,8 @@ Other multiclass classification measures:
 \code{\link{mlr_measures_classif.acc}},
 \code{\link{mlr_measures_classif.bacc}},
 \code{\link{mlr_measures_classif.ce}},
-\code{\link{mlr_measures_classif.logloss}}
+\code{\link{mlr_measures_classif.logloss}},
+\code{\link{mlr_measures_classif.mbrier}}
 }
 \concept{Measure}
 \concept{classification measures}
@@ -141,6 +144,7 @@ Matrix of costs (truth in columns, predicted response in rows).}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 Creates a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
@@ -150,6 +154,7 @@ Creates a new instance of this \link[R6:R6Class]{R6} class.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

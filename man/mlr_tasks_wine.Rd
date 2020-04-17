@@ -3,7 +3,9 @@
 \name{mlr_tasks_wine}
 \alias{mlr_tasks_wine}
 \title{Wine Classification Task}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.
+}
 \source{
 Original owners:
 Forina, M. et al, PARVUS - An Extendible Package for Data Exploration, Classification and Correlation.
@@ -34,6 +36,7 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},

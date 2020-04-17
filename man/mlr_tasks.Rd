@@ -4,7 +4,9 @@
 \name{mlr_tasks}
 \alias{mlr_tasks}
 \title{Dictionary of Tasks}
-\format{\link[R6:R6Class]{R6::R6Class} object inheriting from \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} object inheriting from \link[mlr3misc:Dictionary]{mlr3misc::Dictionary}.
+}
 \description{
 A simple \link[mlr3misc:Dictionary]{mlr3misc::Dictionary} storing objects of class \link{Task}.
 Each task has an associated help page, see \code{mlr_tasks_[id]}.
@@ -66,6 +68,7 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},

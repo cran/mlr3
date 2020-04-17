@@ -1,3 +1,11 @@
+# mlr3 0.2.0
+
+* Some handy cheat sheets can now be downloaded from the project homepage.
+* Added new measures `classif.bbrier` (binary Brier score) and `classif.mbrier`
+  (multi-class Brier score).
+* Added new Resampling: `ResamplingInsample`.
+* Added base class for unsupervised tasks: `TaskUnsupervised`.
+
 # mlr3 0.1.8
 
 * Added S3 methods to combine `ResampleResult`s and `BenchmarkResult`s with

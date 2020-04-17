@@ -23,6 +23,7 @@ mlr_reflections$task_properties$regr
 Other Task: 
 \code{\link{TaskClassif}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},
@@ -71,6 +72,7 @@ Other Task:
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 Creates a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
@@ -95,6 +97,7 @@ Name of the target column.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-truth"></a>}}
+\if{latex}{\out{\hypertarget{method-truth}{}}}
 \subsection{Method \code{truth()}}{
 True response for specified \code{row_ids}. Format depends on the task type.
 Defaults to all rows with role "use".
@@ -116,6 +119,7 @@ Row indices.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

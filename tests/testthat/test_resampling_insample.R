@@ -1,7 +1,7 @@
-context("mlr_resampling_holdout")
+context("mlr_resampling_insample")
 
-test_that("holdout has no duplicated ids", {
-  r = rsmp("holdout")
+test_that("insample has no duplicated ids", {
+  r = rsmp("insample")
   expect_identical(r$duplicated_ids, FALSE)
 })
 
@@ -11,17 +11,15 @@ test_that("stratification", {
   task = TaskClassif$new("stratify_data", b, target = "y")
   task$col_roles$stratum = task$target_names
 
-  r = rsmp("holdout", ratio = .5)
+  r = rsmp("insample")
   r$instantiate(task)
 
   i = 1L
-  expect_equal(task$data(r$train_set(i))[y == "a", .N], 45)
-  expect_equal(task$data(r$train_set(i))[y == "b", .N], 5)
-  expect_equal(task$data(r$test_set(i))[y == "a", .N], 45)
-  expect_equal(task$data(r$test_set(i))[y == "b", .N], 5)
+  expect_set_equal(r$train_set(i), task$row_ids)
+  expect_set_equal(r$test_set(i), task$row_ids)
 })
 
 test_that("grouping", {
-  r = rsmp("holdout")
+  r = rsmp("insample")
   expect_grouping_works(r)
 })

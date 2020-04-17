@@ -44,6 +44,7 @@ predict_wrapper = function(task, learner) {
 
 learner_train = function(learner, task, row_ids = NULL) {
   assert_task(task)
+  assert_learnable(task, learner)
 
   # subset to train set w/o cloning
   if (!is.null(row_ids)) {
@@ -133,7 +134,7 @@ learner_predict = function(learner, task, row_ids = NULL) {
     return(get(f)$new(task = task))
   }
 
-  if (is.null(learner$model)) {
+  if (is.null(learner$state$model)) {
     lg$debug("Learner '%s' has no model stored",
       learner$id, learner = learner$clone())
 

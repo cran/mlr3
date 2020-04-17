@@ -3,7 +3,9 @@
 \name{mlr_tasks_zoo}
 \alias{mlr_tasks_zoo}
 \title{Zoo Classification Task}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.
+}
 \description{
 A classification task for the \link[mlbench:Zoo]{mlbench::Zoo} data set.
 Rownames are stored as variable \verb{"..rownames} with column role \code{"name"}.
@@ -23,6 +25,7 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_boston_housing}},
 \code{\link{mlr_tasks_german_credit}},

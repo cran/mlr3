@@ -3,7 +3,9 @@
 \name{mlr_tasks_boston_housing}
 \alias{mlr_tasks_boston_housing}
 \title{Boston Housing Regression Task}
-\format{\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskRegr}.}
+\format{
+\link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskRegr}.
+}
 \description{
 A regression task for the \link[mlbench:BostonHousing2]{mlbench::BostonHousing2} data set.
 }
@@ -22,6 +24,7 @@ Other Task:
 \code{\link{TaskClassif}},
 \code{\link{TaskRegr}},
 \code{\link{TaskSupervised}},
+\code{\link{TaskUnsupervised}},
 \code{\link{Task}},
 \code{\link{mlr_tasks_german_credit}},
 \code{\link{mlr_tasks_iris}},
