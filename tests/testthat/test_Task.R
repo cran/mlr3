@@ -23,8 +23,16 @@ test_that("Rows return ordered", {
   x = task$data()
   expect_integer(x$t, sorted = TRUE, any.missing = FALSE)
 
+  x = task$data(ordered = FALSE)
+  expect_true(is.unsorted(x$t))
+
   x = task$data(rows = sample(nrow(data), 50))
   expect_integer(x$t, sorted = TRUE, any.missing = FALSE)
+
+  tab = task$order
+  expect_data_table(tab, ncols = 2, nrows = task$nrow)
+  expect_set_equal(names(tab), c("row_id", "order"))
+  expect_integer(rev(tab$order), sorted = TRUE)
 })
 
 test_that("Rows return ordered with multiple order cols", {
@@ -81,6 +89,16 @@ test_that("Task rbind", {
 
   task$rbind(iris[sample(nrow(iris), 5), ])
   expect_set_equal(task$row_ids, c(1:10, 151:155))
+
+  # 496
+  data = iris
+  data$blocks = sample(letters[1:2], nrow(iris), replace = TRUE)
+  task = TaskClassif$new("iris", data, target = "Species")
+  task$col_roles$feature = setdiff(task$col_roles$feature, "blocks")
+  task$col_roles$group = "blocks"
+  learner = lrn("classif.rpart")
+  learner$train(task)
+  expect_prediction(predict(learner, iris, predict_type = "<Prediction>"))
 })
 
 test_that("Task cbind", {

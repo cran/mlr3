@@ -240,19 +240,22 @@ run_experiment = function(task, learner, seed = NULL) {
   if (prediction$task_type != learner$task_type)
     return(err("learner and prediction have different task_type"))
 
-  expected = mlr3::mlr_reflections$learner_predict_types[[learner$task_type]][[learner$predict_type]]
-  msg = checkmate::check_subset(expected, prediction$predict_types, empty.ok = FALSE)
-  if (!isTRUE(msg))
-    return(err(msg))
+  # catch for mlr3proba tasks, which all return every possible predict type
+  if (!(learner$task_type %in% c("dens", "surv"))) {
+    expected = mlr3::mlr_reflections$learner_predict_types[[learner$task_type]][[learner$predict_type]]
+    msg = checkmate::check_subset(expected, prediction$predict_types, empty.ok = FALSE)
+    if (!isTRUE(msg))
+      return(err(msg))
 
-  if (learner$predict_type == "response") {
-    msg = checkmate::check_set_equal(learner$predict_type, prediction$predict_types)
-    if (!isTRUE(msg))
-      return(err(msg))
-  } else {
-    msg = checkmate::check_subset(learner$predict_type, prediction$predict_types, empty.ok = FALSE)
-    if (!isTRUE(msg))
-      return(err(msg))
+    if (learner$predict_type == "response") {
+      msg = checkmate::check_set_equal(learner$predict_type, prediction$predict_types)
+      if (!isTRUE(msg))
+        return(err(msg))
+    } else {
+      msg = checkmate::check_subset(learner$predict_type, prediction$predict_types, empty.ok = FALSE)
+      if (!isTRUE(msg))
+        return(err(msg))
+    }
   }
 
   stage = "score()"
@@ -289,8 +292,8 @@ run_experiment = function(task, learner, seed = NULL) {
     }
 
     if ("oob_error" %in% learner$properties) {
-      err = learner$oob_error()
-      msg = checkmate::check_number(err)
+      oob = learner$oob_error()
+      msg = checkmate::check_number(oob)
       if (!isTRUE(msg))
         return(err(msg))
     }
@@ -299,7 +302,7 @@ run_experiment = function(task, learner, seed = NULL) {
   return(list(ok = TRUE, learner = learner, prediction = prediction, error = character(), seed = seed))
 }
 
-run_autotest = function(learner, N = 30L, exclude = NULL, predict_types = learner$predict_types) {
+run_autotest = function(learner, N = 30L, exclude = NULL, predict_types = learner$predict_types, check_replicable = TRUE) {
   learner = learner$clone(deep = TRUE)
   id = learner$id
   tasks = generate_tasks(learner, N = N)
@@ -324,7 +327,7 @@ run_autotest = function(learner, N = 30L, exclude = NULL, predict_types = learne
           return(repeated_run)
         }
 
-        if (!isTRUE(all.equal(as.data.table(run$prediction), as.data.table(repeated_run$prediction)))) {
+        if (check_replicable && !isTRUE(all.equal(as.data.table(run$prediction), as.data.table(repeated_run$prediction)))) {
           run$ok = FALSE
           run$error = sprintf("Different results for replicated runs using fixed seed %i", run$seed)
           return(run)
