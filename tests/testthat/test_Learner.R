@@ -139,7 +139,7 @@ test_that("predict on newdata works / titanic use case", {
   data("titanic", package = "mlr3data")
   drop = c("cabin", "name", "ticket", "passenger_id")
   data = setDT(remove_named(titanic, drop))
-  task = TaskClassif$new(id = "titanic", data[!is.na(survived), ], target = "survived", positive = "1")
+  task = TaskClassif$new(id = "titanic", data[!is.na(survived), ], target = "survived")
 
   learner = lrn("classif.rpart")$train(task)
   p = learner$predict_newdata(newdata = data[is.na(survived)])
@@ -202,4 +202,10 @@ test_that("empty predict set (#421)", {
   model = learner$train(task, hout$train_set(1))
   pred = learner$predict(task, hout$test_set(1))
   expect_true(any(grepl("No data to predict on", learner$log$msg)))
+})
+
+test_that("fallback learner is deep cloned (#511)", {
+  l = lrn("classif.rpart")
+  l$fallback = lrn("classif.featureless")
+  expect_different_address(l$fallback, l$clone(deep = TRUE)$fallback)
 })

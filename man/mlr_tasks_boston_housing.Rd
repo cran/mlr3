@@ -7,11 +7,23 @@
 \link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskRegr}.
 }
 \description{
-A regression task for the \link[mlbench:BostonHousing2]{mlbench::BostonHousing2} data set.
+A regression task for the \link[mlbench:BostonHousing]{mlbench::BostonHousing2} data set.
 }
 \section{Construction}{
 \preformatted{mlr_tasks$get("boston_housing")
 tsk("boston_housing")
+}
+}
+
+\section{Meta Information}{
+
+\itemize{
+\item Task type: \dQuote{regr}
+\item Dimensions: 506x19
+\item Properties: -
+\item Has Missings: \code{FALSE}
+\item Target: \dQuote{medv}
+\item Features: \dQuote{age}, \dQuote{b}, \dQuote{chas}, \dQuote{cmedv}, \dQuote{crim}, \dQuote{dis}, \dQuote{indus}, \dQuote{lat}, \dQuote{lon}, \dQuote{lstat}, \dQuote{nox}, \dQuote{ptratio}, \dQuote{rad}, \dQuote{rm}, \dQuote{tax}, \dQuote{town}, \dQuote{tract}, \dQuote{zn}
 }
 }
 

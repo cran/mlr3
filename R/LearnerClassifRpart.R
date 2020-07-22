@@ -10,6 +10,12 @@
 #' @templateVar id classif.rpart
 #' @template section_dictionary_learner
 #'
+#' @section Meta Information:
+#' `r rd_info(lrn("classif.rpart"))`
+#'
+#' @section Parameters:
+#' `r rd_info(lrn("classif.rpart")$param_set)`
+#'
 #' @references
 #' \cite{mlr3}{breiman_1984}
 #'

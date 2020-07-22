@@ -92,6 +92,11 @@ expect_backend = function(b) {
   x = b$data(rows = rep(rn1, 2L), cols = b$colnames, data_format = "data.table")
   checkmate::expect_data_table(x, nrows = 2L*length(rn1), ncols = p)
 
+  # cols are returned in the right order
+  j = rev(cn)
+  x = b$data(rows = rn1, cols = j, data_format = "data.table")
+  testthat::expect_equal(j, colnames(x))
+
   # rows are returned in the right order
   i = sample(rn, min(n, 10L))
   x = b$data(rows = i, cols = b$primary_key, data_format = "data.table")
@@ -123,7 +128,7 @@ expect_backend = function(b) {
 
   d = b$distinct(rn, cn, na_rm = FALSE)
   m = b$missings(rn, cn)
-  expect_equal(sapply(d, checkmate::anyMissing), m > 0L)
+  expect_equal(vapply(d, checkmate::anyMissing, FUN.VALUE = logical(1)), m > 0L)
 
   # $missings()
   x = b$missings(b$rownames, b$colnames)
@@ -283,6 +288,7 @@ expect_task_generator = function(gen) {
   checkmate::expect_function(gen$generate, args = "n")
   checkmate::expect_class(gen$param_set, "ParamSet")
   checkmate::expect_list(gen$param_set$values, names = "unique")
+  expect_output(print(gen))
 }
 
 expect_learner = function(lrn, task = NULL) {
@@ -461,7 +467,7 @@ expect_resample_result = function(rr, allow_incomplete = FALSE) {
 }
 
 expect_benchmark_result = function(bmr) {
-  checkmate::expect_r6(bmr, "BenchmarkResult", public = c("data"))
+  checkmate::expect_r6(bmr, "BenchmarkResult", public = "data")
   testthat::expect_output(print(bmr), "BenchmarkResult")
 
   checkmate::expect_data_table(bmr$data, min.cols = length(mlr3::mlr_reflections$rr_names) + 1L)

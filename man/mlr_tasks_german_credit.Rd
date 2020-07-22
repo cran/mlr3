@@ -8,7 +8,9 @@
 }
 \source{
 Data set originally published on \href{https://archive.ics.uci.edu/ml/datasets/statlog+(german+credit+data)}{UCI}.
-This is the preprocessed version taken from package \CRANpkg{evtree}.
+This is the preprocessed version taken from package \CRANpkg{rchallenge} with
+factors instead of dummy variables, and corrected as proposed by Ulrike
+Grömping.
 
 Donor:
 Professor Dr. Hans Hofmann\cr
@@ -31,12 +33,27 @@ tsk("german_credit")
 }
 }
 
+\section{Meta Information}{
+
+\itemize{
+\item Task type: \dQuote{classif}
+\item Dimensions: 1000x21
+\item Properties: \dQuote{twoclass}
+\item Has Missings: \code{FALSE}
+\item Target: \dQuote{credit_risk}
+\item Features: \dQuote{age}, \dQuote{amount}, \dQuote{credit_history}, \dQuote{duration}, \dQuote{employment_duration}, \dQuote{foreign_worker}, \dQuote{housing}, \dQuote{installment_rate}, \dQuote{job}, \dQuote{number_credits}, \dQuote{other_debtors}, \dQuote{other_installment_plans}, \dQuote{people_liable}, \dQuote{personal_status_sex}, \dQuote{present_residence}, \dQuote{property}, \dQuote{purpose}, \dQuote{savings}, \dQuote{status}, \dQuote{telephone}
+}
+}
+
 \examples{
 task = tsk("german_credit")
 costs = matrix(c(0, 1, 5, 0), nrow = 2)
 dimnames(costs) = list(predicted = task$class_names, truth = task$class_names)
 measure = msr("classif.costs", id = "german_credit_costs", costs = costs)
 print(measure)
+}
+\references{
+\cite{mlr3}{gromping_2019}
 }
 \seealso{
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Task]{Tasks}: \link{mlr_tasks}

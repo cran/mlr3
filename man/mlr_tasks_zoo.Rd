@@ -8,11 +8,23 @@
 }
 \description{
 A classification task for the \link[mlbench:Zoo]{mlbench::Zoo} data set.
-Rownames are stored as variable \verb{"..rownames} with column role \code{"name"}.
+Rownames are stored as variable \code{"..rownames"} with column role \code{"name"}.
 }
 \section{Construction}{
 \preformatted{mlr_tasks$get("zoo")
 tsk("zoo")
+}
+}
+
+\section{Meta Information}{
+
+\itemize{
+\item Task type: \dQuote{classif}
+\item Dimensions: 101x17
+\item Properties: \dQuote{multiclass}
+\item Has Missings: \code{FALSE}
+\item Target: \dQuote{type}
+\item Features: \dQuote{airborne}, \dQuote{aquatic}, \dQuote{backbone}, \dQuote{breathes}, \dQuote{catsize}, \dQuote{domestic}, \dQuote{eggs}, \dQuote{feathers}, \dQuote{fins}, \dQuote{hair}, \dQuote{legs}, \dQuote{milk}, \dQuote{predator}, \dQuote{tail}, \dQuote{toothed}, \dQuote{venomous}
 }
 }
 

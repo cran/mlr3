@@ -15,7 +15,9 @@ tgen("friedman1")
 }
 
 \examples{
-tgen("friedman1")$generate(10)$data()
+generator = tgen("friedman1")
+task = generator$generate(200)
+str(task$data())
 }
 \seealso{
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=TaskGenerator]{TaskGenerators}: \link{mlr_task_generators}
@@ -25,7 +27,12 @@ tgen("friedman1")$generate(10)$data()
 Other TaskGenerator: 
 \code{\link{TaskGenerator}},
 \code{\link{mlr_task_generators_2dnormals}},
+\code{\link{mlr_task_generators_cassini}},
+\code{\link{mlr_task_generators_circle}},
+\code{\link{mlr_task_generators_moons}},
+\code{\link{mlr_task_generators_simplex}},
 \code{\link{mlr_task_generators_smiley}},
+\code{\link{mlr_task_generators_spirals}},
 \code{\link{mlr_task_generators_xor}},
 \code{\link{mlr_task_generators}}
 }
@@ -43,7 +50,9 @@ Other TaskGenerator:
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="TaskGenerator" data-id="format">}\href{../../mlr3/html/TaskGenerator.html#method-format}{\code{mlr3::TaskGenerator$format()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="TaskGenerator" data-id="generate">}\href{../../mlr3/html/TaskGenerator.html#method-generate}{\code{mlr3::TaskGenerator$generate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="TaskGenerator" data-id="print">}\href{../../mlr3/html/TaskGenerator.html#method-print}{\code{mlr3::TaskGenerator$print()}}\out{</span>}
 }
 \out{</details>}
 }

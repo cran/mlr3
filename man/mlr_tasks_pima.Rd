@@ -7,12 +7,24 @@
 \link[R6:R6Class]{R6::R6Class} inheriting from \link{TaskClassif}.
 }
 \description{
-A classification task for the \link[mlbench:PimaIndiansDiabetes2]{mlbench::PimaIndiansDiabetes2} data set.
+A classification task for the \link[mlbench:PimaIndiansDiabetes]{mlbench::PimaIndiansDiabetes2} data set.
 Positive class is set to \code{"pos"}.
 }
 \section{Construction}{
 \preformatted{mlr_tasks$get("pima")
 tsk("pima")
+}
+}
+
+\section{Meta Information}{
+
+\itemize{
+\item Task type: \dQuote{classif}
+\item Dimensions: 768x9
+\item Properties: \dQuote{twoclass}
+\item Has Missings: \code{TRUE}
+\item Target: \dQuote{diabetes}
+\item Features: \dQuote{age}, \dQuote{glucose}, \dQuote{insulin}, \dQuote{mass}, \dQuote{pedigree}, \dQuote{pregnant}, \dQuote{pressure}, \dQuote{triceps}
 }
 }
 

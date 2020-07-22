@@ -45,6 +45,23 @@ TaskGenerator = R6Class("TaskGenerator",
     },
 
     #' @description
+    #' Helper for print outputs.
+    format = function() {
+      sprintf("<%s:%s>", class(self)[1L], self$id)
+    },
+
+    #' @description
+    #' Printer.
+    #' @param ... (ignored).
+    print = function(...) {
+      catf(format(self))
+      catf(str_indent("* Task type:", self$task_type))
+      catf(str_indent("* Packages:", self$packages))
+      catf(str_indent("* Parameters:", as_short_string(self$param_set$values, 1000L)))
+      catf(str_indent("* Manual:", sprintf("?%s", self$man)))
+    },
+
+    #' @description
     #' Creates a task of type `task_type` with `n` observations, possibly using additional settings stored in `param_set`.
     #'
     #' @param n (`integer(1)`)\cr
@@ -57,3 +74,9 @@ TaskGenerator = R6Class("TaskGenerator",
     }
   )
 )
+
+convert_mlbench = function(obj) {
+  y = factor(LETTERS[as.integer(obj$classes)], levels = LETTERS[seq_len(uniqueN(obj$classes))])
+  X = set_col_names(obj$x, sprintf("x%i", seq_col(obj$x)))
+  insert_named(as.data.table(X), list(y = y))
+}
