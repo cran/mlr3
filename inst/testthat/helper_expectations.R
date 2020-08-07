@@ -338,7 +338,7 @@ expect_resampling = function(r, task = NULL) {
     testthat::expect_error(r$train_set(1L), "instantiated")
     testthat::expect_error(r$test_set(1L), "instantiated")
     # testthat::expect_identical(r$hash, NA_character_)
-    if (r$id != "custom")
+    if (!(r$id %in% c("custom", "loo")))
       checkmate::expect_count(r$iters, positive = TRUE)
     testthat::expect_identical(r$task_hash, NA_character_)
   } else {
@@ -413,11 +413,14 @@ expect_prediction = function(p) {
 
 expect_prediction_regr = function(p) {
   expect_prediction(p)
-  checkmate::expect_r6(p, "PredictionRegr", public = c("row_ids", "response", "truth", "predict_types", "se"))
+  checkmate::expect_r6(p, "PredictionRegr", public = c("row_ids", "response", "truth", "predict_types", "se", "distr"))
   checkmate::expect_numeric(p$truth, any.missing = TRUE, len = length(p$row_ids), null.ok = TRUE)
   checkmate::expect_numeric(p$response, any.missing = FALSE, len = length(p$row_ids), null.ok = TRUE)
   if ("se" %in% p$predict_types) {
     checkmate::expect_numeric(p$se, any.missing = FALSE, len = length(p$row_ids), lower = 0)
+  }
+  if ("distr" %in% p$predict_types) {
+    checkmate::expect_class(p$distr, "VectorDistribution")
   }
 }
 
