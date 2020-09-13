@@ -46,13 +46,17 @@ TaskClassif = R6Class("TaskClassif",
     #'   Only for binary classification: Name of the positive class.
     #'   The levels of the target columns are reordered accordingly, so that the first element of `$class_names` is the
     #'   positive class, and the second element is the negative class.
-    initialize = function(id, backend, target, positive = NULL) {
+    #' @template param_extra_args
+    initialize = function(id, backend, target, positive = NULL, extra_args = list()) {
       assert_string(target)
-      super$initialize(id = id, task_type = "classif", backend = backend, target = target)
+      super$initialize(
+        id = id, task_type = "classif", backend = backend,
+        target = target, extra_args = extra_args)
 
       private$.update_class_property()
 
       if (!is.null(positive)) {
+        # NB: this also sets `extra_args$positive`
         self$positive = positive
       }
     },
@@ -97,7 +101,7 @@ TaskClassif = R6Class("TaskClassif",
     #' Returns all class labels of the target column.
     class_names = function(rhs) {
       assert_ro_binding(rhs)
-      self$col_info[list(self$target_names), "levels", on = "id", with = FALSE][[1L]][[1L]]
+      fget(self$col_info, i = self$target_names, j = "levels", key = "id")[[1L]]
     },
 
     #' @field positive (`character(1)`)\cr
@@ -117,6 +121,7 @@ TaskClassif = R6Class("TaskClassif",
       }
       positive = assert_choice(rhs, lvls)
       negative = setdiff(lvls, rhs)
+      self$extra_args$positive = positive
       self$col_info[list(self$target_names), levels := list(list(c(positive, negative))), on = "id"][]
     },
 

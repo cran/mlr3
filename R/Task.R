@@ -20,6 +20,7 @@
 #' @template param_rows
 #' @template param_cols
 #' @template param_data_format
+#' @template param_extra_args
 #'
 #' @section S3 methods:
 #' * `as.data.table(t)`\cr
@@ -80,11 +81,16 @@ Task = R6Class("Task",
     #' @template field_man
     man = NA_character_,
 
+    #' @field extra_args (named `list()`)\cr
+    #' Additional arguments set during construction.
+    #' Required for [convert_task()].
+    extra_args = NULL,
+
     #' @description
     #' Creates a new instance of this [R6][R6::R6Class] class.
     #'
     #' Note that this object is typically constructed via a derived classes, e.g. [TaskClassif] or [TaskRegr].
-    initialize = function(id, task_type, backend) {
+    initialize = function(id, task_type, backend, extra_args = list()) {
       self$id = assert_string(id, min.chars = 1L)
       self$task_type = assert_choice(task_type, mlr_reflections$task_types$type)
       if (!inherits(backend, "DataBackend")) {
@@ -108,6 +114,7 @@ Task = R6Class("Task",
       private$.row_roles = list(use = rn, validation = integer())
       private$.col_roles = named_list(mlr_reflections$task_col_roles[[task_type]], character())
       private$.col_roles$feature = setdiff(cn, self$backend$primary_key)
+      self$extra_args = assert_list(extra_args, names = "unique")
     },
 
     #' @description
@@ -183,7 +190,7 @@ Task = R6Class("Task",
     levels = function(cols = NULL) {
       if (is.null(cols)) {
         cols = unlist(private$.col_roles[c("target", "feature")], use.names = FALSE)
-        cols = self$col_info[id %in% cols & type %in% c("factor", "ordered"), "id", with = FALSE][[1L]]
+        cols = self$col_info[get("id") %in% cols & get("type") %in% c("factor", "ordered"), "id", with = FALSE][[1L]]
       } else {
         assert_subset(cols, self$col_info$id)
       }
@@ -346,7 +353,7 @@ Task = R6Class("Task",
     #' `cols` defaults to all columns with storage type "factor" or "ordered".
     #' @return Modified `self`.
     droplevels = function(cols = NULL) {
-      tab = self$col_info[type %in% c("factor", "ordered"), c("id", "levels"), with = FALSE]
+      tab = self$col_info[get("type") %in% c("factor", "ordered"), c("id", "levels"), with = FALSE]
       if (!is.null(cols)) {
         tab = tab[list(cols), on = "id", nomatch = NULL]
       }
@@ -370,8 +377,8 @@ Task = R6Class("Task",
     hash = function(rhs) {
       assert_ro_binding(rhs)
       hash(
-        class(self), self$id, self$backend$hash, private$.row_roles, private$.col_roles,
-        self$col_info$type, self$col_info$levels, self$properties
+        class(self), self$id, self$backend$hash, self$col_info,
+        private$.row_roles, private$.col_roles, private$.properties
       )
     },
 

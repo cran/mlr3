@@ -8,7 +8,7 @@ This is the abstract base class for learner objects like \link{LearnerClassif} a
 
 Learners are build around the three following key parts:
 \itemize{
-\item Methods \verb{$train()} and \verb{$predict()} which call internal methods (either public method \verb{$train_internal()}/\verb{$predict_internal()} (soft deprecated)
+\item Methods \verb{$train()} and \verb{$predict()} which call internal methods (either public method \verb{$train_internal()}/\verb{$predict_internal()} (deprecated)
 or private methods \verb{$.train()}/\verb{$.predict()}).
 \item A \link[paradox:ParamSet]{paradox::ParamSet} which stores meta-information about available hyperparameters, and also stores hyperparameter settings.
 \item Meta-information about the requirements and capabilities of the learner.
@@ -350,7 +350,8 @@ Vector of test indices.}
 \subsection{Method \code{predict_newdata()}}{
 Uses the model fitted during \verb{$train()} to create a new \link{Prediction} based on the new data in \code{newdata}.
 Object \code{task} is the task used during \verb{$train()} and required for conversion of \code{newdata}.
-If the learner's \verb{$train()} method has been called, there is a (size reduced) version of the training task stored in the learner.
+If the learner's \verb{$train()} method has been called, there is a (size reduced) version
+of the training task stored in the learner.
 If the learner has been fitted via \code{\link[=resample]{resample()}} or \code{\link[=benchmark]{benchmark()}}, you need to pass the corresponding task stored
 in the \link{ResampleResult} or \link{BenchmarkResult}, respectively.
 \subsection{Usage}{
