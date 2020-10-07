@@ -1,3 +1,18 @@
+# mlr3 0.7.0
+
+* Updated properties of featureless learners to apply it on all feature types
+  (did not work on POSIXct columns).
+* Fixed measures being calculated as `NaN` for `BenchmarkResult` for resamplings
+  with a single iteration (#551).
+* Fixed a bug where a broken heuristic disabled nested parallelization via
+  package `future` (mlr3tuning#270).
+* `ResampleResult` and `BenchmarkResult` now share a common interface to store
+  the experiment results. Manual construction is still possible with helper
+  function `as_result_data()`
+* Fixed deep cloning of `ResamplingCV` and `ResamplingRepeatedCV`.
+* New measure `classif.prauc` (area under precision-recall curve).
+* Removed dependency on orphaned package `bibtex`.
+
 # mlr3 0.6.0
 
 * Compact in-memory representation of R6 objects to save space when

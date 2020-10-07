@@ -67,7 +67,8 @@ generate_data = function(learner, N) {
       numeric = runif(N),
       character = sample(rep_len(letters[1:2], N)),
       factor = sample(factor(rep_len(c("f1", "f2"), N), levels = c("f1", "f2"))),
-      ordered = sample(ordered(rep_len(c("o1", "o2"), N), levels = c("o1", "o2")))
+      ordered = sample(ordered(rep_len(c("o1", "o2"), N), levels = c("o1", "o2"))),
+      POSIXct = Sys.time() - runif(N, min = 0, max = 10 * 365 * 24 * 60 * 60)
     )
   }
   types = unique(learner$feature_types)
@@ -152,11 +153,11 @@ generate_tasks.LearnerRegr = function(learner, N = 30L) {
 
   # generate sanity task
   data = with_seed(100, {
-    x = seq(from = -10, to = 10, length.out = 100)
+    y = seq(from = -10, to = 10, length.out = 100)
     data.table::data.table(
-      y = rnorm(length(x), mean = 1),
-      x = x,
-      unimportant = runif(length(x), min = 0, max = 3)
+      y = y,
+      x = y + rnorm(length(y), mean = 1),
+      unimportant = runif(length(y), min = 0, max = 1)
     )
   })
   tasks$sanity = mlr3::TaskRegr$new("sanity", mlr3::as_data_backend(data), target = "y")

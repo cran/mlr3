@@ -1,5 +1,19 @@
+#' @title Get 'private' part of an R6 Instance
+#'
+#' @param x ([R6::R6Class]).
+#'
+#' @return (`environment()`).
+#' @noRd
+get_private = function(x) {
+  x[[".__enclos_env__"]][["private"]]
+}
+
 hashes = function(x) {
   map_chr(unname(x), "hash")
+}
+
+phashes = function(x) {
+  map_chr(unname(x), "phash")
 }
 
 hash = function(...) {
@@ -39,7 +53,7 @@ replace_with = function(x, needle, replacement) {
 }
 
 # extract values from a single column of a data table
-# tries hard to avoid the overhead of data.table for small tables
+# tries to avoid the overhead of data.table for small tables
 fget = function(tab, i, j, key = key(tab)) {
   if (nrow(tab) > 1000L) {
     tab[list(i), j, on = key, with = FALSE][[1L]]
@@ -51,4 +65,12 @@ fget = function(tab, i, j, key = key(tab)) {
       tab[[j]][match(i, table, nomatch = 0L)]
     }
   }
+}
+
+get_progressor = function(n, label = NA_character_) {
+  if (!isNamespaceLoaded("progressr")) {
+    return(NULL)
+  }
+
+  progressr::progressor(steps = n, label = label)
 }

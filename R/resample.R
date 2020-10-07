@@ -66,37 +66,24 @@ resample = function(task, learner, resampling, store_models = FALSE) {
   n = instance$iters
   pb = get_progressor(n)
 
-  if (use_future()) {
-    lg$debug("Running resample() via future with %i iterations", n)
+  lg$debug("Running resample() via future with %i iterations", n)
 
-    res = future.apply::future_lapply(seq_len(n), workhorse,
-      task = task, learner = learner, resampling = instance,
-      store_models = store_models, lgr_threshold = lg$threshold, pb = pb,
-      future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
-      future.packages = "mlr3", future.seed = TRUE
-    )
-  } else {
-    lg$debug("Running resample() sequentially with %i iterations", n)
-
-    prev = get_rng_state()
-    on.exit(restore_rng_state(prev))
-    seeds = init_future_seeding(n)
-
-    res = vector("list", n)
-    for (i in seq_len(n)) {
-      assign(".Random.seed", value = seeds[[i]], envir = .GlobalEnv)
-      res[[i]] = workhorse(i, task = task, learner = learner, resampling = instance,
-        store_models = store_models, lgr_threshold = lg$threshold, pb = pb)
-    }
-  }
-
-  ResampleResult$new(
-    task = task,
-    learner = learner,
-    states = map(res, "learner_state"),
-    resampling = instance,
-    iterations = seq_len(n),
-    predictions = map(res, "prediction"),
-    uhash = NULL
+  res = future.apply::future_lapply(seq_len(n), workhorse,
+    task = task, learner = learner, resampling = instance,
+    store_models = store_models, lgr_threshold = lg$threshold, pb = pb,
+    future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
+    future.packages = "mlr3", future.seed = TRUE
   )
+
+  data = data.table(
+    task = list(task),
+    learner = list(learner),
+    learner_state = map(res, "learner_state"),
+    resampling = list(instance),
+    iteration = seq_len(n),
+    prediction = map(res, "prediction"),
+    uhash = UUIDgenerate()
+  )
+
+  ResampleResult$new(ResultData$new(data))
 }

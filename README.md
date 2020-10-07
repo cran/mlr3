@@ -12,13 +12,10 @@ learning. Successor of [mlr](https://github.com/mlr-org/mlr).
 
 [![tic](https://github.com/mlr-org/mlr3/workflows/tic/badge.svg?branch=master)](https://github.com/mlr-org/mlr3/actions)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.01903/status.svg)](https://doi.org/10.21105/joss.01903)
-[![CRAN Status
-Badge](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.org/package=mlr3)
-[![Cran
-Checks](https://cranchecks.info/badges/worst/mlr3)](https://cran.r-project.org/web/checks/check_results_mlr3.html)
-[![codecov](https://codecov.io/gh/mlr-org/mlr3/branch/master/graph/badge.svg)](https://codecov.io/gh/mlr-org/mlr3)
+[![CRAN
+Status](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.org/package=mlr3)
 [![StackOverflow](https://img.shields.io/badge/stackoverflow-mlr3-orange.svg)](https://stackoverflow.com/questions/tagged/mlr3)
-[![Dependencies](https://tinyverse.netlify.com/badge/mlr3)](https://cran.r-project.org/package=mlr3)
+[![Mattermost](https://img.shields.io/badge/chat-mattermost-orange.svg)](https://lmmisld-lmu-stats-slds.srv.mwn.de/mlr_invite/)
 <!-- badges: end -->
 
 Resources (for users and developers)
@@ -30,6 +27,7 @@ Resources (for users and developers)
     studies and demonstrates how frequently occurring problems can be
     solved. It is still in early days so stay tuned for more to come.
 -   [Reference manual](https://mlr3.mlr-org.com/reference/)
+-   [FAQ](https://github.com/mlr-org/mlr3/wiki/FAQ)
 -   **Cheatsheets**
     -   [Overview of cheatsheets](https://cheatsheets.mlr-org.com)
     -   [mlr3](https://cheatsheets.mlr-org.com/mlr3.pdf)
@@ -130,9 +128,9 @@ Example
     rr$score(measure)
 
     ##                 task task_id                   learner    learner_id
-    ## 1: <TaskClassif[45]>    iris <LearnerClassifRpart[32]> classif.rpart
-    ## 2: <TaskClassif[45]>    iris <LearnerClassifRpart[32]> classif.rpart
-    ## 3: <TaskClassif[45]>    iris <LearnerClassifRpart[32]> classif.rpart
+    ## 1: <TaskClassif[46]>    iris <LearnerClassifRpart[33]> classif.rpart
+    ## 2: <TaskClassif[46]>    iris <LearnerClassifRpart[33]> classif.rpart
+    ## 3: <TaskClassif[46]>    iris <LearnerClassifRpart[33]> classif.rpart
     ##            resampling resampling_id iteration              prediction
     ## 1: <ResamplingCV[19]>            cv         1 <PredictionClassif[19]>
     ## 2: <ResamplingCV[19]>            cv         2 <PredictionClassif[19]>
