@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.7.0
+Version: 0.8.0
 Authors@R: 
     c(person(given = "Michel",
              family = "Lang",
@@ -102,7 +102,7 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'helper.R' 'mlr_coercions.R' 'mlr_sugar.R' 'predict.R'
         'reexports.R' 'resample.R' 'task_converters.R' 'worker.R'
         'zzz.R'
-Packaged: 2020-10-07 07:47:15 UTC; lang
+Packaged: 2020-10-21 07:39:49 UTC; michel
 Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -114,4 +114,4 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Marc Becker [ctb] (<https://orcid.org/0000-0002-8115-0400>)
 Maintainer: Michel Lang <michellang@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-10-07 12:00:06 UTC
+Date/Publication: 2020-10-21 09:10:02 UTC
