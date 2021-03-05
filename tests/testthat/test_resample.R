@@ -112,3 +112,19 @@ test_that("empty train/predict sets", {
 test_that("conditions are returned", {
   expect_true(all(c("warnings", "errors") %in% names(rr$score(conditions = TRUE))))
 })
+
+test_that("save/load roundtrip", {
+  path = tempfile()
+  saveRDS(rr, file = path)
+
+  rr2 = readRDS(path)
+  expect_resample_result(rr2)
+})
+
+test_that("debug branch", {
+  task = tsk("iris")
+  learner = lrn("classif.featureless")
+  resampling = rsmp("cv", folds = 2)
+  rr = invoke(resample, task = task, learner = learner, resampling = resampling, .opts = list(mlr3.debug = TRUE))
+  expect_resample_result(rr)
+})

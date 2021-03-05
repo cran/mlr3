@@ -1,3 +1,27 @@
+# mlr3 0.11.0
+
+* Added a `as.data.table.Resampling` method.
+* Renamed column `"row_id"` to `"row_ids"` in the `as.data.table()` methods
+  for `PredictionClassif` and `PredictionRegr` (#547).
+* Added converters `as_prediction_classif()` and `as_prediction_regr()` to
+  reverse the operation of `as.data.table.PredictionClassif()` and
+  `as.data.table.PredictionRegr()`.
+* Specifying a weight column during `learner$predict_newdata()` is not mandatory
+  anymore (#563).
+* `Task$data()` defaults to return only active rows and columns, instead of
+  asserting to only return rows and columns. As a result, the `$data()` method
+  can now also be used to query inactive rows and cols from the `DataBackend`.
+* New (experimental) column role `uri` which is intended to point to external
+  resources, e.g.  images on the file system.
+* New helper `set_threads()` to control the number of threads during calls to
+  external packages. All objects will be migrated to have threading disabled in
+  their defaults to avoid conflicting parallelization techniques (#605).
+* New option `mlr3.debug`: avoid calls to `future` in `resample()` and
+  `benchmark()` to improve the readability of tracebacks.
+* New experimental option `mlr3.allow_utf8_names`: allow non-ascii characters in
+  column names in tasks.
+
+
 # mlr3 0.10.0
 
 * Result containers `ResampleResult` and `BenchmarkResult` now optionally remove
@@ -201,7 +225,7 @@
   training and test set.
   Learners can be instructed to predict on multiple sets by setting
   `predict_sets` (default: `"test"`). Measures operate on all sets specified in
-  their field `predict_sets` (default: `"test"`.
+  their field `predict_sets` (default: `"test"`).
 
 * `ResampleResult$prediction` and `ResampleResult$predictions()` are now methods
   instead of fields, and allow to extract predictions for different predict

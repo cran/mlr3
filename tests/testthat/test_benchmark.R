@@ -283,3 +283,21 @@ test_that("aggregated performance values are calculated correctly (#555)", {
   )
   expect_gt(y[1], y[2])
 })
+
+test_that("save/load roundtrip", {
+  path = tempfile()
+  saveRDS(bmr, file = path)
+
+  bmr2 = readRDS(path)
+  expect_benchmark_result(bmr2)
+})
+
+test_that("debug branch", {
+  tmp = tsk("iris", id = "iris_small")$select("Sepal.Length")
+  tasks = c(mlr_tasks$mget(c("iris", "sonar")), list(tmp))
+  learners = mlr_learners$mget(c("classif.featureless", "classif.rpart"))
+  resamplings = rsmp("cv", folds = 2)
+  design = benchmark_grid(tasks, learners, resamplings)
+  bmr = invoke(benchmark, design, .opts = list(mlr3.debug = TRUE))
+  expect_benchmark_result(bmr)
+})

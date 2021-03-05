@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.10.0
+Version: 0.11.0
 Authors@R: 
     c(person(given = "Michel",
              family = "Lang",
@@ -58,9 +58,9 @@ URL: https://mlr3.mlr-org.com, https://github.com/mlr-org/mlr3
 BugReports: https://github.com/mlr-org/mlr3/issues
 Depends: R (>= 3.1.0)
 Imports: R6 (>= 2.4.1), backports, checkmate (>= 2.0.0), data.table (>=
-        1.12.8), digest, future.apply (>= 1.5.0), lgr (>= 0.3.4),
-        mlbench, mlr3measures (>= 0.3.0), mlr3misc (>= 0.7.0), paradox
-        (>= 0.6.0), uuid
+        1.13.6), digest, future.apply (>= 1.5.0), lgr (>= 0.3.4),
+        mlbench, mlr3measures (>= 0.3.0), mlr3misc (>= 0.7.0),
+        parallelly, palmerpenguins, paradox (>= 0.6.0), uuid
 Suggests: Matrix, callr, datasets, distr6, evaluate, future,
         future.callr, mlr3data, progressr, rpart, testthat (>= 3.0.0)
 Encoding: UTF-8
@@ -89,21 +89,25 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'ResultData.R' 'Task.R' 'TaskSupervised.R' 'TaskClassif.R'
         'mlr_tasks.R' 'TaskClassif_breast_cancer.R'
         'TaskClassif_german_credit.R' 'TaskClassif_iris.R'
-        'TaskClassif_pima.R' 'TaskClassif_sonar.R' 'TaskClassif_spam.R'
-        'TaskClassif_wine.R' 'TaskClassif_zoo.R' 'TaskGenerator.R'
-        'mlr_task_generators.R' 'TaskGenerator2DNormals.R'
-        'TaskGeneratorCassini.R' 'TaskGeneratorCircle.R'
-        'TaskGeneratorFriedman1.R' 'TaskGeneratorMoons.R'
-        'TaskGeneratorSimplex.R' 'TaskGeneratorSmiley.R'
-        'TaskGeneratorSpirals.R' 'TaskGeneratorXor.R' 'TaskRegr.R'
-        'TaskRegr_boston_housing.R' 'TaskRegr_mtcars.R'
-        'TaskUnsupervised.R' 'as_data_backend.R' 'assertions.R'
+        'TaskClassif_penguins.R' 'TaskClassif_pima.R'
+        'TaskClassif_sonar.R' 'TaskClassif_spam.R' 'TaskClassif_wine.R'
+        'TaskClassif_zoo.R' 'TaskGenerator.R' 'mlr_task_generators.R'
+        'TaskGenerator2DNormals.R' 'TaskGeneratorCassini.R'
+        'TaskGeneratorCircle.R' 'TaskGeneratorFriedman1.R'
+        'TaskGeneratorMoons.R' 'TaskGeneratorSimplex.R'
+        'TaskGeneratorSmiley.R' 'TaskGeneratorSpirals.R'
+        'TaskGeneratorXor.R' 'TaskRegr.R' 'TaskRegr_boston_housing.R'
+        'TaskRegr_mtcars.R' 'TaskUnsupervised.R'
+        'as_benchmark_result.R' 'as_data_backend.R' 'as_learner.R'
+        'as_measure.R' 'as_prediction.R' 'as_prediction_classif.R'
+        'as_prediction_data.R' 'as_prediction_regr.R'
+        'as_resample_result.R' 'as_resampling.R' 'as_result_data.R'
+        'as_task.R' 'as_task_classif.R' 'as_task_regr.R' 'assertions.R'
         'auto_convert.R' 'benchmark.R' 'benchmark_grid.R'
         'bibentries.R' 'default_measures.R' 'fix_factor_levels.R'
-        'helper.R' 'mlr_coercions.R' 'mlr_sugar.R' 'predict.R'
-        'reexports.R' 'resample.R' 'task_converters.R' 'worker.R'
-        'zzz.R'
-Packaged: 2021-01-21 08:07:03 UTC; michel
+        'helper.R' 'mlr_sugar.R' 'predict.R' 'reexports.R' 'resample.R'
+        'set_threads.R' 'task_converters.R' 'worker.R' 'zzz.R'
+Packaged: 2021-03-05 12:47:15 UTC; lang
 Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -115,4 +119,4 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Marc Becker [ctb] (<https://orcid.org/0000-0002-8115-0400>)
 Maintainer: Michel Lang <michellang@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-01-21 08:50:06 UTC
+Date/Publication: 2021-03-05 14:00:06 UTC
