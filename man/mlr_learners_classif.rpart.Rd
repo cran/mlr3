@@ -29,16 +29,16 @@ lrn("classif.rpart")
 \section{Parameters}{
 \tabular{lllll}{
    Id \tab Type \tab Default \tab Range \tab Levels \cr
-   minsplit \tab integer \tab 20 \tab \eqn{[1, \infty)}{[1, Inf)} \tab - \cr
-   minbucket \tab integer \tab - \tab \eqn{[1, \infty)}{[1, Inf)} \tab - \cr
    cp \tab numeric \tab 0.01 \tab \eqn{[0, 1]}{[0, 1]} \tab - \cr
-   maxcompete \tab integer \tab 4 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
-   maxsurrogate \tab integer \tab 5 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
-   maxdepth \tab integer \tab 30 \tab \eqn{[1, 30]}{[1, 30]} \tab - \cr
-   usesurrogate \tab integer \tab 2 \tab \eqn{[0, 2]}{[0, 2]} \tab - \cr
-   surrogatestyle \tab integer \tab 0 \tab \eqn{[0, 1]}{[0, 1]} \tab - \cr
-   xval \tab integer \tab 10 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
    keep_model \tab logical \tab FALSE \tab \eqn{(-\infty, \infty)}{(-Inf, Inf)} \tab TRUE, FALSE \cr
+   maxcompete \tab integer \tab 4 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
+   maxdepth \tab integer \tab 30 \tab \eqn{[1, 30]}{[1, 30]} \tab - \cr
+   maxsurrogate \tab integer \tab 5 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
+   minbucket \tab integer \tab - \tab \eqn{[1, \infty)}{[1, Inf)} \tab - \cr
+   minsplit \tab integer \tab 20 \tab \eqn{[1, \infty)}{[1, Inf)} \tab - \cr
+   surrogatestyle \tab integer \tab 0 \tab \eqn{[0, 1]}{[0, 1]} \tab - \cr
+   usesurrogate \tab integer \tab 2 \tab \eqn{[0, 2]}{[0, 2]} \tab - \cr
+   xval \tab integer \tab 10 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
 }
 }
 
@@ -49,9 +49,19 @@ Routledge.
 \doi{10.1201/9781315139470}.
 }
 \seealso{
-\link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
-
-\code{as.data.table(mlr_learners)} for a complete table of all (also dynamically created) \link{Learner} implementations.
+\itemize{
+\item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
+\url{https://mlr3book.mlr-org.com/learners.html}
+\item Package \CRANpkg{mlr3learners} for a solid collection of essential learners.
+\item Package \href{https://github.com/mlr-org/mlr3extralearners}{mlr3extralearners} for more learners.
+\item \link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
+\item \code{as.data.table(mlr_learners)} for a table of available \link[=Learner]{Learners} in the running session (depending on the loaded packages).
+\item Extension packages for additional task types:
+\itemize{
+\item \CRANpkg{mlr3proba} for probabilistic supervised regression and survival analysis.
+\item \CRANpkg{mlr3cluster} for unsupervised clustering.
+}
+}
 
 Other Learner: 
 \code{\link{LearnerClassif}},
@@ -79,6 +89,7 @@ Other Learner:
 \if{html}{
 \out{<details ><summary>Inherited methods</summary>}
 \itemize{
+\item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="base_learner">}\href{../../mlr3/html/Learner.html#method-base_learner}{\code{mlr3::Learner$base_learner()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="format">}\href{../../mlr3/html/Learner.html#method-format}{\code{mlr3::Learner$format()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="help">}\href{../../mlr3/html/Learner.html#method-help}{\code{mlr3::Learner$help()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="mlr3" data-topic="Learner" data-id="predict">}\href{../../mlr3/html/Learner.html#method-predict}{\code{mlr3::Learner$predict()}}\out{</span>}

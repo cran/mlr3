@@ -68,19 +68,23 @@ rr$predictions()[[1]]$confusion
 bmr$filter(task_ids = "sonar")
 print(bmr)
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{data}}{(\code{ResultData})\cr
-Internal data storage object of type \code{ResultData}.
-We discourage users to directly work with this field.
-Use \code{as.table.table(BenchmarkResult)} instead.}
+\seealso{
+Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
+\url{https://mlr3book.mlr-org.com/benchmarking.html}
+
+Other benchmark: 
+\code{\link{benchmark_grid}()},
+\code{\link{benchmark}()}
 }
-\if{html}{\out{</div>}}
-}
+\concept{benchmark}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
+\item{\code{data}}{(\code{ResultData})\cr
+Internal data storage object of type \code{ResultData}.
+This field is deprecated and will be removed in the next release.
+Use \code{as.table.table(BenchmarkResult)} instead.}
+
 \item{\code{task_type}}{(\code{character(1)})\cr
 Task type of objects in the \code{BenchmarkResult}.
 All stored objects (\link{Task}, \link{Learner}, \link{Prediction}) in a single \code{BenchmarkResult} are
@@ -276,8 +280,16 @@ Returns a result table where resampling iterations are combined into
 \link{ResampleResult}s. A column with the aggregated performance score is
 added for each \link{Measure}, named with the id of the respective measure.
 
+Note that the aggregated performances just give a quick impression which
+approaches work well and which approaches are probably underperforming.
+However, the aggregates do not account for variance and cannot replace
+a statistical test.
+See \CRANpkg{mlr3viz} to get a better impression via boxplots or
+\CRANpkg{mlr3benchmark} for critical difference plots and
+significance tests.
+
 For convenience, different flags can be set to extract more
-information from the returned \link{ResampleResult}:
+information from the returned \link{ResampleResult}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BenchmarkResult$aggregate(
   measures = NULL,

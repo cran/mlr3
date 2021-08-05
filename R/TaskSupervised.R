@@ -14,12 +14,12 @@
 #' @template param_rows
 #' @template param_extra_args
 #'
-#' @family Task
+#' @template seealso_task
 #' @keywords internal
 #' @export
 #' @examples
 #' TaskSupervised$new("penguins", task_type = "classif", backend = palmerpenguins::penguins,
-#'     target = "species")
+#'   target = "species")
 TaskSupervised = R6Class("TaskSupervised", inherit = Task,
   public = list(
 

@@ -1,4 +1,4 @@
-#' @title Get a Default Measure
+#' @title Get the Default Measure
 #'
 #' @description
 #' Gets the default measures using the information in [mlr_reflections$default_measures][mlr_reflections]:
@@ -17,8 +17,9 @@
 #' default_measures("classif")
 #' default_measures("regr")
 default_measures = function(task_type) {
-  if (is.null(task_type))
+  if (is.null(task_type)) {
     return(list())
+  }
   assert_choice(task_type, names(mlr_reflections$default_measures))
   keys = mlr_reflections$default_measures[[task_type]]
   mlr_measures$mget(keys)

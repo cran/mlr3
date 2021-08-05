@@ -24,9 +24,9 @@ TaskGeneratorMoons = R6Class("TaskGeneratorMoons",
     #' @description
     #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
-      ps = ParamSet$new(list(
-        ParamDbl$new("sigma", lower = 0, default = 1, tags = "required")
-      ))
+      ps = ps(
+        sigma = p_dbl(0, default = 1, tags = "required")
+      )
       ps$values = list(sigma = 1)
 
       super$initialize(id = "moons", task_type = "classif", param_set = ps,
@@ -58,7 +58,7 @@ TaskGeneratorMoons = R6Class("TaskGeneratorMoons",
 
       data.table(
         y = factor(rep(c("A", "B"), c(n1, n2)), levels = c("A", "B")),
-        x1 = 5  * cos(x) + rnorm(n, mean = mu, sd = sigma),
+        x1 = 5 * cos(x) + rnorm(n, mean = mu, sd = sigma),
         x2 = 10 * sin(x) + rnorm(n, mean = mu, sd = sigma)
       )
     },

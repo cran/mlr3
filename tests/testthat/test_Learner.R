@@ -129,6 +129,14 @@ test_that("predict on newdata works / no target column", {
 
   expect_data_table(as.data.table(p), nrows = length(test))
   expect_set_equal(as.data.table(p)$row_ids, seq_along(test))
+
+  # newdata with 1 col and learner that does not support missings
+  xdt = data.table(x = 1, y = 1)
+  task = as_task_regr(xdt, target = "y")
+  learner = lrn("regr.featureless")
+  learner$properties = setdiff(learner$properties, "missings")
+  learner$train(task)
+  learner$predict_newdata(xdt[, 1])
 })
 
 
@@ -173,7 +181,7 @@ test_that("predict train + test set", {
 })
 
 test_that("assertions work (#357)", {
-  measures = lapply(c("classif.auc","classif.acc"), msr)
+  measures = lapply(c("classif.auc", "classif.acc"), msr)
   task = tsk("iris")
   lrn = lrn("classif.featureless")
   p = lrn$train(task)$predict(task)

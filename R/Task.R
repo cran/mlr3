@@ -43,11 +43,12 @@
 #'   merge both backends into an abstract [DataBackend] which merges the results on-demand.
 #' * `rename()` wraps the [DataBackend] of the Task in an additional [DataBackend] which deals with the renaming. Also updates `$col_roles` and `$col_info`.
 #'
-#' @family Task
+#' @template seealso_task
+#' @concept Task
 #' @export
 #' @examples
-#' # we use the inherited class TaskClassif here,
-#' # Class Task is not intended for direct use
+#' # We use the inherited class TaskClassif here,
+#' # because the base class `Task` is not intended for direct use
 #' task = TaskClassif$new("penguings", palmerpenguins::penguins, target = "species")
 #'
 #' task$nrow
@@ -76,11 +77,12 @@ Task = R6Class("Task",
     backend = NULL,
 
     #' @field col_info ([data.table::data.table()])\cr
-    #' Table with with 3 columns:
+    #' Table with with 4 columns:
     #' - `"id"` (`character()`) stores the name of the column.
     #' - `"type"` (`character()`) holds the storage type of the variable, e.g. `integer`, `numeric` or `character`.
     #'   See [mlr_reflections$task_feature_types][mlr_reflections] for a complete list of allowed types.
     #' - `"levels"` stores a vector of distinct values (levels) for ordered and unordered factor variables.
+    #' - `"label"` stores a character vector of prettier, formated column names.
     col_info = NULL,
 
     #' @template field_man
@@ -105,6 +107,7 @@ Task = R6Class("Task",
       }
 
       self$col_info = col_info(self$backend)
+      self$col_info$label = NA_character_
       assert_names(self$col_info$id, if (allow_utf8_names()) "unique" else "strict",
         .var.name = "feature names")
       assert_subset(self$col_info$type, mlr_reflections$task_feature_types, .var.name = "feature types")
@@ -157,10 +160,10 @@ Task = R6Class("Task",
     #' address columns with their respective column name.
     #'
     #' @param ordered (`logical(1)`)\cr
-    #'   If `TRUE` (default), data is ordered according to the columns with column role `"order"`.
+    #'   If `TRUE`, data is ordered according to the columns with column role `"order"`.
     #'
     #' @return Depending on the [DataBackend], but usually a [data.table::data.table()].
-    data = function(rows = NULL, cols = NULL, data_format = "data.table", ordered = TRUE) {
+    data = function(rows = NULL, cols = NULL, data_format = "data.table", ordered = FALSE) {
       assert_has_backend(self)
       assert_choice(data_format, self$data_formats)
       assert_flag(ordered)
@@ -180,7 +183,7 @@ Task = R6Class("Task",
       if (is.null(cols)) {
         query_cols = cols = c(col_roles$target, col_roles$feature)
       } else {
-        assert_subset(cols, self$backend$colnames)
+        assert_subset(cols, self$col_info$id)
         query_cols = cols
       }
 
@@ -336,7 +339,7 @@ Task = R6Class("Task",
         pk_in_backend = pk %in% names(data)
         type_check = FALSE # done by auto-converter
 
-        keep_cols = intersect(names(data), self$backend$colnames)
+        keep_cols = intersect(names(data), self$col_info$id)
         if (length(keep_cols) == pk_in_backend || nrow(data) == 0L) {
           return(invisible(self))
         }
@@ -348,8 +351,8 @@ Task = R6Class("Task",
 
         ci = self$col_info[list(keep_cols), on = "id"]
         data = do.call(data.table, Map(auto_convert,
-            value = as.list(data)[ci$id],
-            id = ci$id, type = ci$type, levels = ci$levels))
+          value = as.list(data)[ci$id],
+          id = ci$id, type = ci$type, levels = ci$levels))
 
         data = as_data_backend(data, primary_key = pk)
       } else {
@@ -391,7 +394,7 @@ Task = R6Class("Task",
 
       # everything looks good, modify task
       self$backend = DataBackendRbind$new(self$backend, data)
-      self$col_info = tab
+      self$col_info = tab[]
       self$row_roles$use = c(self$row_roles$use, data$rownames)
 
       invisible(self)
@@ -426,14 +429,14 @@ Task = R6Class("Task",
         if (data$ncol <= 1L) {
           return(invisible(self))
         }
+        assert_set_equal(self$row_ids, data$rownames)
       }
 
-      assert_set_equal(self$row_ids, data$rownames)
       ci = col_info(data)
 
       # update col info
       self$col_info = ujoin(self$col_info, ci, key = "id")
-      self$col_info = rbind(self$col_info, ci[!list(self$col_info), on = "id"])
+      self$col_info = rbindlist(list(self$col_info, ci[!list(self$col_info), on = "id"]), use.names = TRUE, fill = TRUE)
       setkeyv(self$col_info, "id")
 
       # add new features
@@ -523,7 +526,7 @@ Task = R6Class("Task",
     #' the object in its previous state.
     set_col_roles = function(cols, roles = NULL, add_to = NULL, remove_from = NULL) {
       assert_has_backend(self)
-      assert_subset(cols, self$backend$colnames)
+      assert_subset(cols, self$col_info$id)
       new_roles = task_set_roles(private$.col_roles, cols, roles, add_to, remove_from)
       private$.col_roles = task_check_col_roles(self, new_roles)
       invisible(self)
@@ -551,13 +554,42 @@ Task = R6Class("Task",
 
       self$col_info = ujoin(self$col_info, tab, key = "id")
       invisible(self)
+    },
+
+
+    #' @description
+    #' Cuts numeric variables into new factors columns which are added to the task with role
+    #' `"stratum"`.
+    #' This ensures that all training and test splits contain observations from all bins.
+    #' The columns are named `"..stratum_[col_name]"`.
+    #'
+    #' @param cols (`character()`)\cr
+    #'   Names of columns to operate on.
+    #' @param bins (`integer()`)\cr
+    #'   Number of bins to cut into (passed to [cut()] as `breaks`).
+    #'   Replicated to have the same length as `cols`.
+    #' @return self (invisibly).
+    add_strata = function(cols, bins = 3L) {
+      assert_names(cols, "unique", subset.of = self$backend$colnames)
+      bins = assert_integerish(bins, any.missing = FALSE, coerce = TRUE)
+
+      col_types = fget(self$col_info, i = cols, j = "type", key = "id")
+      ii = wf(col_types %nin% c("integer", "numeric"))
+      if (length(ii)) {
+        stopf("For `add_strata`, all columns must be numeric, but '%s' is not", cols[ii])
+      }
+
+      strata = pmap_dtc(list(self$data(cols = cols), bins), cut, include.lowest = TRUE)
+      setnames(strata, sprintf("..stratum_%s", cols))
+      self$cbind(strata)
+      self$set_col_roles(names(strata), roles = "stratum")
     }
   ),
 
   active = list(
     #' @template field_hash
     hash = function(rhs) {
-      private$.hash %??% hash(
+      private$.hash %??% calculate_hash(
         class(self), self$id, self$backend$hash, self$col_info,
         private$.row_roles, private$.col_roles, private$.properties
       )
@@ -662,7 +694,6 @@ Task = R6Class("Task",
     #'   Note that only up to one column may have this role.
     #' * `"stratum"`: Stratification variables. Multiple discrete columns may have this role.
     #' * `"weight"`: Observation weights. Only up to one column (assumed to be discrete) may have this role.
-    #' * `"uri"`: URI pointing to an external resource, e.g., images on the file system.
     #'
     #' `col_roles` is a named list whose elements are named by column role and each element is a `character()` vector of column names.
     #' To alter the roles, just modify the list, e.g. with \R's set functions ([intersect()], [setdiff()], [union()], \ldots).
@@ -790,22 +821,36 @@ Task = R6Class("Task",
       setnames(data, c("row_id", "weight"))[]
     },
 
-    #' @field uris ([data.table::data.table()])\cr
-    #' If the task has a column with designated role `"uri"`, a table with two columns:
+
+    #' @field labels (named `character()`)\cr
+    #'   Retrieve `labels` (prettier formated names) from columns.
+    #'   Internally queries the column `label` of the table in field `col_info`.
+    #'   Columns ids referenced by the name of the vector, the labels are the actual string values.
     #'
-    #' * `row_id` (`integer()`), and
-    #' * `uri` (`character()`).
-    #'
-    #' Returns `NULL` if there are is no uri column.
-    uris = function(rhs) {
-      assert_has_backend(self)
-      assert_ro_binding(rhs)
-      uri_col = private$.col_roles$uri
-      if (length(uri_col) == 0L) {
-        return(NULL)
+    #'   Assigning to this column update the task by reference.
+    #'   You have to provide a character vector of labels, named with column ids.
+    #'   To remove a label, set it to `NA`.
+    #'   Alternatively, you can provide a [data.frame()] with the two columns
+    #'   `"id"` and `"label"`.
+    labels = function(rhs) {
+      active = union(self$target_names, self$feature_names)
+
+      if (missing(rhs)) {
+        tab = self$col_info[list(active), c("id", "label"), on = "id", nomatch = NULL, with = FALSE]
+        return(set_names(tab[["label"]], tab[["id"]]))
       }
-      data = self$backend$data(private$.row_roles$use, c(self$backend$primary_key, uri_col))
-      setnames(data, c("row_id", "uri"))[]
+
+      if (is.data.frame(rhs)) { # convert to named character
+        assert_data_frame(rhs, ncols = 2L)
+        assert_names(names(rhs), permutation.of = c("id", "label"))
+        rhs = set_names(rhs[["label"]], rhs[["id"]])
+      }
+
+      assert_names(names(rhs), type = "unique")
+      assert_subset(names(rhs), active)
+      self$col_info[list(names(rhs)), "label" := rhs, on = "id"]
+
+      invisible(self)
     }
   ),
 

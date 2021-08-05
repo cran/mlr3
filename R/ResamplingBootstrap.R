@@ -28,24 +28,26 @@
 #' task$filter(1:10)
 #'
 #' # Instantiate Resampling
-#' rb = rsmp("bootstrap", repeats = 2, ratio = 1)
-#' rb$instantiate(task)
+#' bootstrap = rsmp("bootstrap", repeats = 2, ratio = 1)
+#' bootstrap$instantiate(task)
 #'
 #' # Individual sets:
-#' rb$train_set(1)
-#' rb$test_set(1)
-#' intersect(rb$train_set(1), rb$test_set(1))
+#' bootstrap$train_set(1)
+#' bootstrap$test_set(1)
+#'
+#' # Disjunct sets:
+#' intersect(bootstrap$train_set(1), bootstrap$test_set(1))
 #'
 #' # Internal storage:
-#' rb$instance$M # Matrix of counts
+#' bootstrap$instance$M # Matrix of counts
 ResamplingBootstrap = R6Class("ResamplingBootstrap", inherit = Resampling,
   public = list(
     #' @description
     #' Creates a new instance of this [R6][R6::R6Class] class.
     initialize = function() {
-      ps = ParamSet$new(list(
-        ParamInt$new("repeats", lower = 1L, tags = "required"),
-        ParamDbl$new("ratio", lower = 0, upper = 1, tags = "required"))
+      ps = ps(
+        ratio   = p_dbl(0, upper = 1, tags = "required"),
+        repeats = p_int(1L, tags = "required")
       )
       ps$values = list(ratio = 1, repeats = 30L)
 

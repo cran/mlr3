@@ -30,13 +30,13 @@ test_that("Rows return ordered", {
   expect_true(is.unsorted(x$t))
 
   task$col_roles$order = "t"
-  x = task$data()
+  x = task$data(ordered = TRUE)
   expect_integer(x$t, sorted = TRUE, any.missing = FALSE)
 
   x = task$data(ordered = FALSE)
   expect_true(is.unsorted(x$t))
 
-  x = task$data(rows = sample(nrow(data), 50))
+  x = task$data(rows = sample(nrow(data), 50), ordered = TRUE)
   expect_integer(x$t, sorted = TRUE, any.missing = FALSE)
 })
 
@@ -220,17 +220,6 @@ test_that("stratify works", {
   expect_list(tab$row_id, "integer")
 })
 
-test_that("$uris works", {
-  data = cbind(iris, uri = as.character(1:150))
-  task = TaskClassif$new("uri_test", data, target = "Species")
-  expect_null(task$uris)
-
-  task$set_col_roles("uri", "uri")
-  tab = task$uris
-  expect_data_table(tab, ncols = 2, nrows = 150)
-  expect_names(names(tab), permutation.of = c("row_id", "uri"))
-})
-
 test_that("groups/weights work", {
   b = as_data_backend(data.table(x = runif(20), y = runif(20), w = runif(20), g = sample(letters[1:2], 20, replace = TRUE)))
   task = TaskRegr$new("test", b, target = "y")
@@ -257,7 +246,9 @@ test_that("groups/weights work", {
   task$col_roles$group = character()
   expect_true("groups" %nin% task$properties)
 
-  expect_error({task$col_roles$weight = c("w", "g")}, "up to one")
+  expect_error({
+    task$col_roles$weight = c("w", "g")
+  }, "up to one")
 })
 
 test_that("ordered factors (#95)", {
@@ -305,7 +296,7 @@ test_that("task$droplevels works", {
 test_that("task$missings() works", {
   task = tsk("pima")
   x = task$missings()
-  y = map_int(task$data(), function(x) sum(is.na(x)))
+  y = map_int(task$data(), count_missing)
   expect_equal(x, y[match(names(x), names(y))])
 })
 
@@ -325,8 +316,12 @@ test_that("switch columns on and off (#301)", {
 test_that("row roles setters", {
   task = tsk("iris")
 
-  expect_error({ task$row_roles$use = "foo" })
-  expect_error({ task$row_roles$foo = 1L })
+  expect_error({
+    task$row_roles$use = "foo"
+  })
+  expect_error({
+    task$row_roles$foo = 1L
+  })
 
   task$row_roles$use = 1:20
   expect_equal(task$nrow, 20L)
@@ -335,7 +330,9 @@ test_that("row roles setters", {
 test_that("col roles getters/setters", {
   task = tsk("iris")
 
-  expect_error({ task$col_roles$feature = "foo" })
+  expect_error({
+    task$col_roles$feature = "foo"
+  })
 
   # additional roles allowed (#558)
   task$col_roles$foo = "Species"
@@ -387,4 +384,46 @@ test_that("Task$set_col_roles", {
   task$set_col_roles("age", add_to = "feature", remove_from = "weight")
   expect_true("age" %in% task$feature_names)
   expect_null(task$weights)
+})
+
+test_that("$add_strata", {
+  task = tsk("mtcars")
+  expect_equal(task$col_roles$stratum, character())
+
+  task$add_strata("mpg", bins = 5)
+  expect_set_equal(task$col_roles$stratum, "..stratum_mpg")
+  expect_data_table(task$strata, nrows = 5)
+
+  task$add_strata("am", bins = 3)
+  expect_set_equal(task$col_roles$stratum, c("..stratum_mpg", "..stratum_am"))
+
+  task = tsk("mtcars")
+  task$add_strata(c("mpg", "am"), bins = c(2, 5))
+  expect_set_equal(task$col_roles$stratum, c("..stratum_mpg", "..stratum_am"))
+})
+
+test_that("column labels", {
+  task = tsk("iris")
+  expect_character(task$col_info$label)
+  expect_true(allMissing(task$col_info$label))
+  expect_true(allMissing(task$labels))
+
+  task$labels = c(Species = "sp")
+  expect_equal(task$labels[["Species"]], "sp")
+  expect_equal(count_missing(task$labels), 4L)
+
+  fn = task$feature_names
+  task$labels = set_names(toupper(fn), fn)
+  expect_equal(unname(task$labels), c("sp", toupper(fn)))
+
+  expect_error({ task$labels = c(foo = "as") }, "names")
+
+  dt = data.table(id = c(task$target_names, task$feature_names))
+  dt$label = tolower(dt$id)
+
+  task$labels = dt
+  expect_equal(
+    unname(task$labels),
+    tolower(c(task$target_names, task$feature_names))
+  )
 })

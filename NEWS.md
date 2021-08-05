@@ -1,3 +1,37 @@
+# mlr3 0.12.0
+
+* New method to assign labels to columns in tasks: `Task$label()`.
+  These will be used in visualizations in the future.
+* New method to add stratification variables: `Task$add_strata()`.
+* New helper function `partition()` to split a task into a training and test
+  set.
+* New standardized getter `loglik()` for class `Learner`.
+* New measures `"aic"` and `"bic"` to compute the Akaike Information Criterion
+  or the Bayesian Information Criterion, respectively.
+* New Resampling method: `ResamplingCustomCV`. Creates a custom resampling split
+  based on the levels of a user-provided factor variable.
+* New argument `encapsulate` for `resample()` and `benchmark()` to conveniently
+  enable encapsulation and also set the fallback learner to the
+  featureless learner. This is simply for convenience, configuring each learner
+  individually is still possible and allows a more fine-grained control (#634,
+  #642).
+* New field `parallel_predict` for `Learner` to enable parallel predictions via
+  the future backend. This currently is only enabled while calling the
+  `$predict()` or `$predict_newdata` methods and is disabled during `resample()`
+  and `benchmark()` where you have other means to parallelize.
+* Deprecated public (and already documented as internal) field `$data` in
+  `ResampleResult` and `BenchmarkResult` to simplify the API and avoid
+  confusion. The converter `as.data.table()` can be used instead to access the
+  internal data.
+* Measures now have formal hyperparameters. A popular example where this is
+  required is the F1 score, now implemented with customizable `beta`.
+* Changed default of argument `ordered` in `Task$data()` from `TRUE` to `FALSE`.
+* Fixed getter `ResamplingRepeatedCV$folds()` (#643).
+* Fixed hashing of some measures.
+* Removed experimental column role `uri`. This role be split up into multiple
+  roles by the `mlr3keras` package.
+
+
 # mlr3 0.11.0
 
 * Added a `as.data.table.Resampling` method.
@@ -52,7 +86,7 @@
   featureless tasks.
 * Fixed [ResampleResult] ignoring argument `predict_sets` for returned
   [Prediction] objects.
-* Compability with new version of `lgr`.
+* Compatibility with new version of `lgr`.
 
 # mlr3 0.7.0
 
