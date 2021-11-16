@@ -408,19 +408,47 @@ run_autotest = function(learner, N = 30L, exclude = NULL, predict_types = learne
 #'   run_paramtest(learner, fun, exclude)
 #'   expect_true(result, info = result$error)
 #' })
-run_paramtest = function(learner, fun, exclude = character()) {
-  par_learner = learner$param_set$ids()
-  par_package = formalArgs(fun)
+run_paramtest = function(learner, fun, exclude = character(), tag = NULL) {
+  par_learner = learner$param_set$ids(tags = tag)
+  if (checkmate::test_list(fun)) {
+    # for xgboost we pass a character vector with info scraped from the web
+    if (any(mlr3misc::map_lgl(fun, function(x) class(x) == "character"))) {
+      which = which(mlr3misc::map_lgl(fun, function(x) class(x) == "character"))
+      par_package = fun[[which]]
+      fun[[which]] = NULL
+      other = unlist(lapply(fun, formalArgs))
+      par_package = append(par_package, other)
+    } else {
+      par_package = unlist(lapply(fun, formalArgs))
+    }
+  } else {
+    par_package = formalArgs(fun)
+  }
 
   missing = setdiff(par_package, par_learner)
   missing = setdiff(missing, c(exclude, "..."))
 
-  if (length(missing) == 0L)
+  extra = setdiff(par_learner, par_package)
+  extra = setdiff(extra, c(exclude, "..."))
+
+  if (length(c(missing, extra)) == 0L)
     return(TRUE)
 
-  error = sprintf("Missing parameters for learner '%s': %s",
-    learner$id, paste0(missing, collapse = ", "))
-  list(ok = FALSE, error = error, missing = missing)
+  merror = eerror = character(0)
+
+  if (length(missing) > 0) {
+    merror = sprintf("Missing parameters for learner '%s': %s",
+      learner$id, paste0(missing, collapse = ", "))
+  }
+
+  if (length(extra) > 0) {
+    eerror = sprintf("Extra parameters for learner '%s': %s",
+      learner$id, paste0(extra, collapse = ", "))
+  }
+
+  error = paste(merror, eerror, sep = "\n")
+
+  list(ok = FALSE, error = error, missing = missing, extra = extra)
 }
 
 # Helper function to convert a vector of probabilities to a matrix

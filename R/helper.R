@@ -41,7 +41,7 @@ allow_partial_matching = list(
 # tries to avoid the overhead of data.table for small tables
 fget = function(tab, i, j, key) {
   if (nrow(tab) > 1000L) {
-    tab[list(i), j, on = key, with = FALSE, nomatch = NULL][[1L]]
+    ijoin(tab, i, j, key)[[1L]]
   } else {
     x = tab[[key]]
     if (is.character(x) && is.character(i)) {
@@ -50,6 +50,13 @@ fget = function(tab, i, j, key) {
       tab[[j]][x %in% i]
     }
   }
+}
+
+ijoin = function(tab, .__i__, .__j__, .__key__) {
+  if (!is.list(.__i__)) {
+    .__i__ = list(.__i__)
+  }
+  tab[.__i__, .__j__, with = FALSE, nomatch = NULL, on = .__key__]
 }
 
 allow_utf8_names = function() {
@@ -82,4 +89,39 @@ set_encapsulation = function(learners, encapsulate) {
     }
   }
   learners
+}
+
+future_stdout = function() {
+  if (inherits(plan(), "sequential")) {
+    NA
+  } else {
+    TRUE
+  }
+}
+
+
+format_list_item = function(x, ...) {
+  UseMethod("format_list_item")
+}
+
+#' @description
+#' Calculate task hashes of resampling iterations.
+#'
+#' @param task ([Task]).
+#' @param resampling ([Resampling]).
+#'
+#' @return (`character()`).
+#' @noRd
+task_hashes = function(task, resampling) {
+  row_roles = get_private(task)$.row_roles
+  map_chr(seq_len(resampling$iters), function(i) {
+    train_set = resampling$train_set(i)
+    row_roles$use = train_set
+    calculate_hash(class(task), task$id, task$backend$hash, task$col_info, row_roles, task$col_roles,
+      task$properties)
+  })
+}
+
+catn = function(..., file = "") {
+  cat(paste0(..., collapse = "\n"), "\n", sep = "", file = file)
 }

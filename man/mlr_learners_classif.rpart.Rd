@@ -22,7 +22,7 @@ lrn("classif.rpart")
 \item Task type: \dQuote{classif}
 \item Predict Types: \dQuote{response}, \dQuote{prob}
 \item Feature Types: \dQuote{logical}, \dQuote{integer}, \dQuote{numeric}, \dQuote{factor}, \dQuote{ordered}
-\item Required Packages: \CRANpkg{rpart}
+\item Required Packages: \CRANpkg{mlr3}, \CRANpkg{rpart}
 }
 }
 
@@ -30,7 +30,7 @@ lrn("classif.rpart")
 \tabular{lllll}{
    Id \tab Type \tab Default \tab Range \tab Levels \cr
    cp \tab numeric \tab 0.01 \tab \eqn{[0, 1]}{[0, 1]} \tab - \cr
-   keep_model \tab logical \tab FALSE \tab \eqn{(-\infty, \infty)}{(-Inf, Inf)} \tab TRUE, FALSE \cr
+   keep_model \tab logical \tab FALSE \tab - \tab TRUE, FALSE \cr
    maxcompete \tab integer \tab 4 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
    maxdepth \tab integer \tab 30 \tab \eqn{[1, 30]}{[1, 30]} \tab - \cr
    maxsurrogate \tab integer \tab 5 \tab \eqn{[0, \infty)}{[0, Inf)} \tab - \cr
@@ -51,16 +51,20 @@ Routledge.
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
-\url{https://mlr3book.mlr-org.com/learners.html}
+\url{https://mlr3book.mlr-org.com/basics.html#learners}
 \item Package \CRANpkg{mlr3learners} for a solid collection of essential learners.
 \item Package \href{https://github.com/mlr-org/mlr3extralearners}{mlr3extralearners} for more learners.
 \item \link[mlr3misc:Dictionary]{Dictionary} of \link[=Learner]{Learners}: \link{mlr_learners}
 \item \code{as.data.table(mlr_learners)} for a table of available \link[=Learner]{Learners} in the running session (depending on the loaded packages).
+\item \CRANpkg{mlr3pipelines} to combine learners with pre- and postprocessing steps.
+\item Package \CRANpkg{mlr3viz} for some generic visualizations.
 \item Extension packages for additional task types:
 \itemize{
 \item \CRANpkg{mlr3proba} for probabilistic supervised regression and survival analysis.
 \item \CRANpkg{mlr3cluster} for unsupervised clustering.
 }
+\item \CRANpkg{mlr3tuning} for tuning of hyperparameters, \CRANpkg{mlr3tuningspaces}
+for established default tuning spaces.
 }
 
 Other Learner: 
@@ -69,6 +73,7 @@ Other Learner:
 \code{\link{Learner}},
 \code{\link{mlr_learners_classif.debug}},
 \code{\link{mlr_learners_classif.featureless}},
+\code{\link{mlr_learners_regr.debug}},
 \code{\link{mlr_learners_regr.featureless}},
 \code{\link{mlr_learners_regr.rpart}},
 \code{\link{mlr_learners}}
