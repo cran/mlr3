@@ -42,7 +42,7 @@ test_that("as_benchmark_result.ResampleResult", {
   measures = list(msr("classif.ce"), msr("classif.acc"))
   bmr = as_benchmark_result(rr)
   expect_benchmark_result(bmr)
-  expect_equal(nrow(get_private(bmr)$.data), nrow(private(rr)$.data))
+  expect_equal(nrow(get_private(bmr)$.data), nrow(get_private(rr)$.data))
   expect_set_equal(bmr$uhashes, rr$uhash)
   aggr = bmr$aggregate()
   expect_data_table(aggr, nrows = 1)
@@ -55,15 +55,15 @@ test_that("discarding model", {
 })
 
 test_that("inputs are cloned", {
-  expect_different_address(task, private(rr)$.data$data$tasks$task[[1]])
-  expect_different_address(learner, private(rr)$.data$data$learners$learner[[1]])
-  expect_different_address(resampling, private(rr)$.data$data$resamplings$resampling[[1]])
+  expect_different_address(task, get_private(rr)$.data$data$tasks$task[[1]])
+  expect_different_address(learner, get_private(rr)$.data$data$learners$learner[[1]])
+  expect_different_address(resampling, get_private(rr)$.data$data$resamplings$resampling[[1]])
 })
 
 test_that("memory footprint", {
-  expect_equal(nrow(private(rr)$.data$data$learners), 1L)
-  expect_equal(nrow(private(rr)$.data$data$tasks), 1L)
-  expect_equal(nrow(private(rr)$.data$data$resamplings), 1L)
+  expect_equal(nrow(get_private(rr)$.data$data$learners), 1L)
+  expect_equal(nrow(get_private(rr)$.data$data$tasks), 1L)
+  expect_equal(nrow(get_private(rr)$.data$data$resamplings), 1L)
 })
 
 test_that("predict_type is checked", {
@@ -125,4 +125,21 @@ test_that("encapsulation", {
   expect_class(rr$learner$fallback, "LearnerClassifFeatureless")
   expect_equal(rr$learner$encapsulate[["train"]], "evaluate")
   expect_equal(rr$learner$encapsulate[["predict"]], "evaluate")
+})
+
+test_that("disable cloning", {
+  task = tsk("iris")
+  learner = lrn("classif.featureless")
+  resampling = rsmp("holdout")
+
+  rr = resample(task, learner, resampling, clone = c())
+
+  expect_same_address(task, rr$task)
+  expect_same_address(learner, get_private(rr)$.data$data$learners$learner[[1]])
+  expect_same_address(resampling, rr$resampling)
+
+  expect_identical(task$hash, rr$task$hash)
+  expect_identical(learner$hash, rr$learner$hash)
+  expect_true(resampling$is_instantiated)
+  expect_identical(resampling$hash, rr$resampling$hash)
 })

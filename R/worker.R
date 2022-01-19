@@ -61,13 +61,16 @@ learner_train = function(learner, task, row_ids = NULL, mode = "train") {
     train_time = learner$state$train_time + result$elapsed
   }
 
+  proto = task$data(rows = integer())
   learner$state = insert_named(learner$state, list(
     model = result$result,
     log = log,
     train_time = result$elapsed,
     param_vals = learner$param_set$values,
     task_hash = task$hash,
-    task_prototype = task$data()[0, ]
+    data_prototype = proto,
+    task_prototype = proto, # deprecated, remove for mlr3learners > 0.5.1
+    mlr3_version = packageVersion("mlr3")
   ))
 
   if (is.null(result$result)) {
@@ -117,6 +120,16 @@ learner_predict = function(learner, task, row_ids = NULL) {
 
   assert_task(task)
   assert_learner(learner)
+
+  if (getOption("mlr3.warn_version_mismatch", TRUE)) {
+    v_train = learner$state$mlr3_version
+    v_predict = packageVersion("mlr3")
+
+    if (!is.null(v_train) && v_train != v_predict) {
+      warningf("Detected version mismatch: Learner '%s' has been trained with mlr3 version '%s', not matching currently installed version '%s'",
+        learner$id, v_train, v_predict)
+    }
+  }
 
   # subset to test set w/o cloning
   if (!is.null(row_ids)) {
@@ -202,14 +215,17 @@ learner_predict = function(learner, task, row_ids = NULL) {
 }
 
 
-workhorse = function(iteration, task, learner, resampling, lgr_threshold = NULL, store_models = FALSE, pb = NULL,
+workhorse = function(iteration, task, learner, resampling, lgr_threshold, store_models = FALSE, pb = NULL,
   mode = "train") {
   if (!is.null(pb)) {
     pb(sprintf("%s|%s|i:%i", task$id, learner$id, iteration))
   }
 
-  if (!is.null(lgr_threshold)) {
-    lg$set_threshold(lgr_threshold)
+  # restore logger thresholds
+  for (package in names(lgr_threshold)) {
+    logger = lgr::get_logger(package)
+    threshold = lgr_threshold[package]
+    logger$set_threshold(threshold)
   }
 
   lg$info("%s learner '%s' on task '%s' (iter %i/%i)",

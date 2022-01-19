@@ -4,7 +4,7 @@
 #' @import mlr3misc
 #' @import palmerpenguins
 #' @importFrom R6 R6Class is.R6
-#' @importFrom utils data head tail getFromNamespace
+#' @importFrom utils data head tail getFromNamespace packageVersion
 #' @importFrom graphics plot
 #' @importFrom stats predict rnorm runif sd contr.treatment
 #' @importFrom uuid UUIDgenerate
@@ -46,6 +46,8 @@
 #'   non-ascii characters in column names. This is an experimental and temporal option to
 #'   pave the way for text analysis, and will likely be removed in a future version of the package.
 #'   analysis.
+#' * `"mlr3.warn_version_mismatch"`: Set to `FALSE` to silence warnings raised during predict if a learner has been
+#'   trained with a different version version of mlr3.
 #'
 #' @references
 #' `r tools::toRd(citation("mlr3"))`
@@ -75,6 +77,7 @@ dummy_import = function() {
     lg$set_threshold("warn")
   }
 
+  mlr_reflections$loggers[["mlr3"]] = lg
 } # nocov end
 
 leanify_package()

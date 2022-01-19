@@ -44,6 +44,7 @@ Returns \code{NULL} if the \link{ResultData} is empty.}
 \item \href{#method-iterations}{\code{ResultData$iterations()}}
 \item \href{#method-tasks}{\code{ResultData$tasks()}}
 \item \href{#method-learners}{\code{ResultData$learners()}}
+\item \href{#method-learner_states}{\code{ResultData$learner_states()}}
 \item \href{#method-resamplings}{\code{ResultData$resamplings()}}
 \item \href{#method-predictions}{\code{ResultData$predictions()}}
 \item \href{#method-prediction}{\code{ResultData$prediction()}}
@@ -92,30 +93,6 @@ Returns all unique hashes (\code{uhash} values) of all included \link{ResampleRe
 \describe{
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
 }
 \if{html}{\out{</div>}}
 }
@@ -137,30 +114,6 @@ Returns the number of recorded iterations / experiments.
 \describe{
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
 }
 \if{html}{\out{</div>}}
 }
@@ -180,30 +133,6 @@ Returns a table of included \link{Task}s.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 }
@@ -228,30 +157,6 @@ Returns a table of included \link{Learner}s.
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{states}}{(\code{logical(1)})\cr
 If \code{TRUE}, returns a learner for each iteration/experiment in the \link{ResultData} object.
 If \code{FALSE}, returns an exemplary learner (without state) for each \link{ResampleResult}.}
@@ -267,6 +172,26 @@ returning the learners.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-learner_states"></a>}}
+\if{latex}{\out{\hypertarget{method-learner_states}{}}}
+\subsection{Method \code{learner_states()}}{
+Returns a list of states of included \link{Learner}s without reassembling the learners.
+
+@return list of \code{list()}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ResultData$learner_states(view = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{view}}{\code{character(1)}\cr
+Single \code{uhash} to restrict the results to.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-resamplings"></a>}}
 \if{latex}{\out{\hypertarget{method-resamplings}{}}}
 \subsection{Method \code{resamplings()}}{
@@ -278,30 +203,6 @@ Returns a table of included \link{Resampling}s.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 }
@@ -323,30 +224,6 @@ Returns a list of \link{Prediction} objects.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 
@@ -389,30 +266,6 @@ Returns a combined \link{Prediction} objects.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 
@@ -522,30 +375,6 @@ Combines internal tables into a single flat \code{\link[=data.table]{data.table(
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{reassemble_learners}}{(\code{logical(1)})\cr
 Reassemble the tasks?}
 
@@ -588,30 +417,6 @@ Get a table of recorded learner logs.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
-\item{\code{view}}{\code{character(1)}\cr
-Single \code{uhash} to restrict the results to.}
-
 \item{\code{view}}{\code{character(1)}\cr
 Single \code{uhash} to restrict the results to.}
 

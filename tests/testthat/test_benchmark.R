@@ -82,8 +82,8 @@ test_that("bmr$combine()", {
     expect_benchmark_result(bmr_combined)
 
     expect_data_table(get_private(bmr)$.data$data$fact, nrows = 18L)
-    expect_data_table(private(bmr_new)$.data$data$fact, nrows = 6L)
-    expect_data_table(private(bmr_combined)$.data$data$fact, nrows = 24L)
+    expect_data_table(get_private(bmr_new)$.data$data$fact, nrows = 6L)
+    expect_data_table(get_private(bmr_combined)$.data$data$fact, nrows = 24L)
 
     expect_false("pima" %in% bmr$tasks$task_id)
     expect_true("pima" %in% bmr_new$tasks$task_id)
@@ -93,7 +93,7 @@ test_that("bmr$combine()", {
   rr = resample(tsk("zoo"), lrn("classif.rpart"), rsmp("holdout"))
   bmr2 = c(combined[[1]], rr)
   expect_benchmark_result(bmr2)
-  expect_data_table(private(bmr2)$.data$data$fact, nrows = 25L)
+  expect_data_table(get_private(bmr2)$.data$data$fact, nrows = 25L)
 })
 
 test_that("empty bmr", {
@@ -105,7 +105,7 @@ test_that("empty bmr", {
 
   bmr_new$combine(bmr)
   expect_benchmark_result(bmr_new)
-  expect_data_table(private(bmr_new)$.data$data$fact, nrows = nrow(get_private(bmr)$.data))
+  expect_data_table(get_private(bmr_new)$.data$data$fact, nrows = nrow(get_private(bmr)$.data))
 })
 
 test_that("bmr$resample_result()", {
@@ -128,7 +128,7 @@ test_that("inputs are cloned", {
   rr = bmr$resample_result(1)
 
   expect_different_address(task, rr$task)
-  expect_different_address(learner, private(rr)$.data$data$learner_components$learner[[1L]])
+  expect_different_address(learner, get_private(rr)$.data$data$learner_components$learner[[1L]])
   expect_different_address(resampling, rr$resampling)
 })
 
@@ -304,4 +304,25 @@ test_that("encapsulatiion", {
     expect_equal(learner$encapsulate[["train"]], "evaluate")
     expect_equal(learner$encapsulate[["predict"]], "evaluate")
   }
+})
+
+test_that("disable cloning", {
+  grid = benchmark_grid(
+    tasks = tsk("iris"),
+    learners = lrn("classif.featureless"),
+    resamplings = rsmp("holdout")
+  )
+  task = grid$task[[1L]]
+  learner = grid$learner[[1L]]
+  resampling = grid$resampling[[1L]]
+
+  bmr = benchmark(grid, clone = c())
+
+  expect_same_address(task, bmr$tasks$task[[1]])
+  expect_same_address(learner, get_private(bmr)$.data$data$learners$learner[[1]])
+  expect_same_address(resampling, bmr$resamplings$resampling[[1]])
+
+  expect_identical(task$hash, bmr$tasks$task[[1]]$hash)
+  expect_identical(learner$hash, bmr$learners$learner[[1]]$hash)
+  expect_identical(resampling$hash, bmr$resamplings$resampling[[1]]$hash)
 })

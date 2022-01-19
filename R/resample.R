@@ -13,8 +13,10 @@
 #' @template param_store_backends
 #' @template param_encapsulate
 #' @template param_allow_hotstart
+#' @template param_clone
 #' @return [ResampleResult].
 #'
+#' @template section_predict_sets
 #' @template section_parallelization
 #' @template section_progress_bars
 #' @template section_logging
@@ -52,26 +54,27 @@
 #' bmr1 = as_benchmark_result(rr)
 #' bmr2 = as_benchmark_result(rr_featureless)
 #' print(bmr1$combine(bmr2))
-resample = function(task, learner, resampling, store_models = FALSE, store_backends = TRUE, encapsulate = NA_character_, allow_hotstart = FALSE) {
-  task = assert_task(as_task(task, clone = TRUE))
-  learner = assert_learner(as_learner(learner, clone = TRUE))
-  resampling = assert_resampling(as_resampling(resampling))
+resample = function(task, learner, resampling, store_models = FALSE, store_backends = TRUE, encapsulate = NA_character_, allow_hotstart = FALSE, clone = c("task", "learner", "resampling")) {
+  assert_subset(clone, c("task", "learner", "resampling"))
+  task = assert_task(as_task(task, clone = "task" %in% clone))
+  learner = assert_learner(as_learner(learner, clone = "learner" %in% clone))
+  resampling = assert_resampling(as_resampling(resampling, clone = "resampling" %in% clone))
   assert_flag(store_models)
   assert_flag(store_backends)
   assert_learnable(task, learner)
 
   set_encapsulation(list(learner), encapsulate)
-  instance = resampling$clone(deep = TRUE)
-  if (!instance$is_instantiated) {
-    instance = instance$instantiate(task)
+  if (!resampling$is_instantiated) {
+    resampling = resampling$instantiate(task)
   }
-  n = instance$iters
+  n = resampling$iters
   pb = if (isNamespaceLoaded("progressr")) {
     # NB: the progress bar needs to be created in this env
     pb = progressr::progressor(steps = n)
   } else {
     NULL
   }
+  lgr_threshold = map_int(mlr_reflections$loggers, "threshold")
 
   grid = if (allow_hotstart) {
    hotstart_grid = map_dtr(seq_len(n), function(iteration) {
@@ -91,8 +94,9 @@ resample = function(task, learner, resampling, store_models = FALSE, store_backe
       }
       data.table(learner = list(learner), mode = mode)
     })
+
     # null hotstart stack to reduce overhead in parallelization
-    map(hotstart_grid$learner, function(learner) {
+    walk(hotstart_grid$learner, function(learner) {
       learner$hotstart_stack = NULL
       learner
     })
@@ -105,7 +109,7 @@ resample = function(task, learner, resampling, store_models = FALSE, store_backe
     lg$info("Running resample() sequentially in debug mode with %i iterations", n)
     res = mapply(workhorse,
       iteration = seq_len(n), learner = grid$learner, mode = grid$mode,
-      MoreArgs = list(task = task, resampling = instance, store_models = store_models, lgr_threshold = lg$threshold,
+      MoreArgs = list(task = task, resampling = resampling, store_models = store_models, lgr_threshold = lgr_threshold,
         pb = pb), SIMPLIFY = FALSE
     )
   } else {
@@ -113,7 +117,7 @@ resample = function(task, learner, resampling, store_models = FALSE, store_backe
 
     res = future.apply::future_mapply(workhorse,
       iteration = seq_len(n), learner = grid$learner, mode = grid$mode,
-      MoreArgs = list(task = task, resampling = instance, store_models = store_models, lgr_threshold = lg$threshold,
+      MoreArgs = list(task = task, resampling = resampling, store_models = store_models, lgr_threshold = lgr_threshold,
       pb = pb),
       SIMPLIFY = FALSE, future.globals = FALSE, future.scheduling = structure(TRUE, ordering = "random"),
       future.packages = "mlr3", future.seed = TRUE, future.stdout = future_stdout()
@@ -124,7 +128,7 @@ resample = function(task, learner, resampling, store_models = FALSE, store_backe
     task = list(task),
     learner = grid$learner,
     learner_state = map(res, "learner_state"),
-    resampling = list(instance),
+    resampling = list(resampling),
     iteration = seq_len(n),
     prediction = map(res, "prediction"),
     uhash = UUIDgenerate()

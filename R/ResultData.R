@@ -10,6 +10,7 @@
 #' used in [save()]/[saveRDS()] or during parallelization) leads to objects with unreasonable memory
 #' requirements.
 #'
+#' @template param_view
 #' @keywords internal
 #' @export
 #' @examples
@@ -79,8 +80,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Returns all unique hashes (`uhash` values) of all included [ResampleResult]s.
     #'
-    #' @template param_view
-    #'
     #' @return `character()`.
     uhashes = function(view = NULL) {
       if (is.null(view)) {
@@ -92,8 +91,6 @@ ResultData = R6Class("ResultData",
 
     #' @description
     #' Returns the number of recorded iterations / experiments.
-    #'
-    #' @template param_view
     #'
     #' @return `integer(1)`.
     iterations = function(view = NULL) {
@@ -107,8 +104,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Returns a table of included [Task]s.
     #'
-    #' @template param_view
-    #'
     #' @return `data.table()` with columns `"task_hash"` (`character()`) and `"task"` ([Task]).
     tasks = function(view = NULL) {
       .__ii__ = private$get_view_index(view)
@@ -119,7 +114,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Returns a table of included [Learner]s.
     #'
-    #' @template param_view
     #' @param states (`logical(1)`)\cr
     #'   If `TRUE`, returns a learner for each iteration/experiment in the [ResultData] object.
     #'   If `FALSE`, returns an exemplary learner (without state) for each [ResampleResult].
@@ -153,9 +147,17 @@ ResultData = R6Class("ResultData",
     },
 
     #' @description
-    #' Returns a table of included [Resampling]s.
+    #' Returns a list of states of included [Learner]s without reassembling the learners.
     #'
-    #' @template param_view
+    #'  @return list of `list()`
+    learner_states = function(view = NULL) {
+      .__ii__ = private$get_view_index(view)
+      learner_hash = learner_state = NULL
+      self$data$fact[.__ii__][order(learner_hash), learner_state]
+    },
+
+    #' @description
+    #' Returns a table of included [Resampling]s.
     #'
     #' @return `data.table()` with columns `"resampling_hash"` (`character()`) and `"resampling"` ([Resampling]).
     resamplings = function(view = NULL) {
@@ -167,7 +169,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Returns a list of [Prediction] objects.
     #'
-    #' @template param_view
     #' @template param_predict_sets
     #'
     #' @return `list()` of [Prediction].
@@ -179,7 +180,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Returns a combined [Prediction] objects.
     #'
-    #' @template param_view
     #' @template param_predict_sets
     #'
     #' @return [Prediction].
@@ -267,7 +267,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Combines internal tables into a single flat [data.table()].
     #'
-    #' @template param_view
     #' @param reassemble_learners (`logical(1)`)\cr
     #'   Reassemble the tasks?
     #' @param convert_predictions (`logical(1)`)\cr
@@ -301,7 +300,6 @@ ResultData = R6Class("ResultData",
     #' @description
     #' Get a table of recorded learner logs.
     #'
-    #' @template param_view
     #' @param condition (`character(1)`)
     #'   The condition to extract. One of `"message"`, `"warning"` or `"error"`.
     #'
