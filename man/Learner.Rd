@@ -143,7 +143,7 @@ These packages are loaded, but not attached.}
 \item{\code{predict_sets}}{(\code{character()})\cr
 During \code{\link[=resample]{resample()}}/\code{\link[=benchmark]{benchmark()}}, a \link{Learner} can predict on multiple sets.
 Per default, a learner only predicts observations in the test set (\code{predict_sets == "test"}).
-To change this behavior, set \code{predict_sets} to a non-empty subset of \verb{\{"train", "test", "validation"\}}.
+To change this behavior, set \code{predict_sets} to a non-empty subset of \verb{\{"train", "test", "holdout"\}}.
 Each set yields a separate \link{Prediction} object.
 Those can be combined via getters in \link{ResampleResult}/\link{BenchmarkResult}, or \link{Measure}s can be configured
 to operate on specific subsets of the calculated prediction sets.}
@@ -161,11 +161,6 @@ Timeout for the learner's train and predict steps, in seconds.
 This works differently for different encapsulation methods, see
 \code{\link[mlr3misc:encapsulate]{mlr3misc::encapsulate()}}.
 Default is \code{c(train = Inf, predict = Inf)}.
-Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/technical.html#error-handling}}
-
-\item{\code{fallback}}{(\link{Learner})\cr
-Learner which is fitted to impute predictions in case that either the model fitting or the prediction of the top learner is not successful.
-Requires you to enable encapsulation, otherwise errors are not caught and the execution is terminated before the fallback learner kicks in.
 Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/technical.html#error-handling}}
 
 \item{\code{man}}{(\code{character(1)})\cr
@@ -218,6 +213,13 @@ Controls how to execute the code in internal train and predict methods.
 Must be a named character vector with names \code{"train"} and \code{"predict"}.
 Possible values are \code{"none"}, \code{"evaluate"} (requires package \CRANpkg{evaluate}) and \code{"callr"} (requires package \CRANpkg{callr}).
 See \code{\link[mlr3misc:encapsulate]{mlr3misc::encapsulate()}} for more details.}
+
+\item{\code{fallback}}{(\link{Learner})\cr
+Learner which is fitted to impute predictions in case that either the model fitting or the prediction of the top learner is not successful.
+Requires encapsulation, otherwise errors are not caught and the execution is terminated before the fallback learner kicks in.
+If you have not set encapsulation manually before, setting the fallback learner automatically
+activates encapsulation using the \CRANpkg{evaluate} package.
+Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/technical.html#error-handling}}
 
 \item{\code{hotstart_stack}}{(\link{HotstartStack})\cr.
 Stores \code{HotstartStack}.}

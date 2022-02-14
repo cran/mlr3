@@ -59,7 +59,7 @@ generate_generic_tasks = function(learner, proto) {
   sel = proto$feature_types[list(learner$feature_types), "id", on = "type", with = FALSE][[1L]]
   tasks$utf8_feature_names = proto$clone(deep = TRUE)$select(sel)
   old = sel[1L]
-  new = "äü + öß"
+  new = "\u00e4 + \u1e9e"
   tasks$utf8_feature_names$rename(old, new)
 
   # make sure that task ids match list names
@@ -366,14 +366,14 @@ run_autotest = function(learner, N = 30L, exclude = NULL, predict_types = learne
         sanity_runs[[predict_type]] = run
       }
     }
-  }
-
-  if (task$task_type == "classif" && length(sanity_runs) > 1L) {
-    responses = lapply(sanity_runs, function(r) r$prediction$response)
-    if (!Reduce(all.equal, responses)) {
-      return(make_err("Response is different for different predict types"))
+    if (task$task_type == "classif" && length(sanity_runs) > 1L) {
+      responses = lapply(sanity_runs, function(r) r$prediction$response)
+      if (!isTRUE(Reduce(all.equal, responses))) {
+        return(make_err("Response is different for different predict types"))
+      }
     }
   }
+
 
 
   return(TRUE)

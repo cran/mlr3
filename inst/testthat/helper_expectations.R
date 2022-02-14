@@ -344,8 +344,8 @@ expect_learner = function(lrn, task = NULL) {
 
   checkmate::expect_character(lrn$predict_types, any.missing = FALSE, min.chars = 1L, unique = TRUE)
   checkmate::expect_choice(lrn$predict_type, lrn$predict_types)
-  checkmate::expect_subset(lrn$feature_types, mlr_reflections$task_feature_types, empty.ok = FALSE)
-  checkmate::expect_subset(lrn$data_formats, mlr_reflections$data_formats, empty.ok = FALSE)
+  checkmate::expect_subset(lrn$feature_types, mlr3::mlr_reflections$task_feature_types, empty.ok = FALSE)
+  checkmate::expect_subset(lrn$data_formats, mlr3::mlr_reflections$data_formats, empty.ok = FALSE)
 
   expect_hash(lrn$hash)
   expect_hash(lrn$phash)
@@ -633,4 +633,20 @@ expect_resultdata = function(rdata, consistency = TRUE) {
     expect_fsetequal(data$fact, data$learner_components, "learner_hash")
     expect_fsetequal(data$fact, data$resamplings, "resampling_hash")
   }
+}
+
+expect_no_extra_pkgs = function(expr, pkgs = character()) {
+  req_pkgs = function(expr, pkgs) {
+    library("mlr3")
+    for (pkg in pkgs) {
+      requireNamespace(pkg, quietly = TRUE)
+    }
+    snap = loadedNamespaces()
+    eval(expr)
+    setdiff(loadedNamespaces(), snap)
+  }
+
+  skip_if_not_installed("callr")
+  extra = callr::r(req_pkgs, args = list(substitute(expr), pkgs = pkgs))
+  expect_identical(extra, character(), info = "extra packages required for construction")
 }

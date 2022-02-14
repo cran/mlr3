@@ -6,7 +6,7 @@
 #' @importFrom R6 R6Class is.R6
 #' @importFrom utils data head tail getFromNamespace packageVersion
 #' @importFrom graphics plot
-#' @importFrom stats predict rnorm runif sd contr.treatment
+#' @importFrom stats predict rnorm runif sd contr.treatment model.frame terms
 #' @importFrom uuid UUIDgenerate
 #' @importFrom parallelly availableCores
 #' @importFrom future nbrOfWorkers plan
@@ -58,6 +58,7 @@ dummy_import = function() {
   # this function is required to silence R CMD check
   mlbench::mlbench.xor
   mlr3measures::mse
+  evaluate::evaluate
 } # nocov end
 
 
@@ -76,6 +77,10 @@ dummy_import = function() {
   if (Sys.getenv("IN_PKGDOWN") == "true") {
     lg$set_threshold("warn")
   }
+
+  register_namespace_callback(pkgname, "mlr", function(...) {
+    warning("Packages 'mlr3' and 'mlr' are conflicting and should not be loaded in the same session")
+  })
 
   mlr_reflections$loggers[["mlr3"]] = lg
 } # nocov end
