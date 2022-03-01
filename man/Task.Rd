@@ -108,6 +108,10 @@ Other Task:
 Identifier of the object.
 Used in tables, plot and text output.}
 
+\item{\code{label}}{(\code{character(1)})\cr
+Label for this object.
+Can be used in tables, plot and text output instead of the ID.}
+
 \item{\code{task_type}}{(\code{character(1)})\cr
 Task type, e.g. \code{"classif"} or \code{"regr"}.
 
@@ -183,7 +187,7 @@ Each row (observation) can have an arbitrary number of roles in the learning tas
 \itemize{
 \item \code{"use"}: Use in train / predict / resampling.
 \item \code{"holdout"}: Observations are hold back unless explicitly queried.
-Can be used, e.g., as truly independent validation set.
+Can be used, e.g., as truly independent holdout set.
 }
 
 \code{row_roles} is a named list whose elements are named by row role and each element is an \code{integer()} vector of row ids.
@@ -311,7 +315,7 @@ Creates a new instance of this \link[R6:R6Class]{R6} class.
 
 Note that this object is typically constructed via a derived classes, e.g. \link{TaskClassif} or \link{TaskRegr}.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Task$new(id, task_type, backend, extra_args = list())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Task$new(id, task_type, backend, label = NA_character_, extra_args = list())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -327,6 +331,9 @@ Must be an element of \link[=mlr_reflections]{mlr_reflections$task_types$type}.}
 \item{\code{backend}}{(\link{DataBackend})\cr
 Either a \link{DataBackend}, or any object which is convertible to a \link{DataBackend} with \code{as_data_backend()}.
 E.g., a \code{data.frame()} will be converted to a \link{DataBackendDataTable}.}
+
+\item{\code{label}}{(\code{character(1)})\cr
+Label for the new instance.}
 
 \item{\code{extra_args}}{(named \code{list()})\cr
 Named list of constructor arguments, required for converting task types
