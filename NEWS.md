@@ -1,3 +1,13 @@
+# mlr3 0.13.4
+
+* Added new options for parallelization (`"mlr3.exec_random"` and
+  `"mlr3.exec_chunk_size"`). These options are passed down to the respective map
+  functions in package `future.apply`.
+* Fixed runtime measures depending on specific predict types (#832).
+* Added `head()` and `tail()` methods for `Task`.
+* Improved printing of multiple objects.
+
+
 # mlr3 0.13.3
 
 * Most objects now have a new (optional) field `label`, i.e. `Task`,

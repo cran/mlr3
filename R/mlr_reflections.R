@@ -46,8 +46,11 @@
 #' * `learner_predict_types` (list of list of `character()`)\cr
 #'   List of lists of supported [Learner] predict_types, named by their task type.
 #'
+#' * `learner_param_tags` (`character()`)\cr
+#'   Character vector of allowed 'tags' for the [paradox::Param]s of a [Learner].
+#'
 #' * `predict_sets` (`character()`)\cr
-#'   Vector of possible predict sets. Currently supported are `"train"` and `"test"`.
+#'   Vector of possible predict sets. Currently supported are `"train"`, `"test"` and `"holdout"`.
 #'
 #' * `measure_properties` (list of `character()`)\cr
 #'   List of vectors of supported [Measure] properties, named by their task type.
@@ -89,7 +92,7 @@ local({
   )
 
   mlr_reflections$task_row_roles = c(
-    "use", "holdout"
+    "use", "holdout", "early_stopping"
   )
 
   tmp = c("feature", "target", "name", "order", "stratum", "group", "weight")
@@ -120,6 +123,9 @@ local({
     classif = list(response = "response", prob = c("response", "prob")),
     regr = list(response = "response", se = c("response", "se"), distr = c("response", "se", "distr"))
   )
+
+  # Allowed tags for parameters
+  mlr_reflections$learner_param_tags = c("train", "predict", "hotstart", "importance", "threads", "required")
 
   ### Prediction
   mlr_reflections$predict_sets = c("train", "test", "holdout")

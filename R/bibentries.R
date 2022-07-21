@@ -1,7 +1,7 @@
 #' @importFrom utils bibentry
 bibentries = c(
   anderson_1936 = bibentry("article",
-    url       = "https://www.jstor.org/stable/2394164",
+    doi       = "10.2307/2394164",
     year      = "1936",
     month     = "9",
     publisher = "JSTOR",
