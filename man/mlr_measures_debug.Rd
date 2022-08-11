@@ -32,8 +32,10 @@ msr("debug")
 }
 
 \section{Parameters}{
-
-, |Id       |Type    |Default |Range                |, |:--------|:-------|:-------|:--------------------|, |na_ratio |numeric |-       |\eqn{[0, 1]}{[0, 1]} |
+\tabular{llll}{
+   Id \tab Type \tab Default \tab Range \cr
+   na_ratio \tab numeric \tab - \tab \eqn{[0, 1]}{[0, 1]} \cr
+}
 }
 
 \examples{
@@ -46,7 +48,7 @@ rr$score(measure)
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
-\url{https://mlr3book.mlr-org.com/02-basics-train-predict.html}
+\url{https://mlr3book.mlr-org.com/basics.html#train-predict}
 \item Package \CRANpkg{mlr3measures} for the scoring functions.
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
 \code{as.data.table(mlr_measures)} for a table of available \link[=Measure]{Measures} in the running session (depending on the loaded packages).

@@ -11,8 +11,6 @@ The cost matrix is stored as slot \verb{$costs}.
 
 For calculation of the score, the confusion matrix is multiplied element-wise with the cost matrix.
 The costs are then summed up (and potentially divided by the number of observations if \code{normalize} is set to \code{TRUE} (default)).
-
-This measure requires the \link{Task} during scoring to ensure that the rows and columns of the cost matrix are in the same order as in the confusion matrix.
 }
 \section{Dictionary}{
 
@@ -36,8 +34,10 @@ msr("classif.costs")
 }
 
 \section{Parameters}{
-
-, |Id        |Type    |Default |Levels      |, |:---------|:-------|:-------|:-----------|, |normalize |logical |TRUE    |TRUE, FALSE |
+\tabular{llll}{
+   Id \tab Type \tab Default \tab Levels \cr
+   normalize \tab logical \tab TRUE \tab TRUE, FALSE \cr
+}
 }
 
 \examples{
@@ -64,7 +64,7 @@ rr$aggregate(m)
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
-\url{https://mlr3book.mlr-org.com/02-basics-train-predict.html}
+\url{https://mlr3book.mlr-org.com/basics.html#train-predict}
 \item Package \CRANpkg{mlr3measures} for the scoring functions.
 \link[mlr3misc:Dictionary]{Dictionary} of \link[=Measure]{Measures}: \link{mlr_measures}
 \code{as.data.table(mlr_measures)} for a table of available \link[=Measure]{Measures} in the running session (depending on the loaded packages).
@@ -103,6 +103,10 @@ Other classification measures:
 \code{\link{mlr_measures_classif.fpr}},
 \code{\link{mlr_measures_classif.fp}},
 \code{\link{mlr_measures_classif.logloss}},
+\code{\link{mlr_measures_classif.mauc_au1p}},
+\code{\link{mlr_measures_classif.mauc_au1u}},
+\code{\link{mlr_measures_classif.mauc_aunp}},
+\code{\link{mlr_measures_classif.mauc_aunu}},
 \code{\link{mlr_measures_classif.mbrier}},
 \code{\link{mlr_measures_classif.mcc}},
 \code{\link{mlr_measures_classif.npv}},
@@ -122,6 +126,10 @@ Other multiclass classification measures:
 \code{\link{mlr_measures_classif.bacc}},
 \code{\link{mlr_measures_classif.ce}},
 \code{\link{mlr_measures_classif.logloss}},
+\code{\link{mlr_measures_classif.mauc_au1p}},
+\code{\link{mlr_measures_classif.mauc_au1u}},
+\code{\link{mlr_measures_classif.mauc_aunp}},
+\code{\link{mlr_measures_classif.mauc_aunu}},
 \code{\link{mlr_measures_classif.mbrier}}
 }
 \concept{Measure}

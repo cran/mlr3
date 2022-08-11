@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.13.4
+Version: 0.14.0
 Authors@R: 
     c(person(given = "Michel",
              family = "Lang",
@@ -60,7 +60,7 @@ Depends: R (>= 3.1.0)
 Imports: R6 (>= 2.4.1), backports, checkmate (>= 2.0.0), data.table (>=
         1.14.2), evaluate, future, future.apply (>= 1.5.0), lgr (>=
         0.3.4), mlbench, mlr3measures (>= 0.4.1), mlr3misc (>= 0.10.0),
-        parallelly, palmerpenguins, paradox (>= 0.8.0), uuid
+        parallelly, palmerpenguins, paradox (>= 0.10.0), uuid
 Suggests: Matrix, callr, codetools, datasets, distr6, future.callr,
         mlr3data, progressr, remotes, rpart, testthat (>= 3.1.0)
 Encoding: UTF-8
@@ -103,15 +103,15 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'as_measure.R' 'as_prediction.R' 'as_prediction_classif.R'
         'as_prediction_data.R' 'as_prediction_regr.R'
         'as_resample_result.R' 'as_resampling.R' 'as_result_data.R'
-        'as_task.R' 'as_task_classif.R' 'as_task_regr.R' 'assertions.R'
-        'auto_convert.R' 'benchmark.R' 'benchmark_grid.R'
-        'bibentries.R' 'default_measures.R' 'fix_factor_levels.R'
-        'helper.R' 'helper_data_table.R' 'helper_exec.R'
-        'helper_hashes.R' 'helper_print.R' 'install_pkgs.R'
-        'mlr_sugar.R' 'partition.R' 'predict.R' 'reexports.R'
-        'resample.R' 'set_threads.R' 'task_converters.R' 'worker.R'
-        'zzz.R'
-Packaged: 2022-07-21 12:21:51 UTC; michel
+        'as_task.R' 'as_task_classif.R' 'as_task_regr.R'
+        'as_task_unsupervised.R' 'assertions.R' 'auto_convert.R'
+        'benchmark.R' 'benchmark_grid.R' 'bibentries.R'
+        'default_measures.R' 'fix_factor_levels.R' 'helper.R'
+        'helper_data_table.R' 'helper_exec.R' 'helper_hashes.R'
+        'helper_print.R' 'install_pkgs.R' 'mlr_sugar.R' 'partition.R'
+        'predict.R' 'reexports.R' 'resample.R' 'set_threads.R'
+        'task_converters.R' 'worker.R' 'zzz.R'
+Packaged: 2022-08-11 07:27:04 UTC; michel
 Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -123,4 +123,4 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Marc Becker [ctb] (<https://orcid.org/0000-0002-8115-0400>)
 Maintainer: Michel Lang <michellang@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-07-21 13:30:02 UTC
+Date/Publication: 2022-08-11 09:40:02 UTC

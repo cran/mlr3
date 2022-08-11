@@ -36,8 +36,10 @@ msr("classif.fbeta")
 }
 
 \section{Parameters}{
-
-, |Id   |Type    |Default |Range                       |, |:----|:-------|:-------|:---------------------------|, |beta |integer |-       |\eqn{[0, \infty)}{[0, Inf)} |
+\tabular{llll}{
+   Id \tab Type \tab Default \tab Range \cr
+   beta \tab integer \tab - \tab \eqn{[0, \infty)}{[0, Inf)} \cr
+}
 }
 
 \section{Meta Information}{
@@ -72,6 +74,10 @@ Other classification measures:
 \code{\link{mlr_measures_classif.fpr}},
 \code{\link{mlr_measures_classif.fp}},
 \code{\link{mlr_measures_classif.logloss}},
+\code{\link{mlr_measures_classif.mauc_au1p}},
+\code{\link{mlr_measures_classif.mauc_au1u}},
+\code{\link{mlr_measures_classif.mauc_aunp}},
+\code{\link{mlr_measures_classif.mauc_aunu}},
 \code{\link{mlr_measures_classif.mbrier}},
 \code{\link{mlr_measures_classif.mcc}},
 \code{\link{mlr_measures_classif.npv}},

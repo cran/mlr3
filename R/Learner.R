@@ -142,7 +142,7 @@ Learner = R6Class("Learner",
     #' This works differently for different encapsulation methods, see
     #' [mlr3misc::encapsulate()].
     #' Default is `c(train = Inf, predict = Inf)`.
-    #' Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/06-technical-error-handling.html}
+    #' Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/technical.html#error-handling}
     timeout = c(train = Inf, predict = Inf),
 
     #' @template field_man
@@ -283,7 +283,7 @@ Learner = R6Class("Learner",
       if (is.null(pdata)) {
         return(NULL)
       } else {
-        as_prediction(check_prediction_data(pdata))
+        as_prediction(pdata)
       }
     },
 
@@ -476,7 +476,7 @@ Learner = R6Class("Learner",
     #' Requires encapsulation, otherwise errors are not caught and the execution is terminated before the fallback learner kicks in.
     #' If you have not set encapsulation manually before, setting the fallback learner automatically
     #' activates encapsulation using the \CRANpkg{evaluate} package.
-    #' Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/06-technical-error-handling.html}
+    #' Also see the section on error handling the mlr3book: \url{https://mlr3book.mlr-org.com/technical.html#error-handling}
     fallback = function(rhs) {
       if (missing(rhs)) {
         return(private$.fallback)
@@ -550,6 +550,10 @@ get_log_condition = function(state, condition) {
   }
 }
 
+#' @export
+default_values.Learner = function(x, search_space, task, ...) { # nolint
+  default_values(x$param_set)[search_space$ids()]
+}
 # #' @export
 # format_list_item.Learner = function(x, ...) { # nolint
 #   sprintf("<lrn:%s>", x$id)
