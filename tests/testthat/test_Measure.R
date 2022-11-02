@@ -123,3 +123,10 @@ test_that("time_train works with different predict type (#832)", {
   res = rr$score(msr("time_train"))
   expect_number(res$time_train)
 })
+
+test_that("time_train is > 0", {
+  skip_on_cran()
+  rr = resample(tsk("iris"), lrn("classif.debug"), rsmp("holdout"))
+  res = rr$score(msr("time_train"))
+  expect_gt(res$time_train, 0)
+})

@@ -237,7 +237,10 @@ Learner = R6Class("Learner",
         mode = "hotstart"
       }
 
-      learner_train(learner, task, row_ids, mode)
+      train_row_ids = if (!is.null(row_ids)) row_ids else task$row_roles$use
+      test_row_ids = task$row_roles$test
+
+      learner_train(learner, task, train_row_ids = row_ids, test_row_ids = test_row_ids, mode = mode)
 
       # store the task w/o the data
       self$state$train_task = task_rm_backend(task$clone(deep = TRUE))
@@ -485,8 +488,8 @@ Learner = R6Class("Learner",
       if (!is.null(rhs)) {
         assert_learner(rhs, task_type = self$task_type)
         if (!identical(self$predict_type, rhs$predict_type)) {
-          warningf("The fallback learner '%s' and the base learner '%s' have different predict types",
-            rhs$predict_type, self$predict_type)
+          warningf("The fallback learner '%s' and the base learner '%s' have different predict types: '%s' != '%s'.",
+            rhs$id, self$id, rhs$predict_type, self$predict_type)
         }
         if (is.null(private$.encapsulate)) {
           private$.encapsulate = c(train = "evaluate", predict = "evaluate")
