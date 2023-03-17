@@ -173,7 +173,8 @@ Learner = R6Class("Learner",
 
     #' @description
     #' Helper for print outputs.
-    format = function() {
+    #' @param ... (ignored).
+    format = function(...) {
       sprintf("<%s:%s>", class(self)[1L], self$id)
     },
 
@@ -240,7 +241,7 @@ Learner = R6Class("Learner",
       train_row_ids = if (!is.null(row_ids)) row_ids else task$row_roles$use
       test_row_ids = task$row_roles$test
 
-      learner_train(learner, task, train_row_ids = row_ids, test_row_ids = test_row_ids, mode = mode)
+      learner_train(learner, task, train_row_ids = train_row_ids, test_row_ids = test_row_ids, mode = mode)
 
       # store the task w/o the data
       self$state$train_task = task_rm_backend(task$clone(deep = TRUE))
@@ -535,7 +536,7 @@ Learner = R6Class("Learner",
 
 
 #' @export
-rd_info.Learner = function(obj) {
+rd_info.Learner = function(obj, ...) {
   x = c("",
     sprintf("* Task type: %s", rd_format_string(obj$task_type)),
     sprintf("* Predict Types: %s", rd_format_string(obj$predict_types)),

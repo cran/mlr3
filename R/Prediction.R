@@ -50,7 +50,8 @@ Prediction = R6Class("Prediction",
 
     #' @description
     #' Helper for print outputs.
-    format = function() {
+    #' @param ... (ignored).
+    format = function(...) {
       sprintf("<%s>", class(self)[1L])
     },
 

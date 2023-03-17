@@ -42,7 +42,7 @@ Other Measure:
 \code{\link{mlr_measures_aic}},
 \code{\link{mlr_measures_bic}},
 \code{\link{mlr_measures_classif.costs}},
-\code{\link{mlr_measures_debug}},
+\code{\link{mlr_measures_debug_classif}},
 \code{\link{mlr_measures_elapsed_time}},
 \code{\link{mlr_measures_oob_error}},
 \code{\link{mlr_measures_selected_features}},
@@ -265,9 +265,16 @@ The referenced help package can be opened via method \verb{$help()}.}
 \subsection{Method \code{format()}}{
 Helper for print outputs.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Measure$format()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Measure$format(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Measure-print"></a>}}

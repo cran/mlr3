@@ -135,7 +135,8 @@ Resampling = R6Class("Resampling",
 
     #' @description
     #' Helper for print outputs.
-    format = function() {
+    #' @param ... (ignored).
+    format = function(...) {
       sprintf("<%s>", class(self)[1L])
     },
 
@@ -173,10 +174,10 @@ Resampling = R6Class("Resampling",
 
       if (is.null(strata)) {
         if (is.null(groups)) {
-          instance = private$.sample(task$row_ids, task)
+          instance = private$.sample(task$row_ids, task = task)
         } else {
           private$.groups = groups
-          instance = private$.sample(unique(groups$group))
+          instance = private$.sample(unique(groups$group), task = task)
         }
       } else {
         if (!is.null(groups)) {

@@ -144,6 +144,9 @@ Defaults to \code{NA}, but can be set by child classes.}
 \item{\code{extra_args}}{(named \code{list()})\cr
 Additional arguments set during construction.
 Required for \code{\link[=convert_task]{convert_task()}}.}
+
+\item{\code{mlr3_version}}{(\code{package_version})\cr
+Package version of \code{mlr3} used to create the task.}
 }
 \if{html}{\out{</div>}}
 }
@@ -369,9 +372,16 @@ Opens the corresponding help page referenced by field \verb{$man}.
 \subsection{Method \code{format()}}{
 Helper for print outputs.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Task$format()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Task$format(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-print"></a>}}
