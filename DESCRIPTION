@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.15.0
+Version: 0.16.0
 Authors@R: 
   c(
     person("Michel", "Lang", , "michellang@gmail.com", role = c("cre", "aut"),
@@ -91,10 +91,11 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'benchmark.R' 'benchmark_grid.R' 'bibentries.R'
         'default_measures.R' 'fix_factor_levels.R' 'helper.R'
         'helper_data_table.R' 'helper_exec.R' 'helper_hashes.R'
-        'helper_print.R' 'install_pkgs.R' 'mlr_sugar.R' 'partition.R'
-        'predict.R' 'reexports.R' 'resample.R' 'set_threads.R'
-        'task_converters.R' 'worker.R' 'zzz.R'
-Packaged: 2023-03-17 13:41:54 UTC; michel
+        'helper_print.R' 'install_pkgs.R' 'mlr_sugar.R'
+        'mlr_test_helpers.R' 'partition.R' 'predict.R' 'reexports.R'
+        'resample.R' 'set_threads.R' 'task_converters.R' 'worker.R'
+        'zzz.R'
+Packaged: 2023-05-05 16:56:17 UTC; michel
 Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -110,4 +111,4 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Sebastian Fischer [ctb] (<https://orcid.org/0000-0002-9609-3197>)
 Maintainer: Michel Lang <michellang@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-03-17 14:20:02 UTC
+Date/Publication: 2023-05-05 17:40:02 UTC
