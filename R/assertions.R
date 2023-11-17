@@ -259,7 +259,7 @@ assert_prediction = function(prediction, .var.name = vname(prediction)) {
 
 
 #' @export
-#' @param resample_result ([ResampleResult]).
+#' @param rr ([ResampleResult]).
 #' @rdname mlr_assertions
 assert_resample_result = function(rr, .var.name = vname(rr)) {
   assert_class(rr, "ResampleResult", .var.name = .var.name)
@@ -331,4 +331,17 @@ assert_row_sums = function(prob) {
       }
     }
   }
+}
+
+assert_param_values = function(x, n_learners = NULL, .var.name = vname(x)) {
+  assert_list(x, len = n_learners, .var.name = .var.name)
+
+  ok = every(x, function(x) {
+    test_list(x) && every(x, test_list, names = "unique", null.ok = TRUE)
+  })
+
+  if (!ok) {
+    stopf("'%s' must be a three-time nested list and the most inner list must be named", .var.name)
+  }
+  invisible(x)
 }

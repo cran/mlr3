@@ -152,7 +152,7 @@ Task = R6Class("Task",
       private$.col_roles = named_list(mlr_reflections$task_col_roles[[task_type]], character())
       private$.col_roles$feature = setdiff(cn, self$backend$primary_key)
       self$extra_args = assert_list(extra_args, names = "unique")
-      self$mlr3_version = packageVersion("mlr3")
+      self$mlr3_version = mlr_reflections$package_version
     },
 
     #' @description
@@ -203,6 +203,15 @@ Task = R6Class("Task",
       iwalk(after[after %in% names(roles)], function(role, str) {
         catn(str_indent(sprintf("* %s:", str), roles[[role]]))
       })
+
+      nrows = list(test = length(self$row_roles$test), holdout = length(self$row_roles$holdout))
+      if (nrows$test || nrows$holdout) {
+        str = paste(c(
+          if(nrows$test) sprintf("%i (test)", nrows$test),
+          if(nrows$holdout) sprintf("%i (holdout)", nrows$holdout)
+          ), collapse = ", ")
+        catf(str_indent("* Additional Row Roles:", str))
+      }
     },
 
     #' @description
@@ -1040,14 +1049,29 @@ task_check_col_roles = function(self, new_roles) {
   new_roles
 }
 
-# collect column information of a backend.
-# This currently includes:
-# * storage type
-# * levels (for character / factor / ordered), but not for the primary key column
+#' @title Column Information for Backend
+#'
+#' @description
+#' Collects column information for backend.
+#'
+#' Currently, this includes:
+#' * storage type
+#' * levels (factor / ordered), but not for the primary key column
+#'
+#' @param x (any)\cr
+#'   A backend-like object for which to retrieve column information.
+#' @param ... (any)\cr
+#'   Additional arguments.
+#'
+#' @export
+#' @keywords internal
 col_info = function(x, ...) {
   UseMethod("col_info")
 }
 
+#' @rdname col_info
+#' @param primary_key (`character()`)\cr
+#'   The primary key of the backend.
 #' @export
 col_info.data.table = function(x, primary_key = character(), ...) { # nolint
   types = map_chr(x, function(x) class(x)[1L])
@@ -1056,6 +1080,7 @@ col_info.data.table = function(x, primary_key = character(), ...) { # nolint
   data.table(id = names(types), type = unname(types), levels = levels, key = "id")
 }
 
+#' @rdname col_info
 #' @export
 col_info.DataBackend = function(x, ...) { # nolint
   types = map_chr(x$head(1L), function(x) class(x)[1L])

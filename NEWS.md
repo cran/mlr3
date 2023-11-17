@@ -1,10 +1,23 @@
+# mlr3 0.17.0
+
+* Learners cannot be added to the `HotstartStack` anymore when the model is missing.
+* Learners bellow the `hotstart_threshold` are not added to the `HotstartStack` anymore.
+* The `learner$state$train_time` in hotstarted learners is now only the time of the last training.
+* Added debug messages to the hotstart stack.
+* Fixed bug where the `HotstartStack` did not work with column roles set in the task.
+* The `design` of `benchmark()` can now include parameter settings.
+* Speed up resampling by removing unnecessary calls to `packageVersion()`.
+* Fix boston housing data set.
+* Export generic function `col_info` to allow adding new methods for backends.
+* Task printer includes row roles now.
+* Add `"mlr3.exec_chunk_bins"` option to split the resampling iterations into a number of bins.
+
 # mlr3 0.16.1
 
 * Function `data.table()` is now re-exported.
 * Fixed a test which randomly failed.
 * Improved documentation.
 * Add encapsulation mode `"try"`, which works similar to `"none"` but captures errors
-
 
 
 # mlr3 0.16.0

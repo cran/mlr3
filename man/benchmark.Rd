@@ -18,7 +18,8 @@ benchmark(
 Data frame (or \code{\link[data.table:data.table]{data.table::data.table()}}) with three columns: "task", "learner", and "resampling".
 Each row defines a resampling by providing a \link{Task}, \link{Learner} and an instantiated \link{Resampling} strategy.
 The helper function \code{\link[=benchmark_grid]{benchmark_grid()}} can assist in generating an exhaustive design (see examples) and
-instantiate the \link{Resampling}s per \link{Task}.}
+instantiate the \link{Resampling}s per \link{Task}.
+Additionally, you can set the additional column 'param_values', see \code{\link[=benchmark_grid]{benchmark_grid()}}.}
 
 \item{store_models}{(\code{logical(1)})\cr
 Store the fitted model in the resulting object=
@@ -176,7 +177,7 @@ rr$resampling$train_set(2)
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
-\url{https://mlr3book.mlr-org.com/performance.html}
+\url{https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking}
 \item Package \CRANpkg{mlr3viz} for some generic visualizations.
 \item \CRANpkg{mlr3benchmark} for post-hoc analysis of benchmark results.
 }
