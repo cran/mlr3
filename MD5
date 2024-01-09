@@ -1,6 +1,6 @@
-ae32d2b33fc4ce13820e2bf40cc91de2 *DESCRIPTION
+26b9b995fb16f6fc05b72b5518220e22 *DESCRIPTION
 5c82d08885fb8878faccb3cc4ff22303 *NAMESPACE
-e1bdf35b0b887bb484c2ab8dd3973d86 *NEWS.md
+4acd83663159ef8cf209fd03ecc99b6e *NEWS.md
 1dce8336c4dd9410e9bb78efc485d256 *R/BenchmarkResult.R
 678ea77aab8450cbe0f6cb06de8bb69f *R/DataBackend.R
 1af172fce307e1977f7855f2c779c279 *R/DataBackendCbind.R
@@ -119,7 +119,7 @@ c7ae38ffd7166729490cf4d3de3c3e1a *R/predict.R
 310133f0b422fed6bc84359d5f82ea4e *R/worker.R
 7fbbada1ee9999aaf53549bd6d4949fb *R/zzz.R
 21e1fd2ea47bfaef9bef1552911f8773 *README.md
-7080893e02c49cd296d4424b9be55069 *build/partial.rdb
+8faf250d78a120ba4c7ea2186efddd24 *build/partial.rdb
 b8fce59d8df7d5e57d5c3387edff9852 *inst/CITATION
 5ef4fe41770952192ba0bbabc8e04e5f *inst/extdata/german_credit.rds
 6cb088fd2721f06e1f77e6adf8598e13 *inst/extdata/spam.rds
@@ -355,7 +355,7 @@ c94177cff86ea27be2a0afdaabd34c08 *tests/testthat/test_mlr_resamplings.R
 27eec2967c70b7cdd9d3034e65f21a7e *tests/testthat/test_mlr_sugar.R
 d525908d6ed3398ad59949be2e23493c *tests/testthat/test_mlr_task_generators.R
 005b984901ebf5f2dca25ba56c15addc *tests/testthat/test_mlr_tasks.R
-27df4778054c80fc00b1c997072b9c3f *tests/testthat/test_parallel.R
+c4e99e4b36803af0d9a4f672ae878a29 *tests/testthat/test_parallel.R
 c6ad913ff5651d1354aea25db2402f75 *tests/testthat/test_partition.R
 ad4b6f763b43a42b6e768927db07c102 *tests/testthat/test_predict.R
 617eb425157631302d311176c6f863eb *tests/testthat/test_resample.R
