@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.18.0
+Version: 0.19.0
 Authors@R: 
   c(
     person("Michel", "Lang", , "michellang@gmail.com", role = c("cre", "aut"),
@@ -42,7 +42,7 @@ BugReports: https://github.com/mlr-org/mlr3/issues
 Depends: R (>= 3.1.0)
 Imports: R6 (>= 2.4.1), backports, checkmate (>= 2.0.0), data.table (>=
         1.15.0), evaluate, future, future.apply (>= 1.5.0), lgr (>=
-        0.3.4), mlbench, mlr3measures (>= 0.4.1), mlr3misc (>= 0.14.0),
+        0.3.4), mlbench, mlr3measures (>= 0.4.1), mlr3misc (>= 0.15.0),
         parallelly, palmerpenguins, paradox (>= 0.10.0), RhpcBLASctl,
         uuid
 Suggests: Matrix, callr, codetools, datasets, future.callr, mlr3data,
@@ -92,11 +92,11 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'benchmark.R' 'benchmark_grid.R' 'bibentries.R'
         'default_measures.R' 'fix_factor_levels.R' 'helper.R'
         'helper_data_table.R' 'helper_exec.R' 'helper_hashes.R'
-        'helper_print.R' 'install_pkgs.R' 'mlr_sugar.R'
+        'helper_print.R' 'install_pkgs.R' 'marshal.R' 'mlr_sugar.R'
         'mlr_test_helpers.R' 'partition.R' 'predict.R' 'reexports.R'
         'resample.R' 'set_threads.R' 'task_converters.R' 'worker.R'
         'zzz.R'
-Packaged: 2024-03-04 18:48:22 UTC; marc
+Packaged: 2024-04-24 14:22:51 UTC; marc
 Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -112,4 +112,4 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Sebastian Fischer [ctb] (<https://orcid.org/0000-0002-9609-3197>)
 Maintainer: Michel Lang <michellang@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-03-05 13:10:02 UTC
+Date/Publication: 2024-04-24 16:00:02 UTC
