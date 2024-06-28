@@ -1,9 +1,9 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.19.0
+Version: 0.20.0
 Authors@R: 
   c(
-    person("Michel", "Lang", , "michellang@gmail.com", role = c("cre", "aut"),
+    person("Michel", "Lang", , "michellang@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0001-9754-0393")),
     person("Bernd", "Bischl", , "bernd_bischl@gmx.net", role = "aut",
            comment = c(ORCID = "0000-0001-6002-6980")),
@@ -24,9 +24,9 @@ Authors@R:
            comment = c(ORCID = "0000-0001-9225-4654")),
     person("Lennart", "Schneider", , "lennart.sch@web.de", role = "ctb",
            comment = c(ORCID = "0000-0003-4152-5308")),
-    person("Marc", "Becker", , "marcbecker@posteo.de", role = "aut",
+    person("Marc", "Becker", , "marcbecker@posteo.de", role = c("cre", "aut"),
            comment = c(ORCID = "0000-0002-8115-0400")),
-    person("Sebastian", "Fischer", , "sebf.fischer@gmail.com", role = "ctb",
+    person("Sebastian", "Fischer", , "sebf.fischer@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0002-9609-3197"))
   )
 Description: Efficient, object-oriented programming on the
@@ -62,7 +62,8 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'LearnerRegrRpart.R' 'Measure.R' 'mlr_measures.R'
         'MeasureAIC.R' 'MeasureBIC.R' 'MeasureClassif.R'
         'MeasureClassifCosts.R' 'MeasureDebug.R' 'MeasureElapsedTime.R'
-        'MeasureOOBError.R' 'MeasureRegr.R' 'MeasureSelectedFeatures.R'
+        'MeasureInternalValidScore.R' 'MeasureOOBError.R'
+        'MeasureRegr.R' 'MeasureSelectedFeatures.R'
         'MeasureSimilarity.R' 'MeasureSimple.R' 'Prediction.R'
         'PredictionClassif.R' 'PredictionData.R'
         'PredictionDataClassif.R' 'PredictionDataRegr.R'
@@ -94,10 +95,10 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'DataBackend.R'
         'helper_data_table.R' 'helper_exec.R' 'helper_hashes.R'
         'helper_print.R' 'install_pkgs.R' 'marshal.R' 'mlr_sugar.R'
         'mlr_test_helpers.R' 'partition.R' 'predict.R' 'reexports.R'
-        'resample.R' 'set_threads.R' 'task_converters.R' 'worker.R'
-        'zzz.R'
-Packaged: 2024-04-24 14:22:51 UTC; marc
-Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
+        'resample.R' 'set_threads.R' 'set_validate.R'
+        'task_converters.R' 'worker.R' 'zzz.R'
+Packaged: 2024-06-27 14:44:55 UTC; marc
+Author: Michel Lang [aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
   Patrick Schratz [aut] (<https://orcid.org/0000-0003-0748-6624>),
@@ -108,8 +109,8 @@ Author: Michel Lang [cre, aut] (<https://orcid.org/0000-0001-9754-0393>),
   Florian Pfisterer [aut] (<https://orcid.org/0000-0001-8867-762X>),
   Raphael Sonabend [aut] (<https://orcid.org/0000-0001-9225-4654>),
   Lennart Schneider [ctb] (<https://orcid.org/0000-0003-4152-5308>),
-  Marc Becker [aut] (<https://orcid.org/0000-0002-8115-0400>),
-  Sebastian Fischer [ctb] (<https://orcid.org/0000-0002-9609-3197>)
-Maintainer: Michel Lang <michellang@gmail.com>
+  Marc Becker [cre, aut] (<https://orcid.org/0000-0002-8115-0400>),
+  Sebastian Fischer [aut] (<https://orcid.org/0000-0002-9609-3197>)
+Maintainer: Marc Becker <marcbecker@posteo.de>
 Repository: CRAN
-Date/Publication: 2024-04-24 16:00:02 UTC
+Date/Publication: 2024-06-28 08:30:02 UTC
