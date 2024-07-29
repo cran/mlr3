@@ -1,6 +1,6 @@
-738197dd3d17fd45f09edb1c0d1d1c23 *DESCRIPTION
-34a1e4a7926dde78c5a10a093052266f *NAMESPACE
-d346557c2cc1c5f853b1db93ce3cfe8e *NEWS.md
+d063180f10fc01751e0e8f922886a126 *DESCRIPTION
+f39d747db4903cab2b5ec80caf303dee *NAMESPACE
+40b6f243c4c06f4873efc4b4d1444a48 *NEWS.md
 8bce90f094cd17216c74e29ee7d01af9 *R/BenchmarkResult.R
 c1256978f7e849c3aaa59e0eded04ede *R/DataBackend.R
 1af172fce307e1977f7855f2c779c279 *R/DataBackendCbind.R
@@ -119,8 +119,8 @@ c7ae38ffd7166729490cf4d3de3c3e1a *R/predict.R
 680e0b1eb14d55d7e48b352d51b46c8d *R/set_threads.R
 3eb4b2909655ac8c90a2a32c6826f283 *R/set_validate.R
 9012df20c6484c6d88e44e1c478e8813 *R/task_converters.R
-15494a5f7e6e88ae061fca62885706ec *R/worker.R
-7fbbada1ee9999aaf53549bd6d4949fb *R/zzz.R
+b296a02a4d48b6284971a3db0a1dc0b3 *R/worker.R
+114c4b295d38961dfe1a895995985229 *R/zzz.R
 860c079c2e0dc8f03e79dbdadae8a430 *README.md
 7080893e02c49cd296d4424b9be55069 *build/partial.rdb
 b8fce59d8df7d5e57d5c3387edff9852 *inst/CITATION
@@ -184,7 +184,7 @@ e940729a79a088fc07a29c2123c4339f *man/figures/block.png
 fe772bb47c06d3729a733406a7290119 *man/figures/mlr3verse.svg
 3eb3b7f693c6350b7b57dc69304292fa *man/install_pkgs.Rd
 bdb9c618a6870f33800164a793b1a4f5 *man/marshaling.Rd
-f72b2395e8c6d4d7896b6bf9b4bd0d1c *man/mlr3-package.Rd
+6c51fba8062a1db86aa8fcfd4bcae93a *man/mlr3-package.Rd
 18f9dbd5ccc38fca978aeace8a97c697 *man/mlr_assertions.Rd
 24b19864c7d7fdfab33095f206118f27 *man/mlr_learners.Rd
 02de2443ae5100bad518194491181267 *man/mlr_learners_classif.debug.Rd
@@ -298,7 +298,7 @@ bd449166f82b79671f3ff15cac289ae6 *man/set_threads.Rd
 67a53ef9954596d334ebe76925731e58 *tests/testthat.R
 7759ee5c48f31643d1c4e762898029ef *tests/testthat/helper.R
 84da286ea1fe3a1474d8d5c5cbad13a7 *tests/testthat/helper_resampling.R
-2b69b9330ed308e8a1610139c7daeb32 *tests/testthat/setup.R
+caef4715a480aeccabac4ce2efb73bba *tests/testthat/setup.R
 4bb6927fc24ae5d098b1bf2c41cccead *tests/testthat/teardown.R
 5cd12839d8e906ec61222f80e97c40f3 *tests/testthat/test_DataBackend.R
 a8f2c300c4f4489d0a6675d72a05e15e *tests/testthat/test_DataBackendCbind.R
