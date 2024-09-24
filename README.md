@@ -19,12 +19,12 @@ Status](https://www.r-pkg.org/badges/version-ago/mlr3)](https://cran.r-project.o
 
 ## Resources (for users and developers)
 
--   We *started* writing a [book](https://mlr3book.mlr-org.com/). This
-    should be the central entry point to the package.
+-   We have written a [book](https://mlr3book.mlr-org.com/). This should
+    be the central entry point to the package.
 -   The [mlr-org website](https://mlr-org.com/) includes for example a
     [gallery](https://mlr-org.com/gallery.html) with case studies.
 -   [Reference manual](https://mlr3.mlr-org.com/reference/)
--   [FAQ](https://github.com/mlr-org/mlr3/wiki/FAQ)
+-   [FAQ](https://mlr-org.com/faq.html)
 -   Ask questions on [Stackoverflow (tag
     \#mlr3)](https://stackoverflow.com/questions/tagged/mlr3)
 -   **Extension Learners**
@@ -141,7 +141,7 @@ measure = msr("classif.acc")
 prediction$score(measure)
 ```
 
-    ## classif.acc
+    ## classif.acc 
     ##   0.9651163
 
 ### Resample
@@ -158,16 +158,16 @@ rr$score(measure)[, .(task_id, learner_id, iteration, classif.acc)]
 ```
 
     ##                     task_id    learner_id iteration classif.acc
-    ## 1: palmerpenguins::penguins classif.rpart         1   0.9391304
+    ## 1: palmerpenguins::penguins classif.rpart         1   0.8956522
     ## 2: palmerpenguins::penguins classif.rpart         2   0.9478261
-    ## 3: palmerpenguins::penguins classif.rpart         3   0.9298246
+    ## 3: palmerpenguins::penguins classif.rpart         3   0.9649123
 
 ``` r
 rr$aggregate(measure)
 ```
 
-    ## classif.acc
-    ##    0.938927
+    ## classif.acc 
+    ##   0.9361302
 
 ## Extension Packages
 
