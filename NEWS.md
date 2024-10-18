@@ -1,3 +1,9 @@
+# mlr3 0.21.1
+
+* feat: Throw warning when prediction and measure type do not match.
+* fix: The `mlr_reflections` were broken when an extension package was not loaded on the workers.
+  Extension packages must now register themselves in the `mlr_reflections$loaded_packages` field.
+
 # mlr3 0.21.0
 
 * BREAKING CHANGE: Deprecated `data_format` and `data_formats` for `Learner`, `Task`, and `DataBackend` classes.
