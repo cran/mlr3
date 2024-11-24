@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 0.21.1
+Version: 0.22.0
 Authors@R: 
   c(
     person("Michel", "Lang", , "michellang@gmail.com", role = "aut",
@@ -82,10 +82,11 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'warn_deprecated.R'
         'TaskGeneratorCircle.R' 'TaskGeneratorFriedman1.R'
         'TaskGeneratorMoons.R' 'TaskGeneratorSimplex.R'
         'TaskGeneratorSmiley.R' 'TaskGeneratorSpirals.R'
-        'TaskGeneratorXor.R' 'TaskRegr.R' 'TaskRegr_boston_housing.R'
-        'TaskRegr_mtcars.R' 'TaskUnsupervised.R'
-        'as_benchmark_result.R' 'as_data_backend.R' 'as_learner.R'
-        'as_measure.R' 'as_prediction.R' 'as_prediction_classif.R'
+        'TaskGeneratorXor.R' 'TaskRegr.R'
+        'TaskRegr_california_housing.R' 'TaskRegr_mtcars.R'
+        'TaskUnsupervised.R' 'as_benchmark_result.R'
+        'as_data_backend.R' 'as_learner.R' 'as_measure.R'
+        'as_prediction.R' 'as_prediction_classif.R'
         'as_prediction_data.R' 'as_prediction_regr.R'
         'as_resample_result.R' 'as_resampling.R' 'as_result_data.R'
         'as_task.R' 'as_task_classif.R' 'as_task_regr.R'
@@ -97,7 +98,7 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'warn_deprecated.R'
         'mlr_sugar.R' 'mlr_test_helpers.R' 'partition.R' 'predict.R'
         'reexports.R' 'resample.R' 'set_threads.R' 'set_validate.R'
         'task_converters.R' 'worker.R' 'zzz.R'
-Packaged: 2024-10-18 09:50:23 UTC; marc
+Packaged: 2024-11-23 20:18:29 UTC; marc
 Author: Michel Lang [aut] (<https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (<https://orcid.org/0000-0003-4481-5554>),
@@ -114,4 +115,4 @@ Author: Michel Lang [aut] (<https://orcid.org/0000-0001-9754-0393>),
   Lona Koers [ctb]
 Maintainer: Marc Becker <marcbecker@posteo.de>
 Repository: CRAN
-Date/Publication: 2024-10-18 10:40:14 UTC
+Date/Publication: 2024-11-24 13:30:02 UTC

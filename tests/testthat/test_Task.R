@@ -1,15 +1,10 @@
 test_that("Feature columns can be reordered", {
-  bh = load_dataset("BostonHousing", "mlbench")
-  bh$medv = NULL
+  task = tsk("california_housing")
+  new_order = shuffle(task$feature_names)
 
-  task = tsk("boston_housing")
-  task$col_roles$feature = setdiff(names(bh), "cmedv")
-
-  expect_equal(task$feature_names, setdiff(names(bh), "cmedv"))
-  expect_equal(names(task$data(rows = 1)), c("cmedv", setdiff(names(bh), "cmedv")))
-
-  task$col_roles$feature = shuffle(task$col_roles$feature)
-  expect_equal(names(task$data(rows = 1)), c("cmedv", task$col_roles$feature))
+  task$col_roles$feature = new_order
+  expect_equal(task$feature_names, new_order)
+  expect_equal(names(task$data(rows = 1)), c("median_house_value", new_order))
 })
 
 test_that("Task duplicates rows", {
@@ -665,4 +660,73 @@ test_that("cbind supports non-standard primary key (#961)", {
   task = as_task_regr(b, target = "y")
   task$cbind(data.table(x1 = 10:1))
   expect_true("x1" %in% task$feature_names)
+})
+
+test_that("$select changes hash", {
+  task = tsk("iris")
+  h1 = task$hash
+  task$select("Petal.Length")
+  h2 = task$hash
+  expect_false(h1 == h2)
+})
+
+test_that("$characteristics works", {
+  task = tsk("spam")
+  characteristics = list(foo = 1, bar = "a")
+  task$characteristics = characteristics
+
+  expect_snapshot(task)
+  expect_equal(task$characteristics, characteristics)
+
+  tsk_1 = tsk("spam")
+  tsk_1$characteristics = list(n = 300)
+  tsk_2 = tsk("spam")
+  tsk_2$characteristics = list(n = 200)
+
+  expect_true(tsk_1$hash != tsk_2$hash)
+
+  learner = lrn("classif.rpart")
+  resampling = rsmp("cv", folds = 3)
+
+  design = benchmark_grid(
+    tasks = list(tsk_1, tsk_2),
+    learners = learner,
+    resamplings = resampling
+  )
+
+  bmr = benchmark(design)
+  tab = as.data.table(bmr, task_characteristics = TRUE)
+  expect_names(names(tab), must.include = "n")
+  expect_subset(tab$n, c(300, 200))
+
+  tsk_1$characteristics = list(n = 300, f = 3)
+  tsk_2$characteristics = list(n = 200, f = 2)
+
+  design = benchmark_grid(
+    tasks = list(tsk_1, tsk_2),
+    learners = learner,
+    resamplings = resampling
+  )
+
+  bmr = benchmark(design)
+  tab = as.data.table(bmr, task_characteristics = TRUE)
+  expect_names(names(tab), must.include = c("n", "f"))
+  expect_subset(tab$n, c(300, 200))
+  expect_subset(tab$f, c(2, 3))
+
+  tsk_1$characteristics = list(n = 300, f = 2)
+  tsk_2$characteristics = list(n = 200)
+
+  design = benchmark_grid(
+    tasks = list(tsk_1, tsk_2),
+    learners = learner,
+    resamplings = resampling
+  )
+
+  bmr = benchmark(design)
+  tab = as.data.table(bmr, task_characteristics = TRUE)
+
+  expect_names(names(tab), must.include = c("n", "f"))
+  expect_subset(tab$n, c(300, 200))
+  expect_subset(tab$f, c(2, NA_real_))
 })

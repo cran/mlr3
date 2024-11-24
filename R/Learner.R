@@ -59,9 +59,6 @@
 #' * `oob_error(...)`: Returns the out-of-bag error of the model as `numeric(1)`.
 #'   The learner must be tagged with property `"oob_error"`.
 #'
-#' * `loglik(...)`: Extracts the log-likelihood (c.f. [stats::logLik()]).
-#'   This can be used in measures like [mlr_measures_aic] or [mlr_measures_bic].
-#'
 #' * `internal_valid_scores`: Returns the internal validation score(s) of the model as a named `list()`.
 #'   Only available for [`Learner`]s with the `"validation"` property.
 #'   If the learner is not trained yet, this returns `NULL`.
@@ -469,6 +466,7 @@ Learner = R6Class("Learner",
     #' If the training step or the predict step of the original learner fails, the fallback is used completely to predict predictions sets.
     #' If the original learner only partially fails during predict step (usually in the form of missing to predict some observations or producing some `NA`` predictions), these missing predictions are imputed by the fallback.
     #' Note that the fallback is always trained, as we do not know in advance whether prediction will fail.
+    #' If the training step fails, the `$model` field of the original learner is `NULL`.
     #'
     #' Also see the section on error handling the mlr3book:
     #' \url{https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-error-handling}
@@ -565,7 +563,9 @@ Learner = R6Class("Learner",
     },
 
 
-    #' @template field_hash
+    #' @field hash (`character(1)`)\cr
+    #' Hash (unique identifier) for this object.
+    #' The hash is calculated based on the learner id, the parameter settings, the predict type, the fallback hash, the parallel predict setting, the validate setting, and the predict sets.
     hash = function(rhs) {
       assert_ro_binding(rhs)
       calculate_hash(class(self), self$id, self$param_set$values, private$.predict_type,
@@ -573,8 +573,7 @@ Learner = R6Class("Learner",
     },
 
     #' @field phash (`character(1)`)\cr
-    #' Hash (unique identifier) for this partial object, excluding some components
-    #' which are varied systematically during tuning (parameter values).
+    #' Hash (unique identifier) for this partial object, excluding some components which are varied systematically during tuning (parameter values).
     phash = function(rhs) {
       assert_ro_binding(rhs)
       calculate_hash(class(self), self$id, private$.predict_type,

@@ -16,7 +16,7 @@
 #'    For example, for a classification task a single column must be marked as target column, and others as features.
 #'
 #' Predefined (toy) tasks are stored in the [dictionary][mlr3misc::Dictionary] [mlr_tasks],
-#' e.g. [`penguins`][mlr_tasks_penguins] or [`boston_housing`][mlr_tasks_boston_housing].
+#' e.g. [`penguins`][mlr_tasks_penguins] or [`california_housing`][mlr_tasks_california_housing].
 #' More toy tasks can be found in the dictionary after loading \CRANpkg{mlr3data}.
 #'
 #' @template param_id
@@ -253,6 +253,10 @@ Task = R6Class("Task",
       if (!is.null(private$.internal_valid_task)) {
         catf(str_indent("* Validation Task:", sprintf("(%ix%i)", private$.internal_valid_task$nrow, private$.internal_valid_task$ncol)))
       }
+
+      if (!is.null(self$characteristics)) {
+        catf(str_indent("* Characteristics: ", as_short_string(self$characteristics)))
+      }
     },
 
     #' @description
@@ -305,7 +309,8 @@ Task = R6Class("Task",
       data = self$backend$data(rows = rows, cols = query_cols)
 
       if (length(query_cols) && nrow(data) != length(rows)) {
-        stopf("DataBackend did not return the queried rows correctly: %i requested, %i received", length(rows), nrow(data))
+        stopf("DataBackend did not return the queried rows correctly: %i requested, %i received.
+        The resampling was probably instantiated on a different task.", length(rows), nrow(data))
       }
 
       if (length(rows) && ncol(data) != length(query_cols)) {
@@ -657,6 +662,7 @@ Task = R6Class("Task",
 
     #' @description
     #' Modifies the roles in `$col_roles` **in-place**.
+    #' See `$col_roles` for a list of possible roles.
     #'
     #' @param cols (`character()`)\cr
     #'   Column names for which to change the roles for.
@@ -830,7 +836,10 @@ Task = R6Class("Task",
       invisible(private$.internal_valid_task)
     },
 
-    #' @template field_hash
+    #' @field hash (`character(1)`)\cr
+    #' Hash (unique identifier) for this object.
+    #' The hash is calculated based on the complete task object and `$row_ids`.
+    #' If an internal validation task is set, the hash is recalculated.
     hash = function(rhs) {
       if (is.null(private$.hash)) {
         private$.hash = task_hash(self, self$row_ids, ignore_internal_valid_task = FALSE)
@@ -1112,6 +1121,17 @@ Task = R6Class("Task",
         private$.col_hashes = self$backend$col_hashes[setdiff(unlist(private$.col_roles, use.names = FALSE), self$backend$primary_key)]
       }
       private$.col_hashes
+    },
+
+    #' @field characteristics (`list()`)\cr
+    #' List of characteristics of the task, e.g. `list(n = 5, p = 7)`.
+    characteristics = function(rhs) {
+      if (missing(rhs)) {
+        return(private$.characteristics)
+      }
+
+      private$.characteristics = assert_list(rhs, null.ok = TRUE)
+      private$.hash = NULL
     }
   ),
 
@@ -1123,6 +1143,7 @@ Task = R6Class("Task",
     .row_roles = NULL,
     .hash = NULL,
     .col_hashes = NULL,
+    .characteristics = NULL,
 
     deep_clone = function(name, value) {
       # NB: DataBackends are never copied!
