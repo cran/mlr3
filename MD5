@@ -1,6 +1,6 @@
-3627b2b234aab6a37d97b975047a9634 *DESCRIPTION
+c2248d058f428ceb593269684507eb52 *DESCRIPTION
 00d7d09ac8267e394a6a1d6d17926e9f *NAMESPACE
-7f52914d8c353f133275656ebd5576ee *NEWS.md
+518ae671f6eec4ca17d6af5eaa18919d *NEWS.md
 90ecf8637dd7bb7d17be641698b1a81a *R/BenchmarkResult.R
 38ca01a1360587608691af1d22d6f32b *R/DataBackend.R
 0c62bac1b59846b9beda8706a61c6855 *R/DataBackendCbind.R
@@ -18,7 +18,7 @@ b35c3e26dd2df45b3c84e7b7960243db *R/LearnerClassifDebug.R
 a18042bf7ed43d4bace07334912115d0 *R/LearnerRegrDebug.R
 8d4248e4e7a3371c68823b9aa1d586c2 *R/LearnerRegrFeatureless.R
 af9fc6d28a564391642d6ed13d9c3924 *R/LearnerRegrRpart.R
-0c0a7259bd27a232468b02ac9502fd84 *R/Measure.R
+58f546af4c0319ea2881ec8ef3aec072 *R/Measure.R
 0df84738b0b2ee6b3e35c8a8406454cb *R/MeasureAIC.R
 1820ede300ae6e056f3360f5d31dbd3c *R/MeasureBIC.R
 ef941b5f318e219cef28b127b03b8f97 *R/MeasureClassif.R
@@ -91,7 +91,7 @@ af66925817b577abdaf468a178ad3cca *R/as_resampling.R
 578739d29525aab65e255beeb97c9cfc *R/as_task_classif.R
 abe909c0a284f7b039ca563c5ff41ec5 *R/as_task_regr.R
 ecf18c3fb3e35a216f1915f9ffdb1cf3 *R/as_task_unsupervised.R
-f7aed1b3c9c04252afeb6a148ec7e7a9 *R/assertions.R
+10b67d6fce2c8feac78eb757add977ea *R/assertions.R
 e5d4afa91bb587bbf36e57c133078b55 *R/auto_convert.R
 8f10e1243eae894fd0dcc083a4322013 *R/benchmark.R
 c102a92dd86ca36900562a89747135c2 *R/benchmark_grid.R
