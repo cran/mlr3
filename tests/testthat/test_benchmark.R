@@ -85,9 +85,9 @@ test_that("bmr$combine()", {
     expect_data_table(get_private(bmr_new)$.data$data$fact, nrows = 6L)
     expect_data_table(get_private(bmr_combined)$.data$data$fact, nrows = 24L)
 
-    expect_false("pima" %in% bmr$tasks$task_id)
-    expect_true("pima" %in% bmr_new$tasks$task_id)
-    expect_true("pima" %in% bmr_combined$tasks$task_id)
+    expect_false("pima" %chin% bmr$tasks$task_id)
+    expect_true("pima" %chin% bmr_new$tasks$task_id)
+    expect_true("pima" %chin% bmr_combined$tasks$task_id)
   }
 
   rr = resample(tsk("zoo"), lrn("classif.rpart"), rsmp("holdout"))
@@ -212,7 +212,7 @@ test_that("extract params", {
   aggr = bmr$aggregate(params = TRUE)
   expect_list(aggr$params[[1]], names = "unique", len = 0L)
 
-  expect_true(all(c("warnings", "errors") %in% names(bmr$score(conditions = TRUE))))
+  expect_true(all(c("warnings", "errors") %chin% names(bmr$score(conditions = TRUE))))
 })
 
 test_that("benchmark_grid", {
@@ -367,16 +367,16 @@ test_that("benchmark_grid works if paired = TRUE", {
   # design[, identical(task), by = task]]
   # expect(identical(design$resampling[class(learner)[[1]] ==)]))
   expect_true(nrow(design) == 4L) #
-  expect_true(identical(design$task[[1]], design$task[[2]]))
-  expect_true(identical(design$task[[3]], design$task[[4]]))
+  expect_identical(design$task[[1]], design$task[[2]])
+  expect_identical(design$task[[3]], design$task[[4]])
   expect_false(identical(design$task[[1]], design$task[[3]]))
 
-  expect_true(identical(design$resampling[[1]], design$resampling[[2]]))
-  expect_true(identical(design$resampling[[3]], design$resampling[[4]]))
+  expect_identical(design$resampling[[1]], design$resampling[[2]])
+  expect_identical(design$resampling[[3]], design$resampling[[4]])
   expect_false(identical(design$resampling[[1]], design$resampling[[3]]))
 
-  expect_true(identical(design$learner[[1]], design$learner[[3]]))
-  expect_true(identical(design$learner[[2]], design$learner[[4]]))
+  expect_identical(design$learner[[1]], design$learner[[3]])
+  expect_identical(design$learner[[2]], design$learner[[4]])
   expect_false(identical(design$learner[[2]], design$learner[[3]]))
 
 
@@ -480,7 +480,7 @@ test_that("param_values in benchmark", {
     x
   }
   trained = bmr$learners$learner
-  ii = which(map_lgl(trained, function(x) "cp" %in% names(x$param_set$values))) # find learner with cp
+  ii = which(map_lgl(trained, function(x) "cp" %chin% names(x$param_set$values))) # find learner with cp
   expect_count(ii)
 
   expect_equal(sortnames(bmr$learners$learner[-ii][[1]]$param_set$values), list(minbucket = 2, minsplit = 12, xval = 0))
@@ -588,5 +588,16 @@ test_that("benchmark_grid only allows unique learner ids", {
   resampling = rsmp("holdout")
 
   expect_error(benchmark_grid(task, list(learner, learner), resampling), "unique")
+})
+
+test_that("benchmark allows that param_values overwrites tune token", {
+
+  learner = lrn("classif.rpart", cp = to_tune(0.01, 0.1))
+  design = benchmark_grid(tsk("pima"), learner, rsmp("cv", folds = 3), param_values = list(list(list(cp = 0.01))))
+  expect_benchmark_result(benchmark(design))
+
+  learner = lrn("classif.rpart", cp = to_tune(0.01, 0.1))
+  design = benchmark_grid(tsk("pima"), learner, rsmp("cv", folds = 3))
+  expect_error(benchmark(design), "cannot be trained with TuneToken present in hyperparameter")
 })
 

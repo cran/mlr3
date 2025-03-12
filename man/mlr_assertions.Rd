@@ -10,6 +10,7 @@
 \alias{assert_learnable}
 \alias{assert_predictable}
 \alias{assert_measure}
+\alias{assert_scorable}
 \alias{assert_measures}
 \alias{assert_resampling}
 \alias{assert_resamplings}
@@ -55,7 +56,7 @@ assert_learners(
   .var.name = vname(learners)
 )
 
-assert_learnable(task, learner)
+assert_learnable(task, learner, param_values = NULL)
 
 assert_predictable(task, learner)
 
@@ -63,6 +64,14 @@ assert_measure(
   measure,
   task = NULL,
   learner = NULL,
+  prediction = NULL,
+  .var.name = vname(measure)
+)
+
+assert_scorable(
+  measure,
+  task,
+  learner,
   prediction = NULL,
   .var.name = vname(measure)
 )
@@ -114,6 +123,10 @@ Set of required task properties.}
 \item{learner}{(\link{Learner}).}
 
 \item{learners}{(list of \link{Learner}).}
+
+\item{param_values}{(\code{list()})\cr
+TuneToken are not allowed in the parameter set of the learner.
+If the \code{param_values} overwrite the TuneToken, the assertion will pass.}
 
 \item{measure}{(\link{Measure}).}
 

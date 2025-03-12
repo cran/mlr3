@@ -1,3 +1,16 @@
+# mlr3 0.23.0
+
+* feat: Add new `col_role` offset in `Task` and offset `Learner` property.
+  A warning is produced if a learner that doesn't support offsets is trained with a task that has an offset column.
+* fix: The `$predict_newdata()` method of `Learner` now automatically conducts type conversions (#685).
+* BREAKING_CHANGE: Predicting on a `Task` with the wrong column information is now an error and not a warning.
+* Column names with UTF-8 characters are now allowed by default.
+  The option `mlr3.allow_utf8_names` is removed.
+* BREAKING CHANGE: `Learner$predict_types` is read-only now.
+* docs: Clear up behavior of `Learner$predict_type` after training.
+* feat: Add callbacks to `resample()` and `benchmark()`.
+* fix: Internal tuning and validation now works when the model requires marshaling (#1256).
+
 # mlr3 0.22.1
 
 * fix: Extend `assert_measure()` with checks for trained models in `assert_scorable()`.

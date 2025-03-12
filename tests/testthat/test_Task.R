@@ -237,26 +237,29 @@ test_that("rename works", {
 
 test_that("stratify works", {
   task = tsk("iris")
-  expect_false("strata" %in% task$properties)
+  expect_false("strata" %chin% task$properties)
   expect_null(task$strata)
 
   task$col_roles$stratum = task$target_names
-  expect_true("strata" %in% task$properties)
+  expect_true("strata" %chin% task$properties)
   tab = task$strata
   expect_data_table(tab, ncols = 2, nrows = 3)
   expect_list(tab$row_id, "integer")
 })
 
 test_that("groups/weights work", {
-  b = as_data_backend(data.table(x = runif(20), y = runif(20), w = runif(20), g = sample(letters[1:2], 20, replace = TRUE)))
+  b = as_data_backend(data.table(x = runif(20), y = runif(20), w = runif(20),
+                                 o = runif(20), g = sample(letters[1:2], 20, replace = TRUE)))
   task = TaskRegr$new("test", b, target = "y")
   task$set_row_roles(16:20, character())
 
-  expect_false("groups" %in% task$properties)
-  expect_false("weights" %in% task$properties)
+  expect_false("groups" %chin% task$properties)
+  expect_false("weights" %chin% task$properties)
+  expect_false("offset" %chin% task$properties)
   expect_null(task$groups)
   expect_null(task$weights)
 
+  # weight
   task$col_roles$weight = "w"
   expect_subset("weights", task$properties)
   expect_data_table(task$weights, ncols = 2, nrows = 15)
@@ -265,6 +268,7 @@ test_that("groups/weights work", {
   task$col_roles$weight = character()
   expect_true("weights" %nin% task$properties)
 
+  # group
   task$col_roles$group = "g"
   expect_subset("groups", task$properties)
   expect_data_table(task$groups, ncols = 2, nrows = 15)
@@ -434,7 +438,7 @@ test_that("col roles getters/setters", {
   })
 
   task$col_roles$feature = setdiff(task$col_roles$feature, "Sepal.Length")
-  expect_false("Sepal.Length" %in% task$feature_names)
+  expect_false("Sepal.Length" %chin% task$feature_names)
 })
 
 test_that("Task$row_names", {
@@ -471,7 +475,7 @@ test_that("Task$set_col_roles", {
 
   task$set_col_roles("mass", add_to = "feature")
   expect_equal(task$n_features, 8L)
-  expect_true("mass" %in% task$feature_names)
+  expect_true("mass" %chin% task$feature_names)
 
   task$set_col_roles("age", roles = "weight")
   expect_equal(task$n_features, 7L)
@@ -480,7 +484,7 @@ test_that("Task$set_col_roles", {
 
   task$set_col_roles("age", add_to = "feature", remove_from = "weight")
   expect_equal(task$n_features, 8L)
-  expect_true("age" %in% task$feature_names)
+  expect_true("age" %chin% task$feature_names)
   expect_null(task$weights)
 })
 
@@ -552,15 +556,6 @@ test_that("set_levels", {
 })
 
 test_that("special chars in feature names (#697)", {
-  prev = options(mlr3.allow_utf8_names = FALSE)
-  on.exit(options(prev))
-
-  expect_error(
-    TaskRegr$new("test", data.table(`%^` = 1:3, t = 3:1), target = "t"),
-    "comply"
-  )
-  options(mlr3.allow_utf8_names = TRUE)
-
   expect_error(
     TaskRegr$new("test", data.table(`%asd` = 1:3, t = 3:1), target = "t")
     ,
@@ -633,7 +628,7 @@ test_that("internal_valid_task is printed", {
   task = tsk("iris")
   task$internal_valid_task = c(1:10, 51:60, 101:110)
   out = capture_output(print(task))
-  expect_true(grepl(pattern = "* Validation Task: (30x5)", fixed = TRUE, x = out))
+  expect_match(out, "* Validation Task: (30x5)", fixed = TRUE)
 })
 
 test_that("task hashes during resample", {
@@ -659,7 +654,7 @@ test_that("cbind supports non-standard primary key (#961)", {
   b = as_data_backend(tbl, primary_key = "myid")
   task = as_task_regr(b, target = "y")
   task$cbind(data.table(x1 = 10:1))
-  expect_true("x1" %in% task$feature_names)
+  expect_true("x1" %chin% task$feature_names)
 })
 
 test_that("$select changes hash", {
@@ -729,4 +724,25 @@ test_that("$characteristics works", {
   expect_names(names(tab), must.include = c("n", "f"))
   expect_subset(tab$n, c(300, 200))
   expect_subset(tab$f, c(2, NA_real_))
+})
+
+test_that("warn when internal valid task has 0 obs", {
+  task = tsk("iris")
+  expect_warning({task$internal_valid_task = 151}, "has 0 observations")
+})
+
+
+test_that("$data() is not called during task construction", {
+  tbl = data.table(x = 1:10, y = 1:10, ..row_id = 1:10)
+  backend = R6Class("DataBackendTest",
+    inherit = DataBackendDataTable,
+    cloneable = FALSE,
+    public = list(
+      data = function(rows, cols, data_format) {
+        stop("Bug")
+      }
+    )
+  )$new(tbl, "..row_id")
+  task = as_task_regr(backend, target = "y")
+  expect_class(task, "Task")
 })
