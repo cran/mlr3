@@ -87,6 +87,10 @@ resample = function(
     resampling = resampling$instantiate(task)
   }
 
+  if (!is.null(resampling$task_row_hash) && resampling$task_row_hash != task$row_hash) {
+    stopf("Resampling '%s' is not instantiated on task '%s'", resampling$id, task$id)
+  }
+
   n = resampling$iters
   pb = if (isNamespaceLoaded("progressr")) {
     # NB: the progress bar needs to be created in this env
@@ -94,8 +98,6 @@ resample = function(
   } else {
     NULL
   }
-
-  lgr_threshold = map_int(mlr_reflections$loggers, "threshold")
 
   grid = if (allow_hotstart) {
 
@@ -132,7 +134,7 @@ resample = function(
   }
 
   res = future_map(n, workhorse, iteration = seq_len(n), learner = grid$learner, mode = grid$mode,
-    MoreArgs = list(task = task, resampling = resampling, store_models = store_models, lgr_threshold = lgr_threshold, pb = pb, unmarshal = unmarshal, callbacks = callbacks)
+    MoreArgs = list(task = task, resampling = resampling, store_models = store_models, lgr_index = lgr::logger_index(), pb = pb, unmarshal = unmarshal, callbacks = callbacks)
   )
 
   data = data.table(

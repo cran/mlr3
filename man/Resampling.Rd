@@ -46,6 +46,11 @@ Next, the grouping information is replaced with the respective row ids to genera
 The sets can be accessed via \verb{$train_set(i)} and \verb{$test_set(i)}, respectively.
 }
 
+\section{Inheriting}{
+
+It is possible to overwrite both \code{private$.get_instance()} to have full control, or only \code{private$.sample()} when one wants to use the pre-defined mechanism for stratification and grouping.
+}
+
 \examples{
 r = rsmp("subsampling")
 
@@ -122,6 +127,9 @@ It is advised to not work directly with the \code{instance}, but instead only us
 
 \item{\code{task_hash}}{(\code{character(1)})\cr
 The hash of the \link{Task} which was passed to \code{r$instantiate()}.}
+
+\item{\code{task_row_hash}}{(\code{character(1)})\cr
+The hash of the row ids of the \link{Task} which was passed to \code{r$instantiate()}.}
 
 \item{\code{task_nrow}}{(\code{integer(1)})\cr
 The number of observations of the \link{Task} which was passed to \code{r$instantiate()}.}

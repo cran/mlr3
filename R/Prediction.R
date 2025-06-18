@@ -61,10 +61,10 @@ Prediction = R6Class("Prediction",
     print = function(...) {
       n = length(self$data$row_ids)
       if (n == 0L) {
-        catf("%s for 0 observations", format(self))
+        cat_cli(cli_h1("{.cls {class(self)[1L]}} for {.val 0} observations"))
       } else {
         data = as.data.table(self)
-        catf("%s for %i observations:", format(self), n)
+        cat_cli(cli_h1("{.cls {class(self)[1L]}} for {.val {n}} observations:"))
         print(data, nrows = 10L, topn = 3L, class = FALSE, row.names = FALSE, print.keys = FALSE)
       }
     },
@@ -144,6 +144,14 @@ Prediction = R6Class("Prediction",
     missing = function(rhs) {
       assert_ro_binding(rhs)
       is_missing_prediction_data(self$data)
+    },
+
+    #' @field weights (`numeric()`)\cr
+    #'   Vector of measure weights, obtained from the `weights_measure` column of the [Task] if present.
+    #'   This is `NULL` if no weights are present.
+    weights = function(rhs) {
+      assert_ro_binding(rhs)
+      self$data$weights
     }
   )
 )

@@ -74,7 +74,7 @@ ResampleResult = R6Class("ResampleResult",
       setattr(tab, "class", c("data.table", "data.frame"))
       tab[, "warnings" := map(get("warnings"), length)]
       tab[, "errors" := map(get("errors"), length)]
-      catf("%s with %i resampling iterations",  format(self), self$iters)
+      cat_cli(cli_h1("{.cls {class(self)[1L]}} with {.val {self$iters}} resampling iterations"))
       if (nrow(tab)) {
         tab = remove_named(tab, c("task", "learner", "resampling", "prediction"))
         print(tab, class = FALSE, row.names = FALSE, print.keys = FALSE, digits = 3)
@@ -268,6 +268,20 @@ ResampleResult = R6Class("ResampleResult",
     #'   Additional arguments passed to [`unmarshal_model()`].
     unmarshal = function(...) {
       private$.data$unmarshal(...)
+    },
+
+    #' @description
+    #' Sets the threshold for the response prediction of classification learners, given they have
+    #' output a probability prediction for a binary classification task.
+    #' This modifies the object in-place.
+    #' @param threshold (`numeric(1)`)\cr
+    #'   Threshold value.
+    #' @template param_ties_method
+    set_threshold = function(threshold, ties_method = "random") {
+      if (!self$task_type == "classif") {
+        stopf("Can only change the threshold for classification problems, but task type is '%s'.", self$task_type)
+      }
+      private$.data$set_threshold(self$uhash, threshold, ties_method)
     }
   ),
 

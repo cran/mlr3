@@ -51,7 +51,7 @@ expect_backend = function(b) {
   checkmate::expect_r6(b, cloneable = FALSE,
     public = c("nrow", "ncol", "colnames", "rownames", "head", "data", "hash"),
     private = c(".data", ".hash", ".calculate_hash"))
-  testthat::expect_output(print(b), "^<DataBackend")
+  testthat::expect_output(print(b), "DataBackend")
 
   n = checkmate::expect_count(b$nrow)
   p = checkmate::expect_count(b$ncol)
@@ -472,6 +472,7 @@ expect_resampling = function(r, task = NULL, strata = TRUE) {
     testthat::expect_true(r$is_instantiated)
     expect_hash(r$hash, 1L)
     expect_hash(r$task_hash, 1L)
+    expect_hash(r$task_row_hash, 1L)
     if (!is.null(task)) {
       ids = task$row_ids
     }
@@ -538,7 +539,7 @@ expect_measure = function(m) {
 
 expect_prediction = function(p) {
   checkmate::expect_r6(p, "Prediction", public = c("row_ids", "truth", "predict_types"))
-  testthat::expect_output(print(p), "^<Prediction")
+  testthat::expect_output(print(p), "Prediction")
   checkmate::expect_data_table(data.table::as.data.table(p), nrows  = length(p$row_ids))
   checkmate::expect_integerish(p$missing)
 }
@@ -620,7 +621,7 @@ expect_benchmark_result = function(bmr) {
   expect_resultdata(mlr3misc::get_private(bmr)$.data, TRUE)
   testthat::expect_output(print(bmr), "BenchmarkResult")
 
-  checkmate::expect_names(names(as.data.table(bmr)), permutation.of = c(mlr3::mlr_reflections$rr_names, "prediction", "uhash"))
+  checkmate::expect_names(names(as.data.table(bmr)), permutation.of = c(mlr3::mlr_reflections$rr_names, "prediction", "uhash", "task_id", "learner_id", "resampling_id"))
 
   tab = bmr$tasks
   checkmate::expect_data_table(tab, ncols = 3L)

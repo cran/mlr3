@@ -67,6 +67,8 @@ learner_train = function(learner, task, train_row_ids = NULL, test_row_ids = NUL
       task_private$.row_roles$use = prev_use
     }, add = TRUE)
     task_private$.row_roles$use  = train_row_ids
+    task_private$.row_hash = NULL
+    task_private$.hash = NULL
   } else {
     lg$debug("Skip subsetting of task '%s'", task$id)
   }
@@ -279,7 +281,7 @@ workhorse = function(
   learner,
   resampling,
   param_values = NULL,
-  lgr_threshold,
+  lgr_index,
   store_models = FALSE,
   pb = NULL,
   mode = "train",
@@ -298,10 +300,12 @@ workhorse = function(
     stopf("Cannot set the predict_type field of learner '%s' to 'internal_valid' if there is no internal validation task configured", learner$id)
   }
 
-  # reduce data.table and blas threads to 1
+  # restore settings on the workers
   if (!is_sequential) {
+    # reduce data.table threads to 1
     setDTthreads(1, restore_after_fork = TRUE)
 
+    # reduce blas threads to 1
     # RhpcBLASctl is licensed under AGPL and therefore should be in suggest #1023
     if (require_namespaces("RhpcBLASctl", quietly = TRUE)) {
       old_blas_threads = RhpcBLASctl::blas_get_num_procs()
@@ -318,13 +322,14 @@ workhorse = function(
         Sys.setenv(MKL_NUM_THREADS = old_mkl)
       }, add = TRUE)
     }
-  }
 
-  # restore logger thresholds
-  for (package in names(lgr_threshold)) {
-    logger = lgr::get_logger(package)
-    threshold = lgr_threshold[package]
-    logger$set_threshold(threshold)
+    # restore logger thresholds
+    # skip inherited thresholds
+    lgr_index = lgr_index[!lgr_index$threshold_inherited, ]
+    mapply(function(name, threshold) {
+      logger = lgr::get_logger(name)
+      logger$set_threshold(threshold)
+    }, lgr_index$name, lgr_index$threshold)
   }
 
   lg$info("%s learner '%s' on task '%s' (iter %i/%i)",
@@ -515,7 +520,7 @@ create_internal_valid_task = function(validate, task, test_row_ids, prev_valid, 
   if (is.character(validate)) {
     if (validate == "predefined") {
       if (is.null(task$internal_valid_task)) {
-        stopf("Parameter 'validate' is set to 'predefined' but no internal validation task is present.")
+        stopf("Parameter 'validate' is set to 'predefined' but no internal validation task is present. This commonly happens in GraphLearners and can be avoided by configuring the validation data for the  GraphLearner via `set_validate(<glrn>, validate = <value>)`. See https://mlr3book.mlr-org.com/chapters/chapter15/predsets_valid_inttune.html for more information.")
       }
       if (!identical(task$target_names, task$internal_valid_task$target_names)) {
         stopf("Internal validation task '%s' has different target names than primary task '%s', did you modify the task after creating the internal validation task?",
