@@ -67,6 +67,10 @@ Note that results computed in debug mode use a different seeding mechanism and a
 trained with a different version version of mlr3.
 \item \code{"mlr3.prob_as_default"}: Set to \code{TRUE} to set the predict type of classification learners to
 \code{"prob"} by default (if they support it).
+\item \code{"mlr3.mirai_parallelization"}: Compute profile to use for parallelization with \CRANpkg{mirai}.
+Defaults to \code{"mlr3_parallelization"}.
+\item \code{"mlr3.mirai_encapsulation"}: Compute profile to use for encapsulation with \CRANpkg{mirai}.
+Defaults to \code{"mlr3_encapsulation"}.
 }
 }
 
@@ -108,6 +112,7 @@ Other contributors:
   \item Lennart Schneider \email{lennart.sch@web.de} (\href{https://orcid.org/0000-0003-4152-5308}{ORCID}) [contributor]
   \item Lona Koers \email{lona.koers@gmail.com} [contributor]
   \item John Zobolas \email{bblodfon@gmail.com} (\href{https://orcid.org/0000-0002-3609-8674}{ORCID}) [contributor]
+  \item Maximilian Mücke \email{muecke.maximilian@gmail.com} (\href{https://orcid.org/0009-0000-9432-9795}{ORCID}) [contributor]
 }
 
 }

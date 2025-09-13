@@ -838,3 +838,180 @@ test_that("Learner printer for encapsulation", {
   expect_output(print(lrn("classif.rpart")$encapsulate("evaluate", lrn("classif.featureless"))), "Encapsulation: evaluate \\(fallback: LearnerClassifFeatureless\\)")
   expect_output(print(lrn("classif.rpart")$encapsulate("none")), "Encapsulation: none \\(fallback: -\\)")
 })
+
+test_that("error conditions are working: callr", {
+  l = lrn("classif.debug",
+    timeout = c(train = 0.01),
+    # Sys.sleep does not get interrupted reliably
+    sleep_train = function() while (TRUE) NULL
+  )
+
+  l$encapsulate(
+    "callr",
+    lrn("classif.featureless"),
+    when = function(cond, ...) {
+      !inherits(cond, "Mlr3ErrorTimeout")
+    }
+  )
+
+  expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
+  l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
+  expect_error(l$train(tsk("iris")), regexp = NA)
+})
+
+test_that("error conditions are working: evaluate", {
+  l = lrn("classif.debug",
+    timeout = c(train = 0.2),
+    # Sys.sleep does not get interrupted reliably
+    sleep_train = function() while (TRUE) NULL
+  )
+
+  l$encapsulate(
+    "evaluate",
+    lrn("classif.featureless"),
+    function(cond, ...) {
+      !inherits(cond, "Mlr3ErrorTimeout")
+    }
+  )
+
+  expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
+  l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
+  expect_error(l$train(tsk("iris")), regexp = NA)
+})
+
+test_that("error conditions are working: try", {
+  l = lrn("classif.debug",
+    timeout = c(train = 0.01),
+    # Sys.sleep does not get interrupted reliably
+    sleep_train = function() while (TRUE) NULL
+  )
+
+  l$encapsulate(
+    "try",
+    lrn("classif.featureless"),
+    function(cond, ...) {
+      !inherits(cond, "Mlr3ErrorTimeout")
+    }
+  )
+
+  expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
+  l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
+  expect_error(l$train(tsk("iris")), regexp = NA)
+})
+
+test_that("error conditions are working: mirai", {
+  l = lrn("classif.debug",
+    timeout = c(train = 0.01),
+    # Sys.sleep does not get interrupted reliably
+    sleep_train = function() while (TRUE) NULL
+  )
+
+  l$encapsulate(
+    "mirai",
+    lrn("classif.featureless"),
+    function(cond, ...) {
+      !inherits(cond, "Mlr3ErrorTimeout")
+    }
+  )
+
+  expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
+  l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
+  expect_error(l$train(tsk("iris")), regexp = NA)
+})
+
+test_that("error conditions are working for predict", {
+  # config errors are not caught
+  task = tsk("iris")
+  l = lrn("classif.debug", error_predict = 1, sleep_predict = function() {
+    error_config("all working!")
+  })
+  l$encapsulate("evaluate", lrn("classif.featureless"))
+  l$train(task)
+  expect_error(l$predict(task), regexp = "all working!", fixed = TRUE)
+})
+
+test_that("when: stage parameter is working", {
+  task = tsk("iris")
+  l = lrn("classif.debug")
+
+  # input checks on argument 'when':
+  expect_error(
+    l$encapsulate("evaluate", lrn("classif.featureless"), function(x, y) NULL),
+    regexp = "subset of"
+  )
+  expect_error(
+    l$encapsulate("evaluate", lrn("classif.featureless"), "a"),
+    regexp = "function"
+  )
+  expect_error(
+    l$encapsulate("evaluate", lrn("classif.featureless"), function(...) NULL),
+    regexp = NA
+  )
+
+  # we catch error during train, but not during predict
+  l$encapsulate("evaluate", lrn("classif.featureless"), function(cond, stage) {
+    print(cond)
+    if (inherits(cond, "Mlr3TestError")) return(stage == "train")
+    if (stage == "predict" && grepl("No model stored", cond$message)) return(FALSE)
+    stop("test went wrong")
+  })
+  l$configure(
+    sleep_train = function() error_mlr3("a", class = "Mlr3TestError"),
+    sleep_predict = function() error_mlr3("a", class = "Mlr3TestError")
+  )
+  expect_error(l$train(task), regexp = NA)
+  expect_null(l$model)
+  expect_error(l$predict(task), regexp = "No model stored", class = "Mlr3ErrorLearnerNoModel")
+  l$encapsulate("evaluate", lrn("classif.featureless"), function(cond, stage) {
+    if (inherits(cond, "Mlr3TestError")) return(stage == "train")
+    if (stage == "predict" && grepl("No model stored", cond$message)) return(TRUE)
+    stop("test went wrong")
+  })
+  expect_class(l$predict(task), "PredictionClassif")
+
+  l = lrn("classif.debug", error_train = 1)
+  l$encapsulate("evaluate", lrn("classif.featureless"))
+  l$train(task)
+})
+
+test_that("oob_error is available without storing models via $.extract_oob_error()", {
+  LearnerDummyOOB = R6::R6Class("LearnerDummyOOB", inherit = LearnerClassif,
+    public = list(
+      initialize = function() {
+        super$initialize(
+          id = "classif.dummy_oob",
+          param_set = paradox::ps(),
+          feature_types = c("logical", "integer", "numeric", "character", "factor", "ordered"),
+          predict_types = c("response"),
+          properties = c("twoclass", "multiclass", "oob_error"),
+          man = NA_character_
+        )
+      }
+    ),
+    private = list(
+      .train = function(task) {
+        list(response = as.character(sample(task$truth(), 1L)))
+      },
+      .predict = function(task) {
+        list(response = rep.int(self$model$response, task$nrow))
+      },
+      .extract_oob_error = function() {
+        0.123
+      }
+    )
+  )
+
+  task = tsk("iris")
+  learner = LearnerDummyOOB$new()
+  rr = resample(task, learner, rsmp("holdout"), store_models = FALSE)
+
+  expect_equal(rr$aggregate(msr("oob_error")), c(oob_error = 0.123))
+})
+
+test_that("config error does not trigger callback", {
+  l = lrn("classif.debug", config_error = TRUE)
+  l$encapsulate("evaluate", lrn("classif.featureless"), function(...) TRUE)
+  expect_error(l$train(tsk("iris")), regexp = "You misconfigured the learner")
+  l$encapsulate("evaluate", lrn("classif.featureless"))
+  expect_error(l$train(tsk("iris")), regexp = "You misconfigured the learner")
+})

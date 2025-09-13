@@ -18,6 +18,8 @@ repository \url{https://raphaels1.r-universe.dev}).
 }
 \itemize{
 \item \code{"quantiles"}: Predicts quantile estimates for each observation in the test set.
+Set \verb{$quantiles} to specify the quantiles to predict and \verb{$quantile_response} to specify the response quantile.
+See mlr3book \href{https://mlr3book.mlr-org.com/chapters/chapter13/beyond_regression_and_classification.html#sec-quantile-regression}{section} on quantile regression for more details.
 }
 
 Predefined learners can be found in the \link[mlr3misc:Dictionary]{dictionary} \link{mlr_learners}.
@@ -119,7 +121,6 @@ Creates a new instance of this \link[R6:R6Class]{R6} class.
   predict_types = "response",
   feature_types = character(),
   properties = character(),
-  data_formats,
   packages = character(),
   label = NA_character_,
   man = NA_character_
@@ -164,9 +165,6 @@ If a learner is in a marshaled state, you call first need to call \verb{$unmarsh
 \item \code{"hotstart_backward"}: The learner supports hotstarting a model backward.
 \item `"featureless": The learner does not use features.
 }}
-
-\item{\code{data_formats}}{(\code{character()})\cr
-Deprecated: ignored, and will be removed in the future.}
 
 \item{\code{packages}}{(\code{character()})\cr
 Set of required packages.

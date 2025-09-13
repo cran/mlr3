@@ -8,9 +8,12 @@ This is the abstract base class for measures like \link{MeasureClassif} and \lin
 
 Measures are classes tailored around two functions doing the work:
 \enumerate{
-\item A function \verb{$score()} which quantifies the performance by comparing the truth and predictions.
+\item A function \verb{$score()} which quantifies the performance on a \link{Prediction} object, so a set
+of predicted observation via a scalar number -- usually an aggregate of losses on the contained observations,
+by comparing the truth and prediction columns in the prediction object.
 \item A function \verb{$aggregator()} which combines multiple performance scores returned by
-\verb{$score()} to a single numeric value.
+\verb{$score()} obtained in different resampling iterations to a scalar performance value associated
+with the complete resampling -- usually by averaging or summing.
 }
 
 In addition to these two functions, meta-information about the performance measure is stored.
@@ -47,6 +50,39 @@ Measures that use sum-aggregation do not normalize weights and instead multiply 
 See the documentation of specific measures for more details.
 }
 
+\section{Missing Values during Scoring}{
+
+
+Many measurements cannot be calculated if the test set or predictions are unfortunate, for example because a denominator is 0.
+This typically occurs during (binary) classification if some entries of the confusion matrix are 0.
+For this reason, many measures which origin in \CRANpkg{mlr3measures} allow to change the default missing value (\code{NaN}) via the field \code{na_value}.
+
+If you encounter missing values in a compound object like a \link{ResampleResult} or \link{BenchmarkResult} during scoring or aggregating, simply
+removing iterations with missing values is statistically arguable (but technically possible by prividng a custom aggregation function
+which handles missing values, e.g. \code{function(x) mean(x, na.rm = TRUE)}). Instead, consider stratification on the target of the \link{Task}
+to work around missing values. Switching to micro averaging in the \link{Resampling} can also be a solution here.
+}
+
+\examples{
+
+## ------------------------------------------------
+## Method `Measure$score`
+## ------------------------------------------------
+
+task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+prediction = learner$predict(task)
+msr("classif.ce")$score(prediction)
+
+## ------------------------------------------------
+## Method `Measure$aggregate`
+## ------------------------------------------------
+
+task = tsk("penguins")
+learner = lrn("classif.rpart")
+rr = resample(task, learner, rsmp("holdout"))
+msr("classif.ce")$aggregate(rr)
+}
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
@@ -419,6 +455,17 @@ This is handled internally during \code{\link[=resample]{resample()}}/\code{\lin
 \subsection{Returns}{
 \code{numeric(1)}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+prediction = learner$predict(task)
+msr("classif.ce")$score(prediction)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Measure-aggregate"></a>}}
@@ -440,6 +487,17 @@ function of the measure.
 \subsection{Returns}{
 \code{numeric(1)}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+learner = lrn("classif.rpart")
+rr = resample(task, learner, rsmp("holdout"))
+msr("classif.ce")$aggregate(rr)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Measure-clone"></a>}}

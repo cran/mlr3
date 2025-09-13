@@ -16,6 +16,7 @@
 #'   Table with task type (`"type"`), the implementing package (`"pkg"`), and the names of the generators
 #'   of the corresponding [Task] (`"task"`), [Learner] (`"learner"`),
 #'   [Prediction] (`"prediction"`), [Measure] (`"measure"`) and fallback [Learner].
+#'   The column `"type"` must be unique for each row.
 #'
 #' * `task_feature_types` (named `character()`)\cr
 #'   Vector of base R types supported as [Task] features, named with a 3 letter abbreviation.
@@ -115,6 +116,12 @@ local({
   mlr_reflections$task_print_col_roles = list(
     before = character(),
     after = c("Order by" = "order", "Strata" = "stratum", "Groups" = "group", "Offset" = "offset", "Weights/Learner" = "weights_learner", "Weights/Measure" = "weights_measure")
+  )
+
+  tmp = c("weights_learner", "weights_measure", "name", "order", "stratum", "group")
+  mlr_reflections$task_col_roles_optional_newdata = list(
+    classif = tmp,
+    regr = tmp
   )
 
   ### Learner

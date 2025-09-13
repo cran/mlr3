@@ -12,7 +12,7 @@ test_that("no encapsulation", {
 
 test_that("no encapsulation / resampling", {
   learner = lrn("classif.debug", error_train = 1)
-  expect_error(resample(tsk("iris"), learner, rsmp("cv", folds = 3)), "classif.debug")
+  suppressWarnings(expect_error(resample(tsk("iris"), learner, rsmp("cv", folds = 3)), "classif.debug"))
 })
 
 
@@ -88,4 +88,3 @@ test_that("encapsulation / benchmark", {
   expect_equal(aggr$warnings, 3L)
   expect_equal(aggr$errors, 3L)
 })
-

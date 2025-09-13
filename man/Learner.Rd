@@ -160,6 +160,66 @@ In order to still be able to save them, use them with parallelization or callr e
 to implement how they should be (un)-marshaled. See \code{\link{marshaling}} for how to do this.
 }
 
+\section{Implementing Out-of-Bag Error}{
+
+Some \code{\link{Learner}}s can compute the out-of-bag error during training.
+In order to do this, the learner must:
+\itemize{
+\item annotate the learner with the \code{"oob_error"} property
+\item implement the private method \verb{$.extract_oob_error()} which extracts the out-of-bag error from the \code{\link{Learner}}'s model and returns it as a \code{numeric(1)}.
+}
+}
+
+\examples{
+
+## ------------------------------------------------
+## Method `Learner$train`
+## ------------------------------------------------
+
+task   = tsk("penguins")
+learner = lrn("classif.rpart")
+learner$train(task)
+
+## ------------------------------------------------
+## Method `Learner$predict`
+## ------------------------------------------------
+
+task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$predict(task)
+
+## ------------------------------------------------
+## Method `Learner$predict_newdata`
+## ------------------------------------------------
+
+task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$predict_newdata(task$data(rows = 1:5))
+
+## ------------------------------------------------
+## Method `Learner$reset`
+## ------------------------------------------------
+
+task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$reset()
+
+## ------------------------------------------------
+## Method `Learner$encapsulate`
+## ------------------------------------------------
+
+learner = lrn("classif.rpart")
+fallback = lrn("classif.featureless")
+learner$encapsulate("try", fallback = fallback)
+
+## ------------------------------------------------
+## Method `Learner$configure`
+## ------------------------------------------------
+
+learner = lrn("classif.rpart")
+learner$configure(minsplit = 3, parallel_predict = FALSE)
+learner$configure(.values = list(cp = 0.005))
+}
 \seealso{
 \itemize{
 \item Chapter in the \href{https://mlr3book.mlr-org.com/}{mlr3book}:
@@ -281,10 +341,6 @@ The latter behavior is to avoid cases where a user erroneously assumes that a \c
 For \code{Learner}s that do not support weights, \code{use_weights} needs to be set to \code{"ignore"} if tasks with weights should be handled (by dropping the weights).
 See Section 'weights' for more details.}
 
-\item{\code{data_formats}}{(\code{character()})\cr
-Supported data format. Always \code{"data.table"}..
-This is deprecated and will be removed in the future.}
-
 \item{\code{model}}{(any)\cr
 The fitted model. Only available after \verb{$train()} has been called.}
 
@@ -381,7 +437,6 @@ Note that this object is typically constructed via a derived classes, e.g. \link
   predict_types = character(),
   feature_types = character(),
   properties = character(),
-  data_formats,
   packages = character(),
   label = NA_character_,
   man = NA_character_
@@ -426,9 +481,6 @@ If a learner is in a marshaled state, you call first need to call \verb{$unmarsh
 \item \code{"hotstart_backward"}: The learner supports hotstarting a model backward.
 \item `"featureless": The learner does not use features.
 }}
-
-\item{\code{data_formats}}{(\code{character()})\cr
-Deprecated: ignored, and will be removed in the future.}
 
 \item{\code{packages}}{(\code{character()})\cr
 Set of required packages.
@@ -515,6 +567,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task   = tsk("penguins")
+learner = lrn("classif.rpart")
+learner$train(task)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-predict"></a>}}
@@ -544,6 +606,16 @@ For a simple train-test split, see \code{\link[=partition]{partition()}}.}
 \subsection{Returns}{
 \link{Prediction} object containing the predictions for the specified observations.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$predict(task)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-predict_newdata"></a>}}
@@ -582,6 +654,16 @@ otherwise they are set to to the sequence \code{1:nrow(newdata)}.}
 \subsection{Returns}{
 \link{Prediction}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$predict_newdata(task$data(rows = 1:5))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-reset"></a>}}
@@ -597,6 +679,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+learner = lrn("classif.rpart")$train(task)
+learner$reset()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-base_learner"></a>}}
@@ -619,7 +711,7 @@ Depth of recursion for multiple nested objects.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\link{Learner}.
+\link{Learner}
 }
 }
 \if{html}{\out{<hr>}}
@@ -638,6 +730,11 @@ Output is printed to the console and not logged.
 \item \code{"callr"}: Uses the package \CRANpkg{callr} to call the learner, measure time and do the logging.
 This encapsulation spawns a separate R session in which the learner is called.
 While this comes with a considerable overhead, it also guards your session from being teared down by segfaults.
+\item \code{"mirai"}: Uses the package \CRANpkg{mirai} to call the learner, measure time and do the logging.
+This encapsulation calls the function in a \code{mirai} on a \code{daemon}.
+The \code{daemon} can be pre-started via \code{daemons(1, .compute = "mlr3_encapsulation")}, otherwise a new R session will be created for each encapsulated call.
+If a \code{deamon} is already running with compute profile \code{"mlr3_encapsulation"}, it will be used to executed all calls.
+Using \verb{mirai"} is similarly safe as \code{callr} but much faster if several learners are encapsulated one after the other on the same daemon.
 }
 
 The fallback learner is fitted to create valid predictions in case that either the model fitting or the prediction of the original learner fails.
@@ -645,11 +742,15 @@ If the training step or the predict step of the original learner fails, the fall
 If the original learner only partially fails during predict step (usually in the form of missing to predict some observations or producing some \code{NA} predictions), these missing predictions are imputed by the fallback.
 Note that the fallback is always trained, as we do not know in advance whether prediction will fail.
 If the training step fails, the \verb{$model} field of the original learner is \code{NULL}.
+The results are reproducible across the different encapsulation methods.
+
+Note that for errors of class \code{Mlr3ErrorConfig}, the function always errs and no fallback learner
+is trained.
 
 Also see the section on error handling the mlr3book:
 \url{https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-error-handling}
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Learner$encapsulate(method, fallback = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Learner$encapsulate(method, fallback = NULL, when = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -661,12 +762,28 @@ See the description for details.}
 
 \item{\code{fallback}}{\link{Learner}\cr
 The fallback learner for failed predictions.}
+
+\item{\code{when}}{(\verb{function(cond, stage)})\cr
+Function that takes in the condition (\code{cond}) and the stage (\code{"train"} or \code{"predict"}) and
+returns \code{logical(1)} indicating whether to run the fallback learner.
+
+If \code{NULL} (default), the fallback is always used, except for errors of class \code{Mlr3ErrorConfig}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
 \code{self} (invisibly).
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{learner = lrn("classif.rpart")
+fallback = lrn("classif.featureless")
+learner$encapsulate("try", fallback = fallback)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-configure"></a>}}
@@ -690,6 +807,16 @@ Named list of parameter values and fields.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{learner = lrn("classif.rpart")
+learner$configure(minsplit = 3, parallel_predict = FALSE)
+learner$configure(.values = list(cp = 0.005))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Learner-selected_features"></a>}}

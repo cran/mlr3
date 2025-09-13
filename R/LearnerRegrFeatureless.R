@@ -65,6 +65,9 @@ LearnerRegrFeatureless = R6Class("LearnerRegrFeatureless", inherit = LearnerRegr
     #' Selected features are always the empty set for this learner.
     #' @return `character(0)`.
     selected_features = function() {
+      if (is.null(self$model)) {
+        stopf("No model stored")
+      }
       character()
     }
   ),
@@ -75,9 +78,7 @@ LearnerRegrFeatureless = R6Class("LearnerRegrFeatureless", inherit = LearnerRegr
       x = task$data(cols = task$target_names)[[1L]]
       weights = private$.get_weights(task)
       quantiles = if (self$predict_type == "quantiles") {
-        if (is.null(private$.quantiles) || is.null(private$.quantile_response)) {
-          stopf("Quantiles '$quantiles' and response quantile '$quantile_response' must be set")
-        }
+        assert_quantiles(self, quantile_response = TRUE)
         quantile_weighted(x, probs = private$.quantiles, weights = weights)
       }
 
@@ -101,6 +102,7 @@ LearnerRegrFeatureless = R6Class("LearnerRegrFeatureless", inherit = LearnerRegr
       n = task$nrow
 
       if (self$predict_type == "quantiles") {
+        assert_quantiles(self, quantile_response = TRUE)
         quantiles = matrix(rep(self$model$quantiles, n), nrow = n, byrow = TRUE)
         setattr(quantiles, "probs", private$.quantiles)
         setattr(quantiles, "response", private$.quantile_response)

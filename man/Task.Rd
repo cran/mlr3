@@ -48,6 +48,8 @@ They are an alternative to directly accessing \verb{$col_roles} or \verb{$row_ro
 \item \verb{$cbind()} and \verb{$rbind()} change the task in-place by binding new columns or rows to the data.
 \item \verb{$rename()} changes column names.
 \item \verb{$set_levels()} and \verb{$droplevels()} update the field \verb{$col_info()} to automatically repair factor levels while querying data with \verb{$data()}.
+\item \verb{$materialize_view()} creates a new \link{DataBackendDataTable} which keeps only the data in the currently active view
+possibly freeing some memory consumed by the \link{DataBackend} stored in the \code{Task}.
 }
 }
 
@@ -69,6 +71,128 @@ task$feature_names
 # Add new column "foo"
 task$cbind(data.frame(foo = 1:344))
 head(task)
+
+## ------------------------------------------------
+## Method `Task$data`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$data(rows = 1:5, cols = c("species", "sex"))
+
+## ------------------------------------------------
+## Method `Task$formula`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$formula()
+
+## ------------------------------------------------
+## Method `Task$head`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$head(3)
+
+## ------------------------------------------------
+## Method `Task$levels`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$levels()
+
+## ------------------------------------------------
+## Method `Task$missings`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$missings()
+
+## ------------------------------------------------
+## Method `Task$filter`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$filter(1:10)
+task$nrow
+
+## ------------------------------------------------
+## Method `Task$select`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$select(c("bill_length", "bill_depth"))
+task$feature_names
+
+## ------------------------------------------------
+## Method `Task$rbind`
+## ------------------------------------------------
+
+task = tsk("penguins")
+extra = task$data(rows = 1:2)
+task$rbind(extra)
+
+## ------------------------------------------------
+## Method `Task$cbind`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$cbind(data.table(extra_col = seq_len(task$nrow)))
+head(task$data(cols = "extra_col"))
+
+## ------------------------------------------------
+## Method `Task$rename`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$rename("body_mass", "mass")
+task$feature_names
+
+## ------------------------------------------------
+## Method `Task$set_row_roles`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$set_row_roles(1:5, remove_from = "use")
+
+## ------------------------------------------------
+## Method `Task$set_col_roles`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$set_col_roles("sex", roles = "stratum")
+task$col_roles$stratum
+
+## ------------------------------------------------
+## Method `Task$set_levels`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$set_levels(list(sex = c("male", "female", "unknown")))
+task$levels("sex")
+
+## ------------------------------------------------
+## Method `Task$droplevels`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$set_levels(list(sex = c("male", "female", "unknown")))
+task$levels("sex")
+
+## ------------------------------------------------
+## Method `Task$add_strata`
+## ------------------------------------------------
+
+task = tsk("penguins")
+task$add_strata("flipper_length", bins = 4)
+
+## ------------------------------------------------
+## Method `Task$materialize_view`
+## ------------------------------------------------
+
+task = tsk("iris")
+task$backend$nrow
+task$filter(1:120)
+task$backend$nrow
 }
 \seealso{
 \itemize{
@@ -264,10 +388,6 @@ Returns the total number of columns with role "feature" (i.e. the number of "act
 Returns a table with columns \code{id} and \code{type} where \code{id} are the column names of "active"
 features of the task and \code{type} is the storage type.}
 
-\item{\code{data_formats}}{(\code{character()})\cr
-Supported data format. Always \code{"data.table"}..
-This is deprecated and will be removed in the future.}
-
 \item{\code{strata}}{(\code{\link[data.table:data.table]{data.table::data.table()}})\cr
 If the task has columns designated with role \code{"stratum"}, returns a table with one subpopulation per row and two columns:
 \itemize{
@@ -380,6 +500,7 @@ This is different from \verb{$row_ids} which only returns rows with role "use".}
 \item \href{#method-Task-set_levels}{\code{Task$set_levels()}}
 \item \href{#method-Task-droplevels}{\code{Task$droplevels()}}
 \item \href{#method-Task-add_strata}{\code{Task$add_strata()}}
+\item \href{#method-Task-materialize_view}{\code{Task$materialize_view()}}
 \item \href{#method-Task-clone}{\code{Task$clone()}}
 }
 }
@@ -504,7 +625,7 @@ If \code{rows} is \code{NULL}, rows are returned in the order of \code{task$row_
 If \code{cols} is \code{NULL}, the column order defaults to \code{c(task$target_names, task$feature_names)}.
 Note that it is recommended to \strong{not} rely on the order of columns, and instead always address columns with their respective column name.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Task$data(rows = NULL, cols = NULL, data_format, ordered = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Task$data(rows = NULL, cols = NULL, ordered = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -517,9 +638,6 @@ Always refers to the complete data set, even after filtering.}
 \item{\code{cols}}{(\code{character()})\cr
 Vector of column names.}
 
-\item{\code{data_format}}{(\code{character(1)})\cr
-Deprecated. Ignored, and will be removed in the future.}
-
 \item{\code{ordered}}{(\code{logical(1)})\cr
 If \code{TRUE}, data is ordered according to the columns with column role \code{"order"}.}
 }
@@ -528,6 +646,15 @@ If \code{TRUE}, data is ordered according to the columns with column role \code{
 \subsection{Returns}{
 Depending on the \link{DataBackend}, but usually a \code{\link[data.table:data.table]{data.table::data.table()}}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$data(rows = 1:5, cols = c("species", "sex"))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-formula"></a>}}
@@ -553,6 +680,15 @@ Right hand side of the formula. Defaults to \code{"."} (all features of the task
 \subsection{Returns}{
 \code{\link[=formula]{formula()}}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$formula()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-head"></a>}}
@@ -573,6 +709,15 @@ Get the first \code{n} observations with role \code{"use"} of all columns with r
 \subsection{Returns}{
 \code{\link[data.table:data.table]{data.table::data.table()}} with \code{n} rows.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$head(3)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-levels"></a>}}
@@ -598,6 +743,15 @@ Vector of column names.}
 \subsection{Returns}{
 named \code{list()}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$levels()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-missings"></a>}}
@@ -621,6 +775,15 @@ Vector of column names.}
 \subsection{Returns}{
 Named \code{integer()}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$missings()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-filter"></a>}}
@@ -648,6 +811,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$filter(1:10)
+task$nrow
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-select"></a>}}
@@ -675,6 +848,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$select(c("bill_length", "bill_depth"))
+task$feature_names
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-rbind"></a>}}
@@ -708,6 +891,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+extra = task$data(rows = 1:2)
+task$rbind(extra)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-cbind"></a>}}
@@ -733,6 +926,16 @@ See the section on task mutators for more information.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$cbind(data.table(extra_col = seq_len(task$nrow)))
+head(task$data(cols = "extra_col"))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-rename"></a>}}
@@ -762,6 +965,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$rename("body_mass", "mass")
+task$feature_names
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-set_row_roles"></a>}}
@@ -803,6 +1016,15 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$set_row_roles(1:5, remove_from = "use")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-set_col_roles"></a>}}
@@ -845,6 +1067,16 @@ Returns the object itself, but modified \strong{by reference}.
 You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
 the object in its previous state.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$set_col_roles("sex", roles = "stratum")
+task$col_roles$stratum
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-set_levels"></a>}}
@@ -872,6 +1104,16 @@ List of character vectors of new levels, named by column names.}
 \subsection{Returns}{
 Modified \code{self}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$set_levels(list(sex = c("male", "female", "unknown")))
+task$levels("sex")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-droplevels"></a>}}
@@ -894,6 +1136,16 @@ Vector of column names.}
 \subsection{Returns}{
 Modified \code{self}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$set_levels(list(sex = c("male", "female", "unknown")))
+task$levels("sex")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-add_strata"></a>}}
@@ -922,6 +1174,56 @@ Replicated to have the same length as \code{cols}.}
 \subsection{Returns}{
 self (invisibly).
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("penguins")
+task$add_strata("flipper_length", bins = 4)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Task-materialize_view"></a>}}
+\if{latex}{\out{\hypertarget{method-Task-materialize_view}{}}}
+\subsection{Method \code{materialize_view()}}{
+Certain operations change the view on the data, e.g., \verb{$filter()} or \verb{$select()}.
+This operation queries the \link{DataBackend} for all data required in the active view and
+replaces the internal \link{DataBackend} with the new one. In some scenarios this helps to
+free up memory or speeds up accesses to the data, especially after several \verb{$rbind()}
+and \verb{$cbind()} operations.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Task$materialize_view(internal_valid_task = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{internal_valid_task}}{(\code{logical(1)})\cr
+Also materialize the internal validation task. Default is \code{TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+For tasks containing the same observation more than once (duplicates in \verb{$row_ids}),
+the resulting backend contains it only once.
+}
+
+\subsection{Returns}{
+self (invisibly).
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{task = tsk("iris")
+task$backend$nrow
+task$filter(1:120)
+task$backend$nrow
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Task-clone"></a>}}

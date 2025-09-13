@@ -7,9 +7,12 @@
 #'
 #' Measures are classes tailored around two functions doing the work:
 #'
-#' 1. A function `$score()` which quantifies the performance by comparing the truth and predictions.
+#' 1. A function `$score()` which quantifies the performance on a [Prediction] object, so a set
+#' of predicted observation via a scalar number -- usually an aggregate of losses on the contained observations,
+#' by comparing the truth and prediction columns in the prediction object.
 #' 2. A function `$aggregator()` which combines multiple performance scores returned by
-#'    `$score()` to a single numeric value.
+#' `$score()` obtained in different resampling iterations to a scalar performance value associated
+#' with the complete resampling -- usually by averaging or summing.
 #'
 #' In addition to these two functions, meta-information about the performance measure is stored.
 #'
@@ -40,6 +43,16 @@
 #' Measures that use sum-aggregation do not normalize weights and instead multiply individual losses with the given weights.
 #' See the documentation of specific measures for more details.
 #'
+#' @section Missing Values during Scoring:
+#'
+#' Many measurements cannot be calculated if the test set or predictions are unfortunate, for example because a denominator is 0.
+#' This typically occurs during (binary) classification if some entries of the confusion matrix are 0.
+#' For this reason, many measures which origin in \CRANpkg{mlr3measures} allow to change the default missing value (`NaN`) via the field `na_value`.
+#'
+#' If you encounter missing values in a compound object like a [ResampleResult] or [BenchmarkResult] during scoring or aggregating, simply
+#' removing iterations with missing values is statistically arguable (but technically possible by prividng a custom aggregation function
+#' which handles missing values, e.g. `function(x) mean(x, na.rm = TRUE)`). Instead, consider stratification on the target of the [Task]
+#' to work around missing values. Switching to micro averaging in the [Resampling] can also be a solution here.
 #'
 #' @template param_id
 #' @template param_param_set
@@ -222,6 +235,11 @@ Measure = R6Class("Measure",
     #' @param train_set (`integer()`).
     #'
     #' @return `numeric(1)`.
+    #' @examples
+    #' task = tsk("penguins")
+    #' learner = lrn("classif.rpart")$train(task)
+    #' prediction = learner$predict(task)
+    #' msr("classif.ce")$score(prediction)
     score = function(prediction, task = NULL, learner = NULL, train_set = NULL) {
       assert_scorable(self, task = task, learner = learner, prediction = prediction)
       properties = self$properties
@@ -256,6 +274,11 @@ Measure = R6Class("Measure",
     #' @param rr [ResampleResult].
     #'
     #' @return `numeric(1)`.
+    #' @examples
+    #' task = tsk("penguins")
+    #' learner = lrn("classif.rpart")
+    #' rr = resample(task, learner, rsmp("holdout"))
+    #' msr("classif.ce")$aggregate(rr)
     aggregate = function(rr) {
       switch(self$average,
         "macro_weighted" = {
@@ -401,10 +424,10 @@ Measure = R6Class("Measure",
 #' It is usually a good idea to exploit lazy evaluation while calling this function
 #' to avoid unnecessary allocations.
 #'
-#' @param measure ([Measre]).
-#' @param task ([Measre]).
-#' @param learner ([Measre]).
-#' @param train_set (`intger()`).
+#' @param measure ([Measure]).
+#' @param task ([Measure]).
+#' @param learner ([Measure]).
+#' @param train_set (`integer()`).
 #' @param prediction ([Prediction] | [PredictionData]).
 #'
 #' @return (`numeric()`).
@@ -497,10 +520,6 @@ score_measures = function(obj, measures, reassemble = TRUE, view = NULL, iters =
   tab[]
 }
 
-
-# format_list_item.Measure = function(x, ...) { # nolint
-#   sprintf("<msr:%s>", x$id)
-# }
 
 #' @export
 rd_info.Measure = function(obj, ...) { # nolint

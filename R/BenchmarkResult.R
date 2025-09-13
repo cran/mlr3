@@ -104,7 +104,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
       cat_cli(cli_h1("{.cls {class(self)[1L]}} of {.val {private$.data$iterations()}} rows with {.val {nrow(tab)}} resampling run"))
       if (nrow(tab)) {
         tab = remove_named(tab, c("uhash", "resample_result"))
-        print(tab, class = FALSE, row.names = FALSE, print.keys = FALSE, digits = 3)
+        print(tab, class = FALSE, row.names = FALSE, print.keys = FALSE, digits = 3L)
       }
     },
 
@@ -137,6 +137,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #' Marshals all stored models.
     #' @param ... (any)\cr
     #'   Additional arguments passed to [`marshal_model()`].
+    #' @examples
+    #' bmr$marshal()
     marshal = function(...) {
       private$.data$marshal(...)
     },
@@ -144,6 +146,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #' Unmarshals all stored models.
     #' @param ... (any)\cr
     #'   Additional arguments passed to [`unmarshal_model()`].
+    #' @examples
+    #' bmr$unmarshal()
     unmarshal = function(...) {
       private$.data$unmarshal(...)
     },
@@ -173,6 +177,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #'   if present.
     #'
     #' @return [data.table::data.table()].
+    #' @examples
+    #' bmr$score(msr("classif.acc"))
     score = function(measures = NULL, ids = TRUE, conditions = FALSE, predictions = TRUE) {
       measures = assert_measures(as_measures(measures, task_type = self$task_type))
       assert_flag(ids)
@@ -228,6 +234,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #' additional transformation after aggregation, in this example taking the square-root.
     #' @param predict_sets (`character()`)\cr
     #'   The predict sets.
+    #' @examples
+    #' bmr$obs_loss(msr("classif.acc"))
     obs_loss = function(measures = NULL, predict_sets = "test") {
       measures = assert_measures(as_measures(measures, task_type = self$task_type))
       map_dtr(self$resample_results$resample_result,
@@ -274,6 +282,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #'   iterations with errors as extra integer column `"errors"`.
     #'
     #' @return [data.table::data.table()].
+    #' @examples
+    #' bmr$aggregate()
     aggregate = function(measures = NULL, ids = TRUE, uhashes = FALSE, params = FALSE, conditions = FALSE) {
       measures = if (is.null(measures)) {
         default_measures(self$task_type)
@@ -418,7 +428,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
     resample_result = function(i = NULL, uhash = NULL, task_id = NULL, learner_id = NULL,
       resampling_id = NULL) {
       uhash = private$.get_uhashes(i, uhash, learner_id, task_id, resampling_id)
-      if (length(uhash) != 1) {
+      if (length(uhash) != 1L) {
         stopf("Method requires selecting exactly one ResampleResult, but got %s",
           length(uhash))
       }
@@ -439,6 +449,8 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #' Returns the object itself, but modified **by reference**.
     #' You need to explicitly `$clone()` the object beforehand if you want to keeps
     #' the object in its previous state.
+    #' @examples
+    #' bmr$discard(models = TRUE)
     discard = function(backends = FALSE, models = FALSE) {
       private$.data$discard(backends = backends, models = models)
     },

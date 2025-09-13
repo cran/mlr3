@@ -80,7 +80,8 @@ LearnerClassifDebug = R6Class("LearnerClassifDebug", inherit = LearnerClassif,
         iter                 = p_iter,
         early_stopping       = p_lgl(default = FALSE, tags = "train"),
         count_marshaling     = p_lgl(default = FALSE, tags = "train"),
-        check_pid            = p_lgl(default = TRUE, tags = "train")
+        check_pid            = p_lgl(default = TRUE, tags = "train"),
+        config_error         = p_lgl(default = FALSE, tags = "train")
       )
       super$initialize(
         id = "classif.debug",
@@ -161,6 +162,10 @@ LearnerClassifDebug = R6Class("LearnerClassifDebug", inherit = LearnerClassif,
     .validate = NULL,
     .train = function(task) {
       pv = self$param_set$get_values(tags = "train")
+      if (isTRUE(pv$config_error)) {
+        error_config("You misconfigured the learner")
+      }
+
       pv$count_marshaling = pv$count_marshaling %??% FALSE
       roll = function(name) {
         name %chin% names(pv) && pv[[name]] > runif(1L)
@@ -334,7 +339,7 @@ mlr_learners$add("classif.debug", function() LearnerClassifDebug$new())
 #' @method marshal_model classif.debug_model
 marshal_model.classif.debug_model = function(model, inplace = FALSE, ...) {
   if (!is.null(model$marshal_count)) {
-    model$marshal_count = model$marshal_count + 1
+    model$marshal_count = model$marshal_count + 1L
   }
   structure(list(
     marshaled = model, packages = "mlr3"),

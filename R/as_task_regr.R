@@ -5,7 +5,7 @@
 #' This is a S3 generic. mlr3 ships with methods for the following objects:
 #'
 #' 1. [TaskRegr]: returns the object as-is, possibly cloned.
-#' 2. [`formula`], [data.frame()], [matrix()], [Matrix::Matrix()] and [DataBackend]: provides an alternative to the constructor of [TaskRegr].
+#' 2. [`formula`], [data.frame()], [matrix()], and [DataBackend]: provides an alternative to the constructor of [TaskRegr].
 #' 3. [TaskClassif]: Calls [convert_task()].
 #'
 #' @inheritParams as_task
@@ -33,7 +33,7 @@ as_task_regr.TaskRegr = function(x, clone = FALSE, ...) { # nolint
 #'   Defaults to the (deparsed and substituted) name of the data argument.
 #' @template param_label
 #' @export
-as_task_regr.data.frame = function(x, target = NULL, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
+as_task_regr.data.frame = function(x, target, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
   force(id)
 
   assert_data_frame(x, min.rows = 1L, min.cols = 1L, col.names = "unique")
@@ -49,7 +49,7 @@ as_task_regr.data.frame = function(x, target = NULL, id = deparse1(substitute(x)
 
 #' @rdname as_task_regr
 #' @export
-as_task_regr.matrix = function(x, target = NULL, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
+as_task_regr.matrix = function(x, target, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
   force(id)
 
   assert_matrix(x, mode = "numeric")
@@ -60,20 +60,7 @@ as_task_regr.matrix = function(x, target = NULL, id = deparse1(substitute(x)), l
 
 #' @rdname as_task_regr
 #' @export
-as_task_regr.Matrix = function(x, target = NULL, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
-  force(id)
-
-  assert_names(colnames(x), "unique")
-  assert_choice(target, colnames(x))
-
-  dense = data.table(..row_id = seq_len(nrow(x)))
-  b = DataBackendMatrix$new(x, dense = dense, primary_key = "..row_id")
-  as_task_regr(b, target = target, id = id, label = label, ...)
-}
-
-#' @rdname as_task_regr
-#' @export
-as_task_regr.DataBackend = function(x, target = NULL, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
+as_task_regr.DataBackend = function(x, target, id = deparse1(substitute(x)), label = NA_character_, ...) { # nolint
   force(id)
 
   assert_choice(target, x$colnames)
@@ -84,7 +71,7 @@ as_task_regr.DataBackend = function(x, target = NULL, id = deparse1(substitute(x
 #' @rdname as_task_regr
 #' @inheritParams convert_task
 #' @export
-as_task_regr.TaskClassif = function(x, target = NULL, drop_original_target = FALSE, drop_levels = TRUE, ...) { # nolint
+as_task_regr.TaskClassif = function(x, target, drop_original_target = FALSE, drop_levels = TRUE, ...) { # nolint
   convert_task(intask = x, target = target, new_type = "regr", drop_original_target = FALSE, drop_levels = TRUE)
 }
 

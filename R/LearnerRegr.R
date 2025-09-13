@@ -13,6 +13,8 @@
 #'   - `"distr"`: Probability distribution as `VectorDistribution` object (requires package `distr6`, available via
 #'     repository \url{https://raphaels1.r-universe.dev}).
 #'  - `"quantiles"`: Predicts quantile estimates for each observation in the test set.
+#'    Set `$quantiles` to specify the quantiles to predict and `$quantile_response` to specify the response quantile.
+#'    See mlr3book [section](https://mlr3book.mlr-org.com/chapters/chapter13/beyond_regression_and_classification.html#sec-quantile-regression) on quantile regression for more details.
 #'
 #' Predefined learners can be found in the [dictionary][mlr3misc::Dictionary] [mlr_learners].
 #' Essential regression learners can be found in this dictionary after loading \CRANpkg{mlr3learners}.
@@ -23,7 +25,6 @@
 #' @template param_predict_types
 #' @template param_feature_types
 #' @template param_learner_properties
-#' @template param_data_formats
 #' @template param_packages
 #' @template param_label
 #' @template param_man
@@ -43,9 +44,9 @@ LearnerRegr = R6Class("LearnerRegr", inherit = Learner,
   public = list(
     #' @description
     #' Creates a new instance of this [R6][R6::R6Class] class.
-    initialize = function(id, task_type = "regr", param_set = ps(), predict_types = "response", feature_types = character(), properties = character(), data_formats, packages = character(), label = NA_character_, man = NA_character_) {
+    initialize = function(id, task_type = "regr", param_set = ps(), predict_types = "response", feature_types = character(), properties = character(), packages = character(), label = NA_character_, man = NA_character_) {
       super$initialize(id = id, task_type = task_type, param_set = param_set, feature_types = feature_types,
-        predict_types = predict_types, properties = properties, data_formats, packages = packages,
+        predict_types = predict_types, properties = properties, packages = packages,
         label = label, man = man)
     },
 
@@ -137,7 +138,7 @@ LearnerRegr = R6Class("LearnerRegr", inherit = Learner,
       }
       private$.quantiles = assert_numeric(rhs, lower = 0, upper = 1, any.missing = FALSE, min.len = 1L, sorted = TRUE, .var.name = "quantiles")
 
-      if (length(private$.quantiles) == 1) {
+      if (length(private$.quantiles) == 1L) {
         private$.quantile_response = private$.quantiles
       }
     },

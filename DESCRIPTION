@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: 
   c(
     person("Michel", "Lang", , "michellang@gmail.com", role = "aut",
@@ -30,7 +30,9 @@ Authors@R:
            comment = c(ORCID = "0000-0002-9609-3197")),
     person("Lona", "Koers", , "lona.koers@gmail.com", role = "ctb"),
     person("John", "Zobolas", , "bblodfon@gmail.com", role = "ctb",
-           comment = c(ORCID = "0000-0002-3609-8674"))
+           comment = c(ORCID = "0000-0002-3609-8674")),
+    person("Maximilian", "Mücke", , "muecke.maximilian@gmail.com", role = "ctb",
+           comment = c(ORCID = "0009-0000-9432-9795"))
   )
 Description: Efficient, object-oriented programming on the
     building blocks of machine learning. Provides 'R6' objects for tasks,
@@ -45,36 +47,35 @@ BugReports: https://github.com/mlr-org/mlr3/issues
 Depends: R (>= 3.3.0)
 Imports: R6 (>= 2.4.1), backports (>= 1.5.0), checkmate (>= 2.0.0),
         cli, data.table (>= 1.15.0), evaluate (>= 1.0.4), future,
-        future.apply (>= 1.5.0), lgr (>= 0.3.4), mlbench, mlr3measures
-        (>= 1.0.0), mlr3misc (>= 0.18.0), parallelly, palmerpenguins,
-        paradox (>= 1.0.1), uuid
-Suggests: Matrix, callr, codetools, datasets, future.callr, mlr3data,
+        future.apply (>= 1.5.0), lgr (>= 0.3.4), mirai (>= 2.4.1),
+        methods, mlbench, mlr3measures (>= 1.0.0), mlr3misc (>=
+        0.19.0), parallelly, palmerpenguins, paradox (>= 1.0.1), uuid
+Suggests: callr, codetools, datasets, future.callr, mlr3data,
         progressr, remotes, RhpcBLASctl, rpart, testthat (>= 3.2.0)
 Encoding: UTF-8
 Config/testthat/edition: 3
 Config/testthat/parallel: false
 NeedsCompilation: no
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'CallbackResample.R'
         'ContextResample.R' 'warn_deprecated.R' 'DataBackend.R'
         'DataBackendCbind.R' 'DataBackendDataTable.R'
-        'DataBackendMatrix.R' 'DataBackendRbind.R'
-        'DataBackendRename.R' 'HotstartStack.R' 'Learner.R'
-        'LearnerClassif.R' 'mlr_learners.R' 'LearnerClassifDebug.R'
-        'LearnerClassifFeatureless.R' 'LearnerClassifRpart.R'
-        'LearnerRegr.R' 'LearnerRegrDebug.R' 'LearnerRegrFeatureless.R'
-        'LearnerRegrRpart.R' 'Measure.R' 'mlr_measures.R'
-        'MeasureAIC.R' 'MeasureBIC.R' 'MeasureClassif.R'
-        'MeasureClassifCosts.R' 'MeasureDebug.R' 'MeasureElapsedTime.R'
-        'MeasureInternalValidScore.R' 'MeasureOOBError.R'
-        'MeasureRegr.R' 'MeasureRegrPinball.R' 'MeasureRegrRQR.R'
-        'MeasureRegrRSQ.R' 'MeasureSelectedFeatures.R'
-        'MeasureSimilarity.R' 'MeasureSimple.R' 'Prediction.R'
-        'PredictionClassif.R' 'PredictionData.R'
-        'PredictionDataClassif.R' 'PredictionDataRegr.R'
-        'PredictionRegr.R' 'ResampleResult.R' 'Resampling.R'
-        'mlr_resamplings.R' 'ResamplingBootstrap.R' 'ResamplingCV.R'
-        'ResamplingCustom.R' 'ResamplingCustomCV.R'
+        'DataBackendRbind.R' 'DataBackendRename.R' 'HotstartStack.R'
+        'Learner.R' 'LearnerClassif.R' 'mlr_learners.R'
+        'LearnerClassifDebug.R' 'LearnerClassifFeatureless.R'
+        'LearnerClassifRpart.R' 'LearnerRegr.R' 'LearnerRegrDebug.R'
+        'LearnerRegrFeatureless.R' 'LearnerRegrRpart.R' 'Measure.R'
+        'mlr_measures.R' 'MeasureAIC.R' 'MeasureBIC.R'
+        'MeasureClassif.R' 'MeasureClassifCosts.R' 'MeasureDebug.R'
+        'MeasureElapsedTime.R' 'MeasureInternalValidScore.R'
+        'MeasureOOBError.R' 'MeasureRegr.R' 'MeasureRegrPinball.R'
+        'MeasureRegrRQR.R' 'MeasureRegrRSQ.R'
+        'MeasureSelectedFeatures.R' 'MeasureSimilarity.R'
+        'MeasureSimple.R' 'Prediction.R' 'PredictionClassif.R'
+        'PredictionData.R' 'PredictionDataClassif.R'
+        'PredictionDataRegr.R' 'PredictionRegr.R' 'ResampleResult.R'
+        'Resampling.R' 'mlr_resamplings.R' 'ResamplingBootstrap.R'
+        'ResamplingCV.R' 'ResamplingCustom.R' 'ResamplingCustomCV.R'
         'ResamplingHoldout.R' 'ResamplingInsample.R' 'ResamplingLOO.R'
         'ResamplingRepeatedCV.R' 'ResamplingSubsampling.R'
         'ResultData.R' 'Task.R' 'TaskSupervised.R' 'TaskClassif.R'
@@ -99,12 +100,12 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'CallbackResample.R'
         'benchmark.R' 'benchmark_grid.R' 'bibentries.R'
         'default_fallback.R' 'default_measures.R' 'fix_factor_levels.R'
         'helper.R' 'helper_data_table.R' 'helper_exec.R'
-        'helper_hashes.R' 'helper_print.R' 'install_pkgs.R' 'marshal.R'
+        'helper_hashes.R' 'install_pkgs.R' 'marshal.R'
         'mlr_callbacks.R' 'mlr_sugar.R' 'mlr_test_helpers.R'
         'partition.R' 'predict.R' 'reexports.R' 'resample.R'
         'score_roc_measures.R' 'set_threads.R' 'set_validate.R'
         'task_converters.R' 'worker.R' 'zzz.R'
-Packaged: 2025-07-30 20:00:40 UTC; marc
+Packaged: 2025-09-12 16:15:48 UTC; marc
 Author: Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (ORCID: <https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (ORCID: <https://orcid.org/0000-0003-4481-5554>),
@@ -123,7 +124,8 @@ Author: Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>),
   Sebastian Fischer [aut] (ORCID:
     <https://orcid.org/0000-0002-9609-3197>),
   Lona Koers [ctb],
-  John Zobolas [ctb] (ORCID: <https://orcid.org/0000-0002-3609-8674>)
+  John Zobolas [ctb] (ORCID: <https://orcid.org/0000-0002-3609-8674>),
+  Maximilian Mücke [ctb] (ORCID: <https://orcid.org/0009-0000-9432-9795>)
 Maintainer: Marc Becker <marcbecker@posteo.de>
 Repository: CRAN
-Date/Publication: 2025-07-30 20:50:07 UTC
+Date/Publication: 2025-09-13 23:30:02 UTC

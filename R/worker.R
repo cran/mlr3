@@ -38,14 +38,20 @@ learner_train = function(learner, task, train_row_ids = NULL, test_row_ids = NUL
       get_private(learner)$.extract_internal_tuned_values()
     }
 
-    if (learner$encapsulation[["train"]] == "callr") {
+    # extract out-of-bag error if supported
+    oob_error = if (exists(".extract_oob_error", envir = get_private(learner))) {
+      get_private(learner)$.extract_oob_error()
+    }
+
+    if (learner$encapsulation[["train"]] %in% c("callr", "mirai")) {
       model = marshal_model(model, inplace = TRUE)
     }
 
     list(
       model = model,
       internal_valid_scores = internal_valid_scores,
-      internal_tuned_values = internal_tuned_values
+      internal_tuned_values = internal_tuned_values,
+      oob_error = oob_error
     )
   }
 
@@ -98,10 +104,23 @@ learner_train = function(learner, task, train_row_ids = NULL, test_row_ids = NUL
     .args = list(learner = learner, task = task),
     .pkgs = learner$packages,
     .seed = NA_integer_,
-    .timeout = learner$timeout["train"]
+    .timeout = learner$timeout["train"],
+    .compute = getOption("mlr3.mirai_encapsulation", "mlr3_encapsulation")
   )
 
-  log = append_log(NULL, "train", result$log$class, result$log$msg)
+  cond = cond_from_log(result$log)
+
+  # We still log the warnings and messages in the case of an error,
+  # so we don't throw immediately
+  err = learner_will_err(cond, learner, stage = "train")
+
+  # we don't log an existing (uncaught) error, because it's signalled
+  log = append_log(NULL, "train", result$log$class, result$log$msg, log_error = !err)
+
+  if (err) {
+    stop(cond)
+  }
+
   train_time = result$elapsed
 
   learner$state = set_class(insert_named(learner$state, list(
@@ -123,6 +142,7 @@ learner_train = function(learner, task, train_row_ids = NULL, test_row_ids = NUL
   }
 
   learner$state$internal_tuned_values = result$result$internal_tuned_values
+  learner$state$oob_error = result$result$oob_error
 
   if (is.null(result$result$model)) {
     lg$info("Learner '%s' on task '%s' failed to %s a model",
@@ -214,12 +234,16 @@ learner_predict = function(learner, task, row_ids = NULL) {
 
     pdata = NULL
     learner$state$predict_time = NA_real_
+    cond = error_learner_predict("No model stored", signal = FALSE, class = "Mlr3ErrorLearnerNoModel")
+    if (learner_will_err(cond, learner, stage = "predict")) {
+      stop(cond)
+    }
   } else {
     # call predict with encapsulation
     lg$debug("Calling predict method of Learner '%s' on task '%s' with %i observations",
       learner$id, task$id, task$nrow, learner = learner$clone())
 
-    if (isTRUE(all.equal(learner$encapsulation[["predict"]], "callr"))) {
+    if (learner$encapsulation[["predict"]] %in% c("callr", "mirai")) {
       learner$model = marshal_model(learner$model, inplace = TRUE)
     }
 
@@ -229,11 +253,21 @@ learner_predict = function(learner, task, row_ids = NULL) {
       .args = list(task = task, learner = learner),
       .pkgs = learner$packages,
       .seed = NA_integer_,
-      .timeout = learner$timeout["predict"]
+      .timeout = learner$timeout["predict"],
+      .compute = getOption("mlr3.mirai_encapsulation", "mlr3_encapsulation")
     )
 
+    cond = cond_from_log(result$log)
+    # Still log messages and warnings in the case of an error
+    err = learner_will_err(cond, learner, stage = "predict")
+
     pdata = result$result
-    learner$state$log = append_log(learner$state$log, "predict", result$log$class, result$log$msg)
+    # don't log an existing (uncaught) error, because it's signalled
+    learner$state$log = append_log(learner$state$log, "predict", result$log$class, result$log$msg, log_error = !err)
+
+    if (err) {
+      stop(cond)
+    }
     learner$state$predict_time = sum(learner$state$predict_time, result$elapsed)
 
     lg$debug("Learner '%s' returned an object of class '%s'",
@@ -439,7 +473,7 @@ process_model_before_predict = function(learner, store_models, is_sequential, un
   # and also, do we even need to send it back at all?
 
   currently_marshaled = is_marshaled_model(learner$model)
-  predict_needs_marshaling = isTRUE(all.equal(learner$encapsulation[["predict"]], "callr"))
+  predict_needs_marshaling = learner$encapsulation[["predict"]] %in% c("callr", "mirai")
   final_needs_marshaling = !is_sequential || !unmarshal
 
   # the only scenario in which we keep a copy is when we now have the model in the correct form but need to transform
@@ -486,7 +520,7 @@ process_model_after_predict = function(learner, store_models, is_sequential, unm
   }
 }
 
-append_log = function(log = NULL, stage = NA_character_, class = NA_character_, msg = character()) {
+append_log = function(log = NULL, stage = NA_character_, class = NA_character_, msg = character(), log_error = TRUE) {
   if (is.null(log)) {
     log = data.table(
       stage = factor(levels = c("train", "predict")),
@@ -497,7 +531,7 @@ append_log = function(log = NULL, stage = NA_character_, class = NA_character_, 
 
   if (length(msg)) {
     pwalk(list(stage, class, msg), function(s, c, m) {
-      if (c == "error") lg$error("%s: %s", s, m)
+      if (c == "error" && log_error) lg$error("%s: %s", s, m)
       if (c == "warning") lg$warn("%s: %s", s, m)
     })
     log = rbindlist(list(log, data.table(stage = stage, class = class, msg = msg)), use.names = TRUE)
@@ -549,4 +583,22 @@ create_internal_valid_task = function(validate, task, test_row_ids, prev_valid, 
   # validate is numeric
   task$internal_valid_task = partition(task, ratio = 1 - validate)$test
   return(task)
+}
+
+# This function returns TRUE,
+learner_will_err = function(cond, learner, stage) {
+  when = get_private(learner)$.when
+  if (is.null(cond)) return(FALSE)
+  if (inherits(cond, "Mlr3ErrorConfig")) return(TRUE)
+  if (is.null(when)) return(FALSE)
+  !when(cond = cond, stage = stage)
+}
+
+cond_from_log = function(log) {
+  x = log[class == "error", "condition"][[1L]]
+  if (length(x)) {
+    x[[1L]]
+  } else {
+    NULL
+  }
 }
