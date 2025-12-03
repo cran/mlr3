@@ -12,7 +12,7 @@ get_featureless_learner = function(task_type) {
     }
   }
 
-  return(NULL)
+  NULL
 }
 
 assert_ordered_set = function(x, y, ...) {
@@ -40,7 +40,7 @@ clone_without = function(x, y) {
   x[[y]] = NULL
   x2 = x$clone(deep = TRUE)
   x[[y]] = y_prev
-  return(x2)
+  x2
 }
 
 clone_rep = function(x, n) {
@@ -60,23 +60,6 @@ assert_validate = function(x) {
     return(x)
   }
   assert_choice(x, c("predefined", "test"), null.ok = TRUE)
-}
-
-
-get_obs_loss = function(tab, measures) {
-  for (measure in measures) {
-    fun = measure$obs_loss
-    value = if (is.function(fun)) {
-      args = intersect(names(tab), names(formals(fun)))
-      do.call(fun, tab[, args, with = FALSE])
-    } else {
-      NA_real_
-    }
-
-    set(tab, j = measure$id, value = value)
-  }
-
-  tab[]
 }
 
 # Generalization of quantile(type = 7) for weighted data.
@@ -149,4 +132,12 @@ weighted_mean_sd = function(x, weights) {
   mean = sum(x * weights) / weights_sum
   sd = sqrt(sum(weights * (x - mean)^2) / (weights_sum - sum(weights ^2) / weights_sum))
   list(mean = mean, sd = sd)
+}
+
+# Alternative formatting function for Task / Learner / Measure because mlr3misc::error_* and warning_* fail with input
+# that is formated with angle brackets, e.g. "<TaskClassif:iris>",
+# see https://github.com/r-lib/cli/issues/789
+# Replace this with x$format() when the issue is solved.
+format_angle_brackets = function(x) {
+  sprintf("<<%s:%s>>", class(x)[1L], x$id)
 }

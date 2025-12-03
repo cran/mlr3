@@ -1,6 +1,6 @@
 Package: mlr3
 Title: Machine Learning in R - Next Generation
-Version: 1.2.0
+Version: 1.3.0
 Authors@R: 
   c(
     person("Michel", "Lang", , "michellang@gmail.com", role = "aut",
@@ -48,10 +48,10 @@ Depends: R (>= 3.3.0)
 Imports: R6 (>= 2.4.1), backports (>= 1.5.0), checkmate (>= 2.0.0),
         cli, data.table (>= 1.15.0), evaluate (>= 1.0.4), future,
         future.apply (>= 1.5.0), lgr (>= 0.3.4), mirai (>= 2.4.1),
-        methods, mlbench, mlr3measures (>= 1.0.0), mlr3misc (>=
+        methods, mlbench, mlr3measures (>= 1.2.0), mlr3misc (>=
         0.19.0), parallelly, palmerpenguins, paradox (>= 1.0.1), uuid
 Suggests: callr, codetools, datasets, future.callr, mlr3data,
-        progressr, remotes, RhpcBLASctl, rpart, testthat (>= 3.2.0)
+        progressr, remotes, RhpcBLASctl, rpart, testthat (>= 3.3.0)
 Encoding: UTF-8
 Config/testthat/edition: 3
 Config/testthat/parallel: false
@@ -105,7 +105,7 @@ Collate: 'mlr_reflections.R' 'BenchmarkResult.R' 'CallbackResample.R'
         'partition.R' 'predict.R' 'reexports.R' 'resample.R'
         'score_roc_measures.R' 'set_threads.R' 'set_validate.R'
         'task_converters.R' 'worker.R' 'zzz.R'
-Packaged: 2025-09-12 16:15:48 UTC; marc
+Packaged: 2025-12-02 17:26:38 UTC; marc
 Author: Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>),
   Bernd Bischl [aut] (ORCID: <https://orcid.org/0000-0001-6002-6980>),
   Jakob Richter [aut] (ORCID: <https://orcid.org/0000-0003-4481-5554>),
@@ -128,4 +128,4 @@ Author: Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>),
   Maximilian Mücke [ctb] (ORCID: <https://orcid.org/0009-0000-9432-9795>)
 Maintainer: Marc Becker <marcbecker@posteo.de>
 Repository: CRAN
-Date/Publication: 2025-09-13 23:30:02 UTC
+Date/Publication: 2025-12-03 17:30:02 UTC

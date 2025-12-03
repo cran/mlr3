@@ -125,7 +125,9 @@ test_that("time_train works with different predict type (#832)", {
 })
 
 test_that("time_train is > 0", {
+  # no runtime test on CRAN
   skip_on_cran()
+
   rr = resample(tsk("iris"), lrn("classif.debug"), rsmp("holdout"))
   res = rr$score(msr("time_train"))
   expect_gte(res$time_train, 0)
@@ -140,7 +142,7 @@ test_that("scoring fails when measure requires_model, but model is in marshaled 
   pred = learner$train(task)$predict(task)
   learner$marshal()
   expect_error(measure$score(pred, learner = learner, task = task),
-    regexp = "is in marshaled form")
+    regexp = "model is in marshaled")
 })
 
 test_that("measure weights", {
@@ -171,8 +173,8 @@ test_that("measure weights", {
   m$use_weights = "error"
   expect_equal(prediction_no_weights$score(m), c(classif.acc = 0.5))
   expect_equal(prediction_learner_weights$score(m), c(classif.acc = 0.5))
-  expect_error(prediction_measure_weights$score(m), "since 'use_weights' was set to 'error'")
-  expect_error(m$score(prediction_measure_weights), "since 'use_weights' was set to 'error'")
+  expect_error(prediction_measure_weights$score(m), "'use_weights' was set to 'error'")
+  expect_error(m$score(prediction_measure_weights), "'use_weights' was set to 'error'")
 
   mauc = msr("classif.mauc_au1p")
   prediction_no_weights = learner$predict(tsk("iris"), row_ids = c(1, 2, 51, 52, 101, 102))
@@ -181,8 +183,8 @@ test_that("measure weights", {
 
   expect_equal(prediction_no_weights$score(mauc), c(classif.mauc_au1p = 0.5))
   expect_equal(prediction_learner_weights$score(mauc), c(classif.mauc_au1p = 0.5))
-  expect_error(prediction_measure_weights$score(mauc), "cannot be evaluated with weights since the Measure does not support weights")
-  expect_error(mauc$score(prediction_measure_weights), "cannot be evaluated with weights since the Measure does not support weights")
+  expect_error(prediction_measure_weights$score(mauc), "cannot be evaluated with weights")
+  expect_error(mauc$score(prediction_measure_weights), "cannot be evaluated with weights")
 
   mauc$use_weights = "ignore"
   expect_equal(prediction_measure_weights$score(mauc), c(classif.mauc_au1p = 0.5))
@@ -221,7 +223,7 @@ test_that("measure weights", {
   mauc$use_weights = "error"
   expect_equal(rr_no_weights$score(mauc)$classif.mauc_au1p, c(1, 1) / 2)
   expect_equal(rr_learner_weights$score(mauc)$classif.mauc_au1p, c(1, 1) / 2)
-  expect_error(rr_measure_weights$score(mauc), "cannot be evaluated with weights in .*Task.*since the Measure does not support weights")
+  expect_error(rr_measure_weights$score(mauc), "cannot be evaluated with weights in\n  .*Task.*since the Measure does not support\n  weights")
 
   # aggregating resampling with weights
   m$use_weights = "use"
@@ -253,8 +255,8 @@ test_that("measure weights", {
   mauc$use_weights = "error"
   expect_equal(rr_no_weights$aggregate(mauc), c(classif.mauc_au1p = 0.5))
   expect_equal(rr_learner_weights$aggregate(mauc), c(classif.mauc_au1p = 0.5))
-  expect_error(rr_measure_weights$aggregate(mauc), "cannot be evaluated with weights in .*Task.*since the Measure does not support weights")
-  expect_error(mauc$aggregate(rr_measure_weights), "cannot be evaluated with weights in .*Task.*since the Measure does not support weights")
+  expect_error(rr_measure_weights$aggregate(mauc), "cannot be evaluated with weights in\n  .*Task.*since the Measure does not support\n  weights")
+  expect_error(mauc$aggregate(rr_measure_weights), "cannot be evaluated with weights in\n  .*Task.*since the Measure does not support\n  weights")
 
   m$use_weights = "use"
   m$average = "macro_weighted"
@@ -273,38 +275,29 @@ test_that("measure weights", {
 
 })
 
-
-
-
 test_that("primary iters are respected", {
   task = tsk("sonar")
-  resampling = rsmp("cv")$instantiate(task)
-  train_sets = map(1:10, function(i) resampling$train_set(i))
-  test_sets = map(1:10, function(i) resampling$train_set(i))
-  r1 = rsmp("custom")$instantiate(task, train_sets = train_sets, test_sets = test_sets)
-  get_private(r1, ".primary_iters") = 1:2
-  r2 = rsmp("custom")$instantiate(task, train_sets = train_sets[1:2], test_sets = test_sets[1:2])
-  r3 = rsmp("custom")$instantiate(task, train_sets = train_sets, test_sets = test_sets)
-
   learner = lrn("classif.rpart", predict_type = "prob")
+  resampling = rsmp("cv", folds = 10)
+  resampling$instantiate(task)
+  get_private(resampling, ".primary_iters") = 1:2
 
-  rr1 = resample(task, learner, r1, store_models = TRUE)
-  rr2 = resample(task, learner, r2, store_models = TRUE)
-  rr3 = resample(task, learner, r3, store_models = TRUE)
-
+  rr = resample(task, learner, resampling)
   m = msr("classif.acc")
   m$average = "macro"
-  expect_equal(rr1$aggregate(), rr2$aggregate())
-  m$average = "micro"
-  expect_equal(rr1$aggregate(), rr2$aggregate())
+  scores = rr$score(m)$classif.acc
+
+  # macro aggregation
+  expect_equal(unname(rr$aggregate(m)), mean(scores[1:2]))
+  expect_true(unname(rr$aggregate(m)) != mean(scores))
+
+  # micro aggregation
+  pred_micro = do.call(c, rr$predictions()[1:2])
+  scores = pred_micro$score(m)
+  expect_equal(unname(m$score(pred_micro)), unname(scores))
 
   jaccard = msr("sim.jaccard")
-  expect_error(rr1$aggregate(jaccard), "primary_iters")
-  expect_no_error(rr2$aggregate(jaccard))
-  jaccard$properties = c(jaccard$properties, "primary_iters")
-  x1 = rr1$aggregate(jaccard)
-  x2 = rr3$aggregate(jaccard)
-  expect_equal(x1, x2)
+  expect_error(rr$aggregate(jaccard), "primary_iters")
 })
 
 test_that("no predict_sets required (#1094)", {
@@ -329,5 +322,34 @@ test_that("measure and prediction type is checked", {
 
   measure = msr("classif.logloss")
   expect_warning(measure$score(pred), "is missing predict type")
+})
+
+test_that("obs_loss works", {
+  MeasureTest = R6Class("MeasureTest",
+    inherit = Measure,
+    public = list(
+      initialize = function() {
+        super$initialize("test", task_type = "classif", param_set = ps(), properties = "obs_loss")
+      }
+    ),
+    private = list(
+      .score = function(prediction, task, weights = NULL, ...) {
+        2
+      },
+
+      .obs_loss = function(prediction, task, ...) {
+        x = rnorm(length(prediction$row_ids))
+        x - mean(x) + 2
+      }
+    )
+  )
+
+  measure = MeasureTest$new()
+  learner = lrn("classif.rpart", predict_type = "prob")
+  task = tsk("pima")
+  learner$train(task)
+  pred = learner$predict(task)
+  obs_loss = measure$obs_loss(pred)
+  expect_numeric(obs_loss, len = task$nrow, any.missing = FALSE)
 })
 

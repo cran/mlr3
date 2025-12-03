@@ -87,11 +87,11 @@ HotstartStack = R6Class("HotstartStack",
 
       walk(learners, function(learner) {
         if (!is.null(get0("validate", learner))) {
-          stopf("Hotstart learners that did validation is currently not supported.")
+          error_input("Hotstart learners that did validation is currently not supported.")
         } else if (is.null(learner$model)) {
-          stopf("Learners must be trained before adding them to the hotstart stack.")
+          error_input("Learners must be trained before adding them to the hotstart stack.")
         } else if (is_marshaled_model(learner$model)) {
-          stopf("Learners must be unmarshaled before adding them to the hotstart stack.")
+          error_input("Learners must be unmarshaled before adding them to the hotstart stack.")
         }
       })
 
@@ -138,7 +138,7 @@ HotstartStack = R6Class("HotstartStack",
       hotstart_id = learner$param_set$ids(tags = "hotstart")
 
       set(self$stack, j = "cost", value = NA_real_)
-      cost = self$stack[list(.task_hash, .learner_hash), "cost" := map_dbl(get("start_learner"), function(l) calculate_cost(l, learner, hotstart_id)) , on = c("task_hash", "learner_hash")
+      cost = self$stack[list(.task_hash, .learner_hash), "cost" := map_dbl(get("start_learner"), function(l) calculate_cost(l, learner, hotstart_id)), on = c("task_hash", "learner_hash")
         ][, get("cost")]
       self$stack[, "cost" := NULL]
       cost
