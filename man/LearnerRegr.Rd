@@ -24,7 +24,7 @@ See mlr3book \href{https://mlr3book.mlr-org.com/chapters/chapter13/beyond_regres
 
 Predefined learners can be found in the \link[mlr3misc:Dictionary]{dictionary} \link{mlr_learners}.
 Essential regression learners can be found in this dictionary after loading \CRANpkg{mlr3learners}.
-Additional learners are implement in the Github package \url{https://github.com/mlr-org/mlr3extralearners}.
+Additional learners are implemented in the Github package \url{https://github.com/mlr-org/mlr3extralearners}.
 }
 \examples{
 # get all regression learners from mlr_learners:
@@ -76,7 +76,8 @@ Other Learner:
 Numeric vector of probabilities to be used while predicting quantiles.
 Elements must be between 0 and 1, not missing and provided in ascending order.
 If only one quantile is provided, it is used as response.
-Otherwise, set \verb{$quantile_response} to specify the response quantile.}
+Otherwise, set \verb{$quantile_response} to specify the response quantile.
+Set to \code{NULL} to reset both \verb{$quantiles} and \verb{$quantile_response}.}
 
 \item{\code{quantile_response}}{(\code{numeric(1)})\cr
 The quantile to be used as response.}

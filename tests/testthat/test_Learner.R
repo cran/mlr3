@@ -501,7 +501,7 @@ test_that("internal_valid_task is created correctly", {
   expect_null(task$internal_valid_task)
 })
 
-test_that("compatability check on validation task", {
+test_that("compatibility check on validation task", {
   learner = lrn("classif.debug", validate = "predefined")
   task = tsk("german_credit")
   task$internal_valid_task = 1:10
@@ -608,6 +608,11 @@ test_that("quantiles in LearnerRegr", {
 
   expect_numeric(learner$quantiles, any.missing = FALSE, len = 3)
 
+  learner$quantiles = NULL
+  expect_null(learner$quantiles)
+  expect_null(learner$quantile_response)
+
+  learner$quantiles = quantiles
   learner$quantile_response = 0.6
   expect_equal(learner$quantile_response, 0.6)
   expect_equal(learner$quantiles, c(0.05, 0.5, 0.6, 0.95))
@@ -862,7 +867,7 @@ test_that("error conditions are working: callr", {
 
   expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
   l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
-  expect_error(l$train(tsk("iris")), regexp = NA)
+  expect_learner(l$train(tsk("iris")))
 })
 
 test_that("error conditions are working: evaluate", {
@@ -885,12 +890,23 @@ test_that("error conditions are working: evaluate", {
 
   expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
   l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
-  expect_error(l$train(tsk("iris")), regexp = NA)
+  expect_learner(l$train(tsk("iris")))
 })
 
 test_that("error conditions are working: try", {
   # no runtime test on CRAN
   skip_on_cran()
+
+  # try encapsulation prints to console
+  null_con = file(nullfile(), open = "wt")
+  sink(null_con, type = "message")
+  sink(null_con, type = "output")
+
+  on.exit({
+    sink(type = "message")
+    sink(type = "output")
+    close(null_con)
+  })
 
   l = lrn("classif.debug",
     timeout = c(train = 0.01),
@@ -906,9 +922,9 @@ test_that("error conditions are working: try", {
     }
   )
 
-  expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
+  expect_error(l$train(tsk("iris")), class = "Mlr3ErrorTimeout")
   l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
-  expect_error(l$train(tsk("iris")), regexp = NA)
+  expect_learner(l$train(tsk("iris")))
 })
 
 test_that("error conditions are working: mirai", {
@@ -931,7 +947,7 @@ test_that("error conditions are working: mirai", {
 
   expect_error(l$train(tsk("iris")), regexp = "reached elapsed time limit")
   l$configure(error_train = 1, sleep_train = NULL, timeout = c(train = Inf, predict = Inf))
-  expect_error(l$train(tsk("iris")), regexp = NA)
+  expect_learner(l$train(tsk("iris")))
 })
 
 test_that("error conditions are working for predict", {
@@ -965,7 +981,6 @@ test_that("when: stage parameter is working", {
 
   # we catch error during train, but not during predict
   l$encapsulate("evaluate", lrn("classif.featureless"), function(cond, stage) {
-    print(cond)
     if (inherits(cond, "Mlr3TestError")) return(stage == "train")
     if (stage == "predict" && grepl("No model stored", cond$message)) return(FALSE)
     stop("test went wrong")
@@ -1042,4 +1057,57 @@ test_that("new_levels property is working", {
 
   learner$properties = c(learner$properties, "new_levels")
   expect_prediction(learner$predict_newdata(data))
+})
+
+test_that("native_model returns model by default", {
+  task = tsk("iris")
+  learner = lrn("classif.rpart")
+  learner$train(task)
+  expect_identical(learner$native_model, learner$model)
+  expect_class(learner$native_model, "rpart")
+})
+
+test_that("native_model can be overwritten by learner", {
+  LearnerWithExtraInfo = R6Class("LearnerWithExtraInfo",
+    inherit = LearnerClassif,
+    public = list(
+      initialize = function() {
+        super$initialize(
+          id = "classif.extra_info",
+          param_set = paradox::ps(),
+          feature_types = c("logical", "integer", "numeric", "factor", "ordered"),
+          predict_types = c("response"),
+          properties = c("twoclass", "multiclass"),
+          man = NA_character_
+        )
+      }
+    ),
+    active = list(
+      native_model = function(rhs) {
+        assert_ro_binding(rhs)
+        self$model$model
+      }
+    ),
+    private = list(
+      .train = function(task) {
+        list(
+          model = list(response = as.character(sample(task$truth(), 1L))),
+          extra_info = "some additional information"
+        )
+      },
+      .predict = function(task) {
+        list(response = rep.int(self$model$model$response, task$nrow))
+      }
+    )
+  )
+
+  task = tsk("iris")
+  learner = LearnerWithExtraInfo$new()
+  learner$train(task)
+  expect_list(learner$model)
+  expect_true("extra_info" %in% names(learner$model))
+  expect_equal(learner$model$extra_info, "some additional information")
+  expect_list(learner$native_model)
+  expect_false("extra_info" %in% names(learner$native_model))
+  expect_true("response" %in% names(learner$native_model))
 })

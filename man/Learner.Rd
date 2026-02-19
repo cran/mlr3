@@ -6,7 +6,7 @@
 \description{
 This is the abstract base class for learner objects like \link{LearnerClassif} and \link{LearnerRegr}.
 
-Learners are build around the three following key parts:
+Learners are built around the three following key parts:
 \itemize{
 \item Methods \verb{$train()} and \verb{$predict()} which call internal methods or private methods \verb{$.train()}/\verb{$.predict()}).
 \item A \link[paradox:ParamSet]{paradox::ParamSet} which stores meta-information about available hyperparameters, and also stores hyperparameter settings.
@@ -138,8 +138,8 @@ XGBoost, for example, can tune the number of boosting rounds based on the valida
 CV Glmnet, on the other hand, can tune the regularization parameter based on an internal cross-validation.
 Internal tuning \emph{can} therefore rely on the internal validation data, but does not necessarily do so.
 
-In order to be able to combine this internal hyperparamer tuning with the standard hyperparameter optimization
-implemented via \CRANpkg{mlr3tuning}, one most:
+In order to be able to combine this internal hyperparameter tuning with the standard hyperparameter optimization
+implemented via \CRANpkg{mlr3tuning}, one must:
 \itemize{
 \item annotate the learner with the \code{"internal_tuning"} property
 \item implement the active binding \verb{$internal_tuned_values} (see section \emph{Optional Extractors}) as well as the
@@ -254,71 +254,11 @@ Other Learner:
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{id}}{(\code{character(1)})\cr
-Identifier of the object.
-Used in tables, plot and text output.}
-
-\item{\code{label}}{(\code{character(1)})\cr
-Label for this object.
-Can be used in tables, plot and text output instead of the ID.}
-
-\item{\code{state}}{(\code{NULL} | named \code{list()})\cr
+\item{\code{state}}{(named \code{list()} | \code{NULL})\cr
 Current (internal) state of the learner.
 Contains all information gathered during \code{train()} and \code{predict()}.
 It is not recommended to access elements from \code{state} directly.
 This is an internal data structure which may change in the future.}
-
-\item{\code{task_type}}{(\code{character(1)})\cr
-Task type, e.g. \code{"classif"} or \code{"regr"}.
-
-For a complete list of possible task types (depending on the loaded packages),
-see \code{\link[=mlr_reflections]{mlr_reflections$task_types$type}}.}
-
-\item{\code{feature_types}}{(\code{character()})\cr
-Stores the feature types the learner can handle, e.g. \code{"logical"}, \code{"numeric"}, or \code{"factor"}.
-A complete list of candidate feature types, grouped by task type, is stored in \code{\link[=mlr_reflections]{mlr_reflections$task_feature_types}}.}
-
-\item{\code{properties}}{(\code{character()})\cr
-Stores a set of properties/capabilities the learner has.
-A complete list of candidate properties, grouped by task type, is stored in \code{\link[=mlr_reflections]{mlr_reflections$learner_properties}}.}
-
-\item{\code{packages}}{(\code{character(1)})\cr
-Set of required packages.
-These packages are loaded, but not attached.}
-
-\item{\code{predict_sets}}{(\code{character()})\cr
-During \code{\link[=resample]{resample()}}/\code{\link[=benchmark]{benchmark()}}, a \link{Learner} can predict on multiple sets.
-Per default, a learner only predicts observations in the test set (\code{predict_sets == "test"}).
-To change this behavior, set \code{predict_sets} to a non-empty subset of \verb{\{"train", "test", "internal_valid"\}}.
-The \code{"train"} predict set contains the train ids from the resampling. This means that if a learner does validation and
-sets \verb{$validate} to a ratio (creating the validation data from the training data), the train predictions
-will include the predictions for the validation data.
-Each set yields a separate \link{Prediction} object.
-Those can be combined via getters in \link{ResampleResult}/\link{BenchmarkResult}, or \link{Measure}s can be configured
-to operate on specific subsets of the calculated prediction sets.}
-
-\item{\code{parallel_predict}}{(\code{logical(1)})\cr
-If set to \code{TRUE}, use \CRANpkg{future} to calculate predictions in parallel (default: \code{FALSE}).
-The row ids of the \code{task} will be split into \code{\link[future:nbrOfWorkers]{future::nbrOfWorkers()}} chunks,
-and predictions are evaluated according to the active \code{\link[future:plan]{future::plan()}}.
-This currently only works for methods \code{Learner$predict()} and \code{Learner$predict_newdata()},
-and has no effect during \code{\link[=resample]{resample()}} or \code{\link[=benchmark]{benchmark()}} where you have other means
-to parallelize.
-
-Note that the recorded time required for prediction reports the time required to predict
-is not properly defined and depends on the parallelization backend.}
-
-\item{\code{timeout}}{(named \code{numeric(2)})\cr
-Timeout for the learner's train and predict steps, in seconds.
-This works differently for different encapsulation methods, see
-\code{\link[mlr3misc:encapsulate]{mlr3misc::encapsulate()}}.
-Default is \code{c(train = Inf, predict = Inf)}.
-Also see the section on error handling the mlr3book:
-\url{https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-error-handling}}
-
-\item{\code{man}}{(\code{character(1)})\cr
-String in the format \verb{[pkg]::[topic]} pointing to a manual page for this object.
-Defaults to \code{NA}, but can be set by child classes.}
 }
 \if{html}{\out{</div>}}
 }
@@ -343,6 +283,14 @@ See Section 'weights' for more details.}
 
 \item{\code{model}}{(any)\cr
 The fitted model. Only available after \verb{$train()} has been called.}
+
+\item{\code{native_model}}{(any)\cr
+The native model object from the upstream package.
+For most learners, this is identical to \verb{$model}.
+However, some learners store additional information beyond the model from the upstream package.
+In such cases, \verb{$model} contains a named list with the native model stored in element \code{model} along with additional information.
+The \verb{$native_model} field can be overwritten by the learner to return the actual model object from the upstream package.
+The default returns \verb{$model}.}
 
 \item{\code{timings}}{(named \code{numeric(2)})\cr
 Elapsed time in seconds for the steps \code{"train"} and \code{"predict"}.
@@ -401,6 +349,66 @@ If set to \code{"all"} the complete feature set is returned.}
 Stores the possible predict types the learner is capable of.
 A complete list of candidate predict types, grouped by task type, is stored in \code{\link[=mlr_reflections]{mlr_reflections$learner_predict_types}}.
 This field is read-only.}
+
+\item{\code{id}}{(\code{character(1)})\cr
+Identifier of the object.
+Used in tables, plot and text output.}
+
+\item{\code{label}}{(\code{character(1)})\cr
+Label for this object.
+Can be used in tables, plot and text output instead of the ID.}
+
+\item{\code{task_type}}{(\code{character(1)})\cr
+Task type, e.g. \code{"classif"} or \code{"regr"}.
+
+For a complete list of possible task types (depending on the loaded packages),
+see \code{\link[=mlr_reflections]{mlr_reflections$task_types$type}}.}
+
+\item{\code{feature_types}}{(\code{character()})\cr
+Stores the feature types the learner can handle, e.g. \code{"logical"}, \code{"numeric"}, or \code{"factor"}.
+A complete list of candidate feature types, grouped by task type, is stored in \code{\link[=mlr_reflections]{mlr_reflections$task_feature_types}}.}
+
+\item{\code{properties}}{(\code{character()})\cr
+Stores a set of properties/capabilities the learner has.
+A complete list of candidate properties, grouped by task type, is stored in \code{\link[=mlr_reflections]{mlr_reflections$learner_properties}}.}
+
+\item{\code{packages}}{(\code{character(1)})\cr
+Set of required packages.
+These packages are loaded, but not attached.}
+
+\item{\code{predict_sets}}{(\code{character()})\cr
+During \code{\link[=resample]{resample()}}/\code{\link[=benchmark]{benchmark()}}, a \link{Learner} can predict on multiple sets.
+Per default, a learner only predicts observations in the test set (\code{predict_sets == "test"}).
+To change this behavior, set \code{predict_sets} to a non-empty subset of \verb{\{"train", "test", "internal_valid"\}}.
+The \code{"train"} predict set contains the train ids from the resampling. This means that if a learner does validation and
+sets \verb{$validate} to a ratio (creating the validation data from the training data), the train predictions
+will include the predictions for the validation data.
+Each set yields a separate \link{Prediction} object.
+Those can be combined via getters in \link{ResampleResult}/\link{BenchmarkResult}, or \link{Measure}s can be configured
+to operate on specific subsets of the calculated prediction sets.}
+
+\item{\code{parallel_predict}}{(\code{logical(1)})\cr
+If set to \code{TRUE}, use \CRANpkg{future} to calculate predictions in parallel (default: \code{FALSE}).
+The row ids of the \code{task} will be split into \code{\link[future:nbrOfWorkers]{future::nbrOfWorkers()}} chunks,
+and predictions are evaluated according to the active \code{\link[future:plan]{future::plan()}}.
+This currently only works for methods \code{Learner$predict()} and \code{Learner$predict_newdata()},
+and has no effect during \code{\link[=resample]{resample()}} or \code{\link[=benchmark]{benchmark()}} where you have other means
+to parallelize.
+
+Note that the recorded time required for prediction reports the time required to predict
+is not properly defined and depends on the parallelization backend.}
+
+\item{\code{timeout}}{(named \code{numeric(2)})\cr
+Timeout for the learner's train and predict steps, in seconds.
+This works differently for different encapsulation methods, see
+\code{\link[mlr3misc:encapsulate]{mlr3misc::encapsulate()}}.
+Default is \code{c(train = Inf, predict = Inf)}.
+Also see the section on error handling in the mlr3book:
+\url{https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-error-handling}}
+
+\item{\code{man}}{(\code{character(1)} | \code{NULL})\cr
+String in the format \verb{[pkg]::[topic]} pointing to a manual page for this object.
+Defaults to \code{NA}, but can be set by child classes.}
 }
 \if{html}{\out{</div>}}
 }
@@ -564,7 +572,7 @@ For a simple split into training and test set, see \code{\link[=partition]{parti
 }
 \subsection{Returns}{
 Returns the object itself, but modified \strong{by reference}.
-You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
+You need to explicitly \verb{$clone()} the object beforehand if you want to keep
 the object in its previous state.
 }
 \subsection{Examples}{
@@ -627,7 +635,7 @@ If the learner's \verb{$train()} method has been called, there is a (size reduce
 of the training task stored in the learner.
 If the learner has been fitted via \code{\link[=resample]{resample()}} or \code{\link[=benchmark]{benchmark()}}, you need to pass the corresponding task stored
 in the \link{ResampleResult} or \link{BenchmarkResult}, respectively.
-Further, \code{\link{auto_convert}} is used for type-conversions to ensure compatability
+Further, \code{\link{auto_convert}} is used for type-conversions to ensure compatibility
 of features between \verb{$train()} and \verb{$predict()}.
 
 If the stored training task has a \code{weights_measure} column, \emph{and} if \code{newdata} contains a column with the same name,
@@ -645,7 +653,7 @@ New data to predict on.
 All data formats convertible by \code{\link[=as_data_backend]{as_data_backend()}} are supported, e.g.
 \code{data.frame()} or \link{DataBackend}.
 If a \link{DataBackend} is provided as \code{newdata}, the row ids are preserved,
-otherwise they are set to to the sequence \code{1:nrow(newdata)}.}
+otherwise they are set to the sequence \code{1:nrow(newdata)}.}
 
 \item{\code{task}}{(\link{Task}).}
 }
@@ -676,7 +684,7 @@ Reset the learner, i.e. un-train by resetting the \code{state}.
 
 \subsection{Returns}{
 Returns the object itself, but modified \strong{by reference}.
-You need to explicitly \verb{$clone()} the object beforehand if you want to keeps
+You need to explicitly \verb{$clone()} the object beforehand if you want to keep
 the object in its previous state.
 }
 \subsection{Examples}{
@@ -729,11 +737,11 @@ Output is printed to the console and not logged.
 \item \code{"evaluate"}: Uses the package \CRANpkg{evaluate} to call the learner, measure time and do the logging.
 \item \code{"callr"}: Uses the package \CRANpkg{callr} to call the learner, measure time and do the logging.
 This encapsulation spawns a separate R session in which the learner is called.
-While this comes with a considerable overhead, it also guards your session from being teared down by segfaults.
+While this comes with a considerable overhead, it also guards your session from being torn down by segfaults.
 \item \code{"mirai"}: Uses the package \CRANpkg{mirai} to call the learner, measure time and do the logging.
 This encapsulation calls the function in a \code{mirai} on a \code{daemon}.
 The \code{daemon} can be pre-started via \code{daemons(1, .compute = "mlr3_encapsulation")}, otherwise a new R session will be created for each encapsulated call.
-If a \code{deamon} is already running with compute profile \code{"mlr3_encapsulation"}, it will be used to executed all calls.
+If a \code{daemon} is already running with compute profile \code{"mlr3_encapsulation"}, it will be used to execute all calls.
 Using \verb{mirai"} is similarly safe as \code{callr} but much faster if several learners are encapsulated one after the other on the same daemon.
 }
 
@@ -747,7 +755,7 @@ The results are reproducible across the different encapsulation methods.
 Note that for errors of class \code{Mlr3ErrorConfig}, the function always errs and no fallback learner
 is trained.
 
-Also see the section on error handling the mlr3book:
+Also see the section on error handling in the mlr3book:
 \url{https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-error-handling}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Learner$encapsulate(method, fallback = NULL, when = NULL)}\if{html}{\out{</div>}}

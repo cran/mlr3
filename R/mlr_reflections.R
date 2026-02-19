@@ -3,7 +3,7 @@
 #' @format [environment].
 #' @description
 #' Environment which stores various information to allow objects to examine and introspect their structure and properties
-#' (c.f. [Reflections](https://www.wikiwand.com/en/Reflection_(computer_programming))).
+#' (c.f. [Reflections](https://en.wikipedia.org/wiki/Reflective_programming)).
 #'
 #' This environment be modified by third-party packages, e.g. by adding information about new task types
 #' or by extending the set of allowed feature types.
@@ -125,7 +125,7 @@ local({
   )
 
   ### Learner
-  tmp = c("featureless", "missings", "weights", "importance", "selected_features", "oob_error", "hotstart_forward", "hotstart_backward", "validation", "internal_tuning", "marshal", "offset")
+  tmp = c("featureless", "missings", "weights", "importance", "selected_features", "oob_error", "hotstart_forward", "hotstart_backward", "validation", "internal_tuning", "marshal", "offset", "new_levels")
   mlr_reflections$learner_properties = list(
     classif = c(tmp, "twoclass", "multiclass"),
     regr = tmp

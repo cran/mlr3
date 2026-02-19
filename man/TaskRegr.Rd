@@ -12,7 +12,7 @@ It is recommended to use \code{\link[=as_task_regr]{as_task_regr()}} for constru
 Predefined tasks are stored in the \link[mlr3misc:Dictionary]{dictionary} \link{mlr_tasks}.
 }
 \examples{
-task = as_task_regr(palmerpenguins::penguins, target = "bill_length_mm")
+task = as_task_regr(mtcars, target = "mpg")
 task$task_type
 task$formula()
 task$truth()
@@ -137,7 +137,7 @@ Defaults to all rows with role "use".
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{rows}}{(positive \code{integer()})\cr
+\item{\code{rows}}{(positive \code{integer()} | \code{NULL})\cr
 Vector or row indices.
 Always refers to the complete data set, even after filtering.}
 }

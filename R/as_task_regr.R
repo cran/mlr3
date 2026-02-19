@@ -44,6 +44,11 @@ as_task_regr.data.frame = function(x, target, id = deparse1(substitute(x)), labe
     warning_input("Detected columns with unsupported Inf values in data: %s", str_collapse(names(ii)))
   }
 
+  if (anyMissing(x[[target]])) {
+    messagef("Target column '%s' contains missing values. This will be an error in the future.", target)
+    # error_input("Target column '%s' must not contain missing values", target)
+  }
+
   TaskRegr$new(id = id, backend = x, target = target, label = label)
 }
 

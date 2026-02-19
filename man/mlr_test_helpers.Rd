@@ -50,6 +50,11 @@ Default is \code{TRUE}.
 \item \code{configure_learner} (\verb{function(learner, task)})\cr
 Before running a \code{learner} on a \code{task}, this function allows to change its parameter values depending on the input task.
 }
+
+To speed up test execution, start an encapsulation daemon in advance by calling
+\code{mirai::daemons(1, .compute = "mlr3_encapsulation")} in \code{tests/testthat/setup.R}.
+After the tests complete, stop them with
+\code{mirai::daemons(0, .compute = "mlr3_encapsulation")} in \code{tests/testthat/teardown.R}.
 }
 
 \section{run_paramtest()}{
@@ -91,7 +96,7 @@ If \code{NULL} (default), all parameters are checked.
 
 
 Checks various properties that learners have to satisfy.
-Used for testing learner implementations, especially if all methods and fields are implement as document.
+Used for testing learner implementations, especially if all methods and fields are implemented as documented.
 
 \strong{Parameters}
 \itemize{

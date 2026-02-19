@@ -365,7 +365,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #'
     #' @return
     #' Returns the object itself, but modified **by reference**.
-    #' You need to explicitly `$clone()` the object beforehand if you want to keeps
+    #' You need to explicitly `$clone()` the object beforehand if you want to keep
     #' the object in its previous state.
     #' @examples
     #' design = benchmark_grid(
@@ -425,7 +425,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
     resample_result = function(i = NULL, uhash = NULL, task_id = NULL, learner_id = NULL,
       resampling_id = NULL) {
       uhash = private$.get_uhashes(i, uhash, learner_id, task_id, resampling_id)
-      if (length(uhash) != 1) {
+      if (length(uhash) != 1L) {
         error_input("Method requires selecting exactly one ResampleResult, but got %s",
           length(uhash))
       }
@@ -444,7 +444,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #'
     #' @return
     #' Returns the object itself, but modified **by reference**.
-    #' You need to explicitly `$clone()` the object beforehand if you want to keeps
+    #' You need to explicitly `$clone()` the object beforehand if you want to keep
     #' the object in its previous state.
     #' @examples
     #' bmr$discard(models = TRUE)
@@ -525,7 +525,7 @@ BenchmarkResult = R6Class("BenchmarkResult",
     #' * `"learner"` ([Learner]).
     #'
     #' Note that it is not feasible to access learned models via this field, as the training task would be ambiguous.
-    #' For this reason the returned learner are reset before they are returned.
+    #' For this reason the returned learners are reset before they are returned.
     #' Instead, select a row from the table returned by `$score()`.
     learners = function(rhs) {
       assert_ro_binding(rhs)
@@ -713,7 +713,7 @@ uhash = function(bmr, learner_id = NULL, task_id = NULL, resampling_id = NULL) {
   assert_string(task_id, null.ok = TRUE)
   assert_string(resampling_id, null.ok = TRUE)
   uhash = uhashes(bmr, learner_id, task_id, resampling_id)
-  if (length(uhash) != 1) {
+  if (length(uhash) != 1L) {
     error_input("Expected exactly one uhash, got %s", length(uhash))
   }
   uhash

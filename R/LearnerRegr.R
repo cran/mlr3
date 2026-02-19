@@ -18,7 +18,7 @@
 #'
 #' Predefined learners can be found in the [dictionary][mlr3misc::Dictionary] [mlr_learners].
 #' Essential regression learners can be found in this dictionary after loading \CRANpkg{mlr3learners}.
-#' Additional learners are implement in the Github package \url{https://github.com/mlr-org/mlr3extralearners}.
+#' Additional learners are implemented in the Github package \url{https://github.com/mlr-org/mlr3extralearners}.
 #'
 #' @template param_id
 #' @template param_param_set
@@ -128,6 +128,7 @@ LearnerRegr = R6Class("LearnerRegr", inherit = Learner,
     #' Elements must be between 0 and 1, not missing and provided in ascending order.
     #' If only one quantile is provided, it is used as response.
     #' Otherwise, set `$quantile_response` to specify the response quantile.
+    #' Set to `NULL` to reset both `$quantiles` and `$quantile_response`.
     quantiles = function(rhs) {
       if (missing(rhs)) {
         return(private$.quantiles)
@@ -135,6 +136,11 @@ LearnerRegr = R6Class("LearnerRegr", inherit = Learner,
 
       if ("quantiles" %nin% self$predict_types) {
         error_config("Learner does not support predicting quantiles")
+      }
+      if (is.null(rhs)) {
+        private$.quantiles = NULL
+        private$.quantile_response = NULL
+        return(invisible(NULL))
       }
       private$.quantiles = assert_numeric(rhs, lower = 0, upper = 1, any.missing = FALSE, min.len = 1L, sorted = TRUE, .var.name = "quantiles")
 

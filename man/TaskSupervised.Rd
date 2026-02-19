@@ -5,7 +5,7 @@
 \title{Supervised Task}
 \description{
 This is the abstract base class for task objects like \link{TaskClassif} and \link{TaskRegr}.
-It extends \link{Task} with methods to handle a target columns.
+It extends \link{Task} with methods to handle a target column.
 Supervised tasks for probabilistic regression (including survival analysis) can be
 found in \CRANpkg{mlr3proba}.
 }
@@ -143,7 +143,7 @@ Defaults to all rows with role "use".
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{rows}}{(positive \code{integer()})\cr
+\item{\code{rows}}{(positive \code{integer()} | \code{NULL})\cr
 Vector or row indices.
 Always refers to the complete data set, even after filtering.}
 }
