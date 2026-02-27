@@ -1,6 +1,6 @@
-2da121d19c33a132bd73f0f7aab3caee *DESCRIPTION
-2c1b1994ac54672dfef78e284f6dfddb *NAMESPACE
-8b87d66ade18d7dab0954aaccd49ccd0 *NEWS.md
+1bff5d790039cabef046632a5e2fcf47 *DESCRIPTION
+771f389b77c7b4417a8f5500aa9930e5 *NAMESPACE
+163cb3c481ef8674f38cbffeb5946309 *NEWS.md
 69a4e562afcae23ec953c121493102a4 *R/BenchmarkResult.R
 94b397a12fa9fc7cf8deda381324039e *R/CallbackResample.R
 67a20d96c270ea452848d6b194e29842 *R/ContextResample.R
@@ -10,7 +10,7 @@
 20d966ba3f0361af771cb92249092e3e *R/DataBackendRbind.R
 7c7c423ec01d4d09eaee9a0a660ce611 *R/DataBackendRename.R
 4d2cdb548b36fc23e2a9f6c11c944852 *R/HotstartStack.R
-a7d8882c9dd4e80b44680496c4f56923 *R/Learner.R
+fd70a77518ec8b16a2ff80600c9eb581 *R/Learner.R
 6762f67684133c433b4373ed97c0b5f3 *R/LearnerClassif.R
 a5e0afb046ba59a304e43cfed9790625 *R/LearnerClassifDebug.R
 3a3ac6e72b717aa3c39eb812b0a212c4 *R/LearnerClassifFeatureless.R
@@ -52,7 +52,7 @@ b32354cca2815fad988fa4c2e8c40b06 *R/ResamplingInsample.R
 c80e67fc446c49d0905ac4b87febe28d *R/ResamplingLOO.R
 8908f72aeaf9da8565478f0b68594068 *R/ResamplingRepeatedCV.R
 4785a6b5ca35c0a08cfe72fa643d1855 *R/ResamplingSubsampling.R
-9205bed7ef6a431fa652e8e8847880b2 *R/ResultData.R
+a35baccb0930c5e38e4d2f385e540827 *R/ResultData.R
 0dc1b558b9d05536df9676c5e1817c08 *R/Task.R
 6de1a7952cc58b7dae026f840d8f8c1c *R/TaskClassif.R
 6354489470896720236da85a57e336ac *R/TaskClassif_breast_cancer.R
@@ -103,7 +103,7 @@ b652b7b1d1b0a4ad3d3536bb80427a53 *R/benchmark_grid.R
 2cdf541bf6926c48f47b541f5de4248a *R/default_fallback.R
 c1dceec581ae7e0f012ec078e337c009 *R/default_measures.R
 0d9979b592caed104cf5f524e16f3ad5 *R/fix_factor_levels.R
-9b45639241718ddc35fe5b28a3e41b7f *R/helper.R
+1866f044c1fe9eecc6b0e3111bf516e6 *R/helper.R
 e94d7438ce2ab51a7d570678eb00f1ca *R/helper_data_table.R
 ede70e3db697eeaa712c39c16147269b *R/helper_exec.R
 ba9b517c6f3b9cbfa0d6787ae4d29740 *R/helper_hashes.R
@@ -127,7 +127,7 @@ ae02408129e476f277eead3125b94fc2 *R/score_roc_measures.R
 e546a9a797d1ac9aff5cd857f0d290da *R/set_validate.R
 617ea4523130f9a28ccb640d92b38508 *R/task_converters.R
 d667a937f9275ad15f527bc227250d36 *R/warn_deprecated.R
-bfd1181d421fe594cb29d5bf4ef4366b *R/worker.R
+1b29998ce6863949befe84c78c55c2fe *R/worker.R
 6e544937f09e2e0e4db6bf1dbbcf587e *R/zzz.R
 c67912e414eb160def0cbb569da4d2da *README.md
 76e123f5dcc8dee07678412adc0a2a84 *build/partial.rdb
@@ -136,7 +136,7 @@ d71c66752131a7bf166dc62739d0fd9b *inst/extdata/california_housing.rds
 5ef4fe41770952192ba0bbabc8e04e5f *inst/extdata/german_credit.rds
 6cb088fd2721f06e1f77e6adf8598e13 *inst/extdata/spam.rds
 2f72d2496c91be1e7727a56d3d59116b *inst/extdata/wine.rds
-404a769c94c993fe242d22de8f5a846d *inst/testthat/helper_autotest.R
+351c9371b4a2c54fd1dd6eeda231e639 *inst/testthat/helper_autotest.R
 5eb3e2b543f31494a24f3b43369e0593 *inst/testthat/helper_debugging.R
 c87fc2e12a916a8467164cdace2b4b7e *inst/testthat/helper_expectations.R
 ab45b2355b57ff45ba732ab9409b060b *inst/testthat/helper_misc.R
@@ -146,7 +146,7 @@ ffddd2490f243814238a8518cfa6a301 *man/ContextResample.Rd
 231c232d25e25af34c0f77b1e3933a3d *man/DataBackend.Rd
 f116d01f623b1cdfe1630f35a74de3d4 *man/DataBackendDataTable.Rd
 d8bb0d2b9cd4ece9344561e214f0e08f *man/HotstartStack.Rd
-c1814dc2370c8043866a31b13ee90500 *man/Learner.Rd
+963ff45a48d808af86d441671fbf6139 *man/Learner.Rd
 8a9583ee88879a326facc90c0a6650f9 *man/LearnerClassif.Rd
 7ebbc40c9510cf3748840a2b4f92df1c *man/LearnerRegr.Rd
 a5621d51282546e3ac7a7ae95fb50b45 *man/Measure.Rd
@@ -333,7 +333,7 @@ e6596b063999586c9a726d70bc8837dc *tests/testthat/test_DataBackendRbind.R
 a7076d498d873b8548c9f8ed45a77fd5 *tests/testthat/test_DataBackendRename.R
 7e4d92424ba6f2685164044acc6b1edd *tests/testthat/test_Dictionary.R
 0ef1fe861d803152e1702e10d82afd3d *tests/testthat/test_HotstartStack.R
-92caa555105c79cac2c6203ed3be9863 *tests/testthat/test_Learner.R
+50521ae8776576b723f345fb705e5c99 *tests/testthat/test_Learner.R
 7292809007b863a801895cc4ae8e1185 *tests/testthat/test_LearnerClassif.R
 bc55f81a4bfb8d7401822eb09e88af6f *tests/testthat/test_LearnerRegr.R
 e3dbd452a9085a5e8b545f9e329584b4 *tests/testthat/test_Measure.R
@@ -359,13 +359,13 @@ ed9993eb3ff7c32241ba7634df9aa9bd *tests/testthat/test_as_measure.R
 f3870e2c953b62fc4b9ebb6cc8e83a5d *tests/testthat/test_as_task.R
 727e969ecad3cfc7996e9bdcf036758e *tests/testthat/test_assertions.R
 06fe4425d5baee5f1aa689fea7067c06 *tests/testthat/test_auto_convert.R
-72c637306555db60cf4ed65ca4f1e047 *tests/testthat/test_autotest.R
+2593d8e3602d48b0b3fcf17819b11a18 *tests/testthat/test_autotest.R
 67d8b5d55a2dbf1e714e15c2e5b6ae2d *tests/testthat/test_backward_compatibility.R
 71e5039e9a48598141cabe4b18d00c51 *tests/testthat/test_benchmark.R
 43748e608e25c6fd2260c5891b045233 *tests/testthat/test_convert_task.R
 74f8b25e3f8495b090c72129cc5f8275 *tests/testthat/test_default_fallback.R
-0bf0824ed74ba172b35fbee0cfb1d959 *tests/testthat/test_encapsulate.R
-75dfb5dab3040bedf74f1201e53e1bfe *tests/testthat/test_errorhandling.R
+bc1d4d86b5f958ba7f721faeabba10c1 *tests/testthat/test_encapsulate.R
+5eda532dcddd91df75a37691271d639d *tests/testthat/test_errorhandling.R
 6815a0dda202a63a299a204ea1933947 *tests/testthat/test_expectations.R
 0dedc6e3ead8f7e010019468cf00f649 *tests/testthat/test_fallback.R
 373a975fde5db37b295d00679feeacad *tests/testthat/test_hashes.R
